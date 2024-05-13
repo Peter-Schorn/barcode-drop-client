@@ -11,3 +11,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.barcode-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid black;
+}
+
+.barcode-table th {
+    padding: 5px;
+    border: 2px solid black;
+}
+
+.barcode-table td {
+    padding: 5px;
+    border: 2px solid black;
+}
+
+#root {
+    padding: 20px 50px;
+}
