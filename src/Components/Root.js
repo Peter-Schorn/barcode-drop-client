@@ -20,14 +20,6 @@ export default class Root extends Component {
        };
    }
 
-   barcodeButton = (barcode) => {   
-       return (
-           <button onClick={() => this.props.history.push(`/barcode/${barcode}`)}>
-                {barcode}
-           </button>
-       );
-    }
-
     onClickBarcode = (barcode) => {
         return (e) => {
             console.log("Clicked barcode: " + barcode);
