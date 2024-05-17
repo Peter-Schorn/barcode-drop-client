@@ -3,8 +3,6 @@
 import { Component } from "react";
 import Root from './Components/Root';
 
-import UseContextAdapter from "./Components/UseContextAdapter";
-
 import { useEffect } from 'react';
 import { useContext } from 'react';
 import { AppContext } from './AppContext.js';
@@ -104,20 +102,6 @@ export default class App extends Component {
                 barcodes={this.state.items}
                 clearAllUserBarcodes={this.clearAllUserBarcodes}
             />
-            // <div>
-            //     <UseContextAdapter 
-            //         contextType={AppContext}
-            //         renderBody={(appContext, props) => {
-            //             return (
-            //                 <Root 
-            //                     barcodes={this.state.items}
-            //                     context={appContext}
-            //                     clearAllUserBarcodes={this.clearAllUserBarcodes}
-            //                 />
-            //             );
-            //         }}
-            //     />
-            // </div>
         );
     }
 
