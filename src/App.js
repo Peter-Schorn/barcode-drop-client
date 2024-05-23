@@ -1,13 +1,15 @@
 // import logo from './logo.svg';
 // import React from 'react';
-import { Component } from "react";
-import Root from './Components/Root';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+// import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
-import { useEffect } from 'react';
-import { useContext } from 'react';
+import { Component } from "react";
 import { AppContext } from './AppContext.js';
 
 import axios from 'axios';
+
+import UserScansRoot from "./Components/UserScansRoot";
+
 
 export default class App extends Component {
 
@@ -44,7 +46,7 @@ export default class App extends Component {
 
     componentDidMount() {
         console.log("App.componentDidMount(): will retrieveAllUserBarcodes()");
-        this.retrieveAllUserBarcodes();
+        // this.retrieveAllUserBarcodes();
     }
 
     retrieveAllUserBarcodes = () => {
@@ -98,10 +100,15 @@ export default class App extends Component {
 
     render() {
         return (
-            <Root 
-                barcodes={this.state.items}
-                clearAllUserBarcodes={this.clearAllUserBarcodes}
-            />
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/scans/:user" element={<UserScansRoot
+                        barcodes={this.state.items}
+                        dataIsLoaded={this.state.dataIsLoaded}
+                        clearAllUserBarcodes={this.clearAllUserBarcodes}
+                    />} />
+                </Routes>
+            </BrowserRouter>
         );
     }
 
