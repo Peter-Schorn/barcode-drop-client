@@ -4,13 +4,13 @@ import {Component} from "react";
 export default class Root extends Component {
 
     static sampleBarcodes = [
-        {"barcode": "052000104332", "date": "2024-05-12T16:14:37Z", "id": "adfgjkfhaskjfhasjk"}, 
-        {"barcode": "052000104332", "date": "2024-05-12T16:14:35Z", "id": "dfadsfhfsghsd"}, 
-        {"barcode": "12-58", "date": "2024-05-11T17:58:51Z", "id": "eirxvasdfadfsga"}, 
-        {"barcode": "12-35", "date": "2024-05-11T17:36:05Z", "id": "owudnebrrasrtasd"}, 
-        {"barcode": "yet another one", "date": "2024-05-11T03:33:27Z", "id": "liowmrnjcueopte"}, 
-        {"barcode": "curl2", "date": "2024-05-11T03:21:22Z", "id": "cfieijmohoioegg"}, 
-        {"barcode": "curl", "date": "2024-05-11T03:15:15Z", "id": "jewurudkeypgmqgal"}
+        {"barcode": "052000104332", "user": "schornpe", "date": "2024-05-12T16:14:37Z", "id": "adfgjkfhaskjfhasjk"}, 
+        {"barcode": "052000104332", "user": "schornpe", "date": "2024-05-12T16:14:35Z", "id": "dfadsfhfsghsd"}, 
+        {"barcode": "12-58", "user": "schornpe", "date": "2024-05-11T17:58:51Z", "id": "eirxvasdfadfsga"}, 
+        {"barcode": "12-35", "user": "schornpe", "date": "2024-05-11T17:36:05Z", "id": "owudnebrrasrtasd"}, 
+        {"barcode": "yet another one", "user": "schornpe", "date": "2024-05-11T03:33:27Z", "id": "liowmrnjcueopte"}, 
+        {"barcode": "curl2", "user": "schornpe", "date": "2024-05-11T03:21:22Z", "id": "cfieijmohoioegg"}, 
+        {"barcode": "curl", "user": "schornpe", "date": "2024-05-11T03:15:15Z", "id": "jewurudkeypgmqgal"}
     ]
 
     constructor(props) {
