@@ -16,8 +16,8 @@ export default class Root extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            // barcodes: Root.sampleBarcodes
-            barcodes: props.barcodes
+            barcodes: Root.sampleBarcodes
+            // barcodes: props.barcodes
             // context: props.context
        };
    }
