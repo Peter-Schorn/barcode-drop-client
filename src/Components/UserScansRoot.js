@@ -3,6 +3,9 @@ import { Component } from "react";
 import { Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
+import { Backend } from '../API/backend';
+import { AppContext } from "../AppContext";
+
 export default function UserScansRoot(props) {
     
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
@@ -109,20 +112,54 @@ class UserScansRootCore extends Component {
         }
     ];
 
+    static contextType = AppContext;
+
     constructor(props) {
         super(props);
         this.state = {
-            barcodes: UserScansRootCore.sampleBarcodes
+            barcodes: []
+            // barcodes: UserScansRootCore.sampleBarcodes
             // barcodes: props.barcodes
             // context: props.context
         };
         this.user = props.router.params.user;
+        if (this.user) {
+            console.log(
+                `UserScansRootCore.constructor(): user: ${this.user}`
+            );
+        }
+        else {
+            console.error(
+                `UserScansRootCore.constructor(): invalid user: ${this.user}`
+            );
+        }
     }
 
-    onClickBarcode = (barcode) => {
+    componentDidMount() {
+        console.log("UserScansRootCore.componentDidMount():");
+        console.log(`context.api: ${this.context.api}`);
+        this.context.api.getUserScans(this.user)
+            .then((result) => {
+                console.log(
+                    `UserScansRootCore.componentDidMount(): result: ${result}`
+                );
+                this.setState({
+                    barcodes: result
+                });
+            })
+            .catch((error) => {
+                console.error(
+                    `UserScansRootCore.componentDidMount(): error: ${error}`
+                );
+            });
+    }
+
+    onClickCopyButton = (barcode) => {
         return (e) => {
-            console.log("Clicked barcode: " + barcode);
             navigator.clipboard.writeText(barcode);
+            console.log(`Copied barcode to clipboard: "${barcode}"`);
+            console.log("context: ", this.context);
+
         };
     };
 
@@ -134,8 +171,9 @@ class UserScansRootCore extends Component {
             barcodes: []
         });
 
-        // this.state.context.clearAllUserBarcodes();
-        this.props.clearAllUserBarcodes();
+        this.context.api.deleteUserScans({
+             user: this.user
+        });
 
         console.log("Cleared all user barcodes");
     };
@@ -149,9 +187,6 @@ class UserScansRootCore extends Component {
 
         if (diffSecs <= 3) {
             return "Just now";
-        }
-        if (diffSecs > 86_400 /* more than 1 day old */) {
-            return `More than one day ago`;
         }
         if (diffSecs <= 15 /* 3 - 15 seconds */) {
             return "Less than 15 seconds ago";
@@ -180,8 +215,17 @@ class UserScansRootCore extends Component {
         if (diffSecs <= 7_200 /* 1 - 2 hours */) {
             return "About an hour ago";
         }
-        if (diffSecs > 7_200 /* > 2 hours */) {
-            return "More than an hour ago";
+        if (diffSecs > 7_200 /* 2 - 4 hours */) {
+            return "About two hours ago";
+        }
+        if (diffSecs > 14_400 /* 4 - 6 hours */) {
+            return "About four hours ago";
+        }
+        if (diffSecs > 21_600 /* 6 - 24 hours */) {
+            return "More than six hours ago";
+        }
+        if (diffSecs > 86_400 /* more than 1 day old */) {
+            return `More than one day ago`;
         }
 
     }
@@ -229,7 +273,7 @@ class UserScansRootCore extends Component {
                                 }}>
                                     <button
                                         style={{ margin: "5px 10px" }}
-                                        onClick={this.onClickBarcode(barcode.barcode)}
+                                        onClick={this.onClickCopyButton(barcode.barcode)}
                                     >
                                         Copy
                                     </button>

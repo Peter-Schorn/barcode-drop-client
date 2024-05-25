@@ -1,114 +1,45 @@
 // import logo from './logo.svg';
-// import React from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 // import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
 import { Component } from "react";
-import { AppContext } from './AppContext.js';
-
-import axios from 'axios';
 
 import UserScansRoot from "./Components/UserScansRoot";
 
+import { AppContext } from './AppContext';
+
+import Backend from './API/backend';
 
 export default class App extends Component {
+
+    static contextType = AppContext;
 
     static backendUrl = process.env.REACT_APP_BACKEND_URL;
 
     constructor(props) {
         super(props);
+        const api = new Backend();
         this.state = {
-            items: [],
-            dataIsLoaded: false,
+            api: api
         };
     }
 
-    retrieveUser() {
-        
-        const currentURL = new URL(window.location.href);
-        
-        // /scans/schornpe
-        const path = currentURL.pathname;
-        const pathParts = path.split('/');
-        if (pathParts.length >= 2) {
-            // schornpe
-            const user = pathParts[1];
-            return user;
-        }
-
-        console.log(
-            "Could not retrieve user from URL: " + window.location.href
-        );
-        // return null;
-        // TODO: Remove this default user
-        return "schornpe";
-    }
 
     componentDidMount() {
-        console.log("App.componentDidMount(): will retrieveAllUserBarcodes()");
-        // this.retrieveAllUserBarcodes();
+        console.log("App.componentDidMount():");
     }
-
-    retrieveAllUserBarcodes = () => {
-        
-        const user = this.retrieveUser();
-        let url = App.backendUrl + "/scans";
-        if (user) {
-            url += "/" + user;
-            console.log("Retrieving all user barcodes for user: " + user);
-        }
-        else {
-            console.log("Retrieving all barcodes (user could not be retrieved)");
-        }
-
-        axios.get(url).then((result) => {
-
-            console.log(
-                `Retrieved all user barcodes for user ${user}: `,
-                result.data
-            );
-
-            this.setState({
-                items: result.data,
-                dataIsLoaded: true,
-            });
-
-        });
-    }
-
-    clearAllUserBarcodes = () => {
-
-        const user = this.retrieveUser();
-
-        if (!user) {
-            console.log("User could not be retrieved for url: " + window.location.href);
-            return;
-        }
-
-        let url = App.backendUrl + "/scans/" + user;
-
-        axios.delete(url).then((result) => {
-            console.log(result.data);
-            this.setState({
-                items: [],
-                dataIsLoaded: true,
-            });
-        });
-
-    }
-
 
     render() {
         return (
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/scans/:user" element={<UserScansRoot
-                        barcodes={this.state.items}
-                        dataIsLoaded={this.state.dataIsLoaded}
-                        clearAllUserBarcodes={this.clearAllUserBarcodes}
-                    />} />
-                </Routes>
-            </BrowserRouter>
+            <AppContext.Provider value={this.state}>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/scans/:user" element={<UserScansRoot
+                        />} />
+                    </Routes>
+                </BrowserRouter>
+            </AppContext.Provider>
         );
     }
 
