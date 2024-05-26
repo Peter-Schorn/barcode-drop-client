@@ -1,23 +1,23 @@
 import React from 'react';
 import { Component } from "react";
-import { Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
-import { Backend } from '../API/backend';
 import { AppContext } from "../AppContext";
 
+import { Button, Table } from 'react-bootstrap';
+
 export default function UserScansRoot(props) {
-    
+
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
-    
+
     let params = useParams();
     // let location = useLocation();
     // let navigate = useNavigate();
-    
+
     return (
-        <UserScansRootCore 
-            {...props} 
-            router={{params}}
+        <UserScansRootCore
+            {...props}
+            router={{ params }}
         />
     );
 
@@ -39,7 +39,7 @@ class UserScansRootCore extends Component {
             "user": "schornpe"
         },
         {
-            "barcode": "https:\/\/amazon.com\/thisboxusqr",
+            "barcode": "https://amazon.com/thisboxusqr",
             "date": "2024-05-23T21:45:41Z",
             "id": "664f9475a31dbee57cf438d1",
             "user": "schornpe"
@@ -172,7 +172,7 @@ class UserScansRootCore extends Component {
         });
 
         this.context.api.deleteUserScans({
-             user: this.user
+            user: this.user
         });
 
         console.log("Cleared all user barcodes");
@@ -188,13 +188,16 @@ class UserScansRootCore extends Component {
         if (diffSecs <= 3) {
             return "Just now";
         }
-        if (diffSecs <= 15 /* 3 - 15 seconds */) {
-            return "Less than 15 seconds ago";
+        if (diffSecs <= 10 /* 3 - 10 seconds */) {
+            return "About 5 seconds ago";
         }
-        if (diffSecs <= 30 /* 15 - 30 seconds */) {
-            return "Less than 30 seconds ago";
+        if (diffSecs <= 20 /* 10 - 20 seconds */) {
+            return "About 15 seconds ago";
         }
-        if (diffSecs <= 120 /* 30 seconds - 2 minutes */) {
+        if (diffSecs <= 45 /* 20 - 45 seconds */) {
+            return "About 30 seconds ago";
+        }
+        if (diffSecs <= 120 /* 45 seconds - 2 minutes */) {
             return "About a minute ago";
         }
         if (diffSecs <= 300 /* 2 - 5 minutes */) {
@@ -244,19 +247,19 @@ class UserScansRootCore extends Component {
 
                 {/* Delete All */}
 
-                <button
+                <Button
                     // className="" 
                     style={{ margin: "5px 10px" }}
                     onClick={this.clearAllUserBarcodes}
                 >
                     Clear All Barcodes
-                </button>
+                </Button>
 
                 {/* spacer */}
 
                 {/* Table of Barcodes */}
 
-                <table className="barcode-table">
+                <Table className="barcode-table striped bordered hover">
                     <thead>
                         <tr>
                             <th></th>
@@ -269,20 +272,20 @@ class UserScansRootCore extends Component {
                             <tr key={barcode.id}>
                                 <td style={{
                                     textAlign: "center",
-                                    width: "100px"
+                                    width: "60px"
                                 }}>
-                                    <button
-                                        style={{ margin: "5px 10px" }}
+                                    <Button
+                                        style={{ margin: "5px 5px" }}
                                         onClick={this.onClickCopyButton(barcode.barcode)}
                                     >
                                         Copy
-                                    </button>
+                                    </Button>
                                 </td>
                                 <td>
                                     {barcode.barcode}
                                 </td>
-                                <td 
-                                    data-toggle="tooltip" 
+                                <td
+                                    data-toggle="tooltip"
                                     data-placement="top"
                                     title={this.formattedDateString(barcode.date)}
                                 >
@@ -291,7 +294,7 @@ class UserScansRootCore extends Component {
                             </tr>
                         )}
                     </tbody>
-                </table>
+                </Table>
             </div>
         );
     }
