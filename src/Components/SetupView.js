@@ -1,0 +1,37 @@
+import React from 'react';
+import { Component } from "react";
+import { Container } from "react-bootstrap";
+
+
+export default class SetupView extends Component {
+
+    render() {
+        return (
+            <Container className="text-center">
+                <div>
+                    <h1 className="p-5">Setup</h1>
+
+
+                    <p>
+                        Make a POST request to the following URL
+                        in your barcode scanner app
+                        ("replace {"<user>"} with your username"):
+                    </p>
+                    <a href="https://api.barcodedrop.com/scan/<user>">
+                        {"https://api.barcodedrop.com/scan/<user>"}
+                    </a>
+
+                    <p className="pt-5">
+                        Access your scanned barcodes at the following URL ("replace {"<user>"} with your username"):
+                    </p>
+                    <a href="https://barcodedrop.com/scans/<user>">
+                        {"https://barcodedrop.com/scans/<user>"}
+                    </a>
+
+                </div>
+            </Container>
+                
+        );
+    }
+
+}
