@@ -2,11 +2,15 @@ import React from 'react';
 import { Component } from "react";
 import { useParams } from 'react-router-dom';
 
-import { AppContext } from "../AppContext";
+import { AppContext } from "../Model/AppContext";
 
 import { Button, Table } from 'react-bootstrap';
 
-export default function UserScansRoot(props) {
+import UserScansRow from "./UserScanRow";
+
+import Badge from 'react-bootstrap/Badge';
+
+export default function UserScansTable(props) {
 
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
 
@@ -15,7 +19,7 @@ export default function UserScansRoot(props) {
     // let navigate = useNavigate();
 
     return (
-        <UserScansRootCore
+        <UserScansTableCore
             {...props}
             router={{ params }}
         />
@@ -23,7 +27,7 @@ export default function UserScansRoot(props) {
 
 };
 
-class UserScansRootCore extends Component {
+class UserScansTableCore extends Component {
 
     static sampleBarcodes = [
         {
@@ -118,30 +122,30 @@ class UserScansRootCore extends Component {
         super(props);
         this.state = {
             barcodes: []
-            // barcodes: UserScansRootCore.sampleBarcodes
+            // barcodes: UserScansTableCore.sampleBarcodes
             // barcodes: props.barcodes
             // context: props.context
         };
         this.user = props.router.params.user;
         if (this.user) {
             console.log(
-                `UserScansRootCore.constructor(): user: ${this.user}`
+                `UserScansTableCore.constructor(): user: ${this.user}`
             );
         }
         else {
             console.error(
-                `UserScansRootCore.constructor(): invalid user: ${this.user}`
+                `UserScansTableCore.constructor(): invalid user: ${this.user}`
             );
         }
     }
 
     componentDidMount() {
-        console.log("UserScansRootCore.componentDidMount():");
+        console.log("UserScansTableCore.componentDidMount():");
         console.log(`context.api: ${this.context.api}`);
         this.context.api.getUserScans(this.user)
             .then((result) => {
                 console.log(
-                    `UserScansRootCore.componentDidMount(): result: ${result}`
+                    `UserScansTableCore.componentDidMount(): result: ${result}`
                 );
                 this.setState({
                     barcodes: result
@@ -149,19 +153,10 @@ class UserScansRootCore extends Component {
             })
             .catch((error) => {
                 console.error(
-                    `UserScansRootCore.componentDidMount(): error: ${error}`
+                    `UserScansTableCore.componentDidMount(): error: ${error}`
                 );
             });
     }
-
-    onClickCopyButton = (barcode) => {
-        return (e) => {
-            navigator.clipboard.writeText(barcode);
-            console.log(`Copied barcode to clipboard: "${barcode}"`);
-            console.log("context: ", this.context);
-
-        };
-    };
 
     clearAllUserBarcodes = (e) => {
         console.log("Clearing all user barcodes");
@@ -178,120 +173,59 @@ class UserScansRootCore extends Component {
         console.log("Cleared all user barcodes");
     };
 
-    dateDifferenceFromNow(date) {
-
-        const now = new Date();
-        const then = new Date(date);  // date passed in
-        const diffMS = now - then;
-        let diffSecs = Math.floor(diffMS / 1_000);
-
-        if (diffSecs <= 3) {
-            return "Just now";
-        }
-        if (diffSecs <= 10 /* 3 - 10 seconds */) {
-            return "About 5 seconds ago";
-        }
-        if (diffSecs <= 20 /* 10 - 20 seconds */) {
-            return "About 15 seconds ago";
-        }
-        if (diffSecs <= 45 /* 20 - 45 seconds */) {
-            return "About 30 seconds ago";
-        }
-        if (diffSecs <= 120 /* 45 seconds - 2 minutes */) {
-            return "About a minute ago";
-        }
-        if (diffSecs <= 300 /* 2 - 5 minutes */) {
-            return "A few minutes ago";
-        }
-        if (diffSecs <= 600 /* 5 - 10 minutes */) {
-            return "About 5 minutes ago";
-        }
-        if (diffSecs <= 900 /* 10 - 15 minutes */) {
-            return "About 10 minutes ago";
-        }
-        if (diffSecs <= 1_800 /* 15 - 30 minutes */) {
-            return "About 15 minutes ago";
-        }
-        if (diffSecs <= 3_600 /* 30 minutes - 1 hour */) {
-            return "About 30 minutes ago";
-        }
-        if (diffSecs <= 7_200 /* 1 - 2 hours */) {
-            return "About an hour ago";
-        }
-        if (diffSecs > 7_200 /* 2 - 4 hours */) {
-            return "About two hours ago";
-        }
-        if (diffSecs > 14_400 /* 4 - 6 hours */) {
-            return "About four hours ago";
-        }
-        if (diffSecs > 21_600 /* 6 - 24 hours */) {
-            return "More than six hours ago";
-        }
-        if (diffSecs > 86_400 /* more than 1 day old */) {
-            return `More than one day ago`;
-        }
-
+    makeRemoveBarcodeFromState = (barcodeID) => {
+        return (e) => {
+            console.log(`Removing barcode with ID: ${barcodeID}`);
+            const newBarcodes = this.state.barcodes.filter(
+                (barcode) => barcode.id !== barcodeID
+            );
+            this.setState({
+                barcodes: newBarcodes
+            });
+        };
     }
 
-    formattedDateString(date) {
-        const dateObj = new Date(date);
-        return dateObj.toLocaleTimeString();
-    }
 
     render() {
         return (
             <div>
 
-                <h1>Scanned Barcodes for {this.user}</h1>
+                <h1><strong>Scanned Barcodes for {this.user}</strong></h1>
 
 
                 {/* Delete All */}
 
                 <Button
-                    // className="" 
-                    style={{ margin: "5px 10px" }}
+                    variant="danger"
+                    style={{ margin: "15px 0px" }}
                     onClick={this.clearAllUserBarcodes}
                 >
-                    Clear All Barcodes
+                    Delete All Barcodes
                 </Button>
 
                 {/* spacer */}
 
                 {/* Table of Barcodes */}
 
-                <Table className="barcode-table striped bordered hover">
+                <Table className="barcode-table border-dark" striped bordered hover>
                     <thead>
                         <tr>
-                            <th></th>
+                            
+                            <th style={{width: "60px"}}>{/* copy button */}</th>
                             <th>Barcode</th>
-                            <th>Date</th>
+                            <th>Time</th>
+                            <th style={{width: "80px"}}>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
                         {this.state.barcodes.map((barcode) =>
-                            <tr key={barcode.id}>
-                                <td style={{
-                                    textAlign: "center",
-                                    width: "60px"
-                                }}>
-                                    <Button
-                                        style={{ margin: "5px 5px" }}
-                                        onClick={this.onClickCopyButton(barcode.barcode)}
-                                    >
-                                        Copy
-                                    </Button>
-                                </td>
-                                <td>
-                                    {barcode.barcode}
-                                </td>
-                                <td
-                                    data-toggle="tooltip"
-                                    data-placement="top"
-                                    title={this.formattedDateString(barcode.date)}
-                                >
-                                    {this.dateDifferenceFromNow(barcode.date)}
-                                </td>
-                            </tr>
+                            <UserScansRow 
+                                barcode={barcode} 
+                                user={this.user}
+                                removeBarcodeFromState={
+                                    this.makeRemoveBarcodeFromState(barcode.id)
+                                }
+                            />
                         )}
                     </tbody>
                 </Table>

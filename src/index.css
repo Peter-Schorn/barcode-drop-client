@@ -12,23 +12,23 @@ code {
     monospace;
 }
 
+#root {
+    padding: 20px 50px;
+}
+
 .barcode-table {
-    width: 100%;
-    margin: 20px 0px;
-    border-collapse: collapse;
-    border: 2px solid black;
+    /* width: 100%; */
+    /* margin: 20px 0px; */
+    /* border-collapse: collapse; */
+    /* border: 1px solid black !important; */
 }
 
 .barcode-table th {
-    padding: 5px;
-    border: 2px solid black;
+    /* padding: 5px; */
+    /* border: 1px solid black !important; */
 }
 
 .barcode-table td {
-    padding: 5px;
-    border: 2px solid black;
-}
-
-#root {
-    padding: 20px 50px;
+    /* padding: 5px; */
+    /* border: 1px solid black !important; */
 }
