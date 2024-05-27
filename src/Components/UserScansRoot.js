@@ -122,8 +122,8 @@ class UserScansRootCore extends Component {
         super(props);
         
         this.state = {
-            barcodes: [],
-            autoCopy: false
+            barcodes: []
+            // autoCopy: false
             // barcodes: UserScansRootCore.sampleBarcodes
             // barcodes: props.barcodes
             // context: props.context
@@ -192,20 +192,20 @@ class UserScansRootCore extends Component {
 
     }
 
-    autoCopyIfEnabled = () => {
-        if (this.state.autoCopy) {
-            console.log("Auto-copying most recent barcode");
-            const mostRecentBarcode = this.state.barcodes[0];
-            const barcodeText = mostRecentBarcode.barcode;
-            navigator.clipboard.writeText(barcodeText);
-            console.log(
-                `AUTO-Copied barcode to clipboard: "${barcodeText}"`
-            );
-        }
-        else {
-            console.log("Auto-copy is disabled; not copying latest barcode");
-        }
-    }
+    // autoCopyIfEnabled = () => {
+    //     if (this.state.autoCopy) {
+    //         console.log("Auto-copying most recent barcode");
+    //         const mostRecentBarcode = this.state.barcodes[0];
+    //         const barcodeText = mostRecentBarcode.barcode;
+    //         navigator.clipboard.writeText(barcodeText);
+    //         console.log(
+    //             `AUTO-Copied barcode to clipboard: "${barcodeText}"`
+    //         );
+    //     }
+    //     else {
+    //         console.log("Auto-copy is disabled; not copying latest barcode");
+    //     }
+    // }
 
     // Get the user's scans
     // isInitial: `true` if this is the first time the scans are being fetched;
@@ -225,12 +225,12 @@ class UserScansRootCore extends Component {
                 barcodes: result
             });
 
-            console.log(
-                "UserScansRootCore.getUserScans(): " +
-                "calling autoCopyIfEnabled()"
-            );
+            // console.log(
+            //     "UserScansRootCore.getUserScans(): " +
+            //     "calling autoCopyIfEnabled()"
+            // );
 
-            this.autoCopyIfEnabled();
+            // this.autoCopyIfEnabled();
 
         })
         .catch((error) => {
