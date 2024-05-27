@@ -14,6 +14,12 @@ export default class UserScansRow extends Component {
 
     static contextType = AppContext;
 
+    rowStyleClassName = () => {
+        // TODO: figure out why table variants cover borders
+        // return this.props.index === 0 ? "table-success" : "";
+        return "";
+    }
+
     dateDifferenceFromNow(date) {
 
         const now = new Date();
@@ -106,7 +112,10 @@ export default class UserScansRow extends Component {
 
     render() {
         return (
-            <tr key={this.props.barcode.id}>
+            <tr 
+                key={this.props.barcode.id}
+                className={this.rowStyleClassName()}
+            >
                 <td style={{
                     textAlign: "center",
                 }}>

@@ -8,6 +8,7 @@ import { Button, Table } from 'react-bootstrap';
 
 import UserScansRow from "./UserScanRow";
 import UserScansTable from "./UserScansTable";
+import MainNavbar from "./MainNavbar";
 
 export default function UserScansRoot(props) {
 
@@ -121,11 +122,14 @@ class UserScansRootCore extends Component {
         super(props);
         
         this.state = {
-            barcodes: []
+            barcodes: [],
+            autoCopy: false
             // barcodes: UserScansRootCore.sampleBarcodes
             // barcodes: props.barcodes
             // context: props.context
         };
+
+        this.pollingID = null;
 
         this.user = props.router.params.user;
         
@@ -149,23 +153,24 @@ class UserScansRootCore extends Component {
         }
     }
 
+    componentWillUnmount() {
+        console.log("UserScansRootCore.componentWillUnmount():");
+        // this.socket.close();
+        clearInterval(this.pollingID);
+    }
+
     componentDidMount() {
         console.log("UserScansRootCore.componentDidMount():");
         console.log(`context.api: ${this.context.api}`);
-        this.context.api.getUserScans(this.user)
-            .then((result) => {
-                console.log(
-                    `UserScansRootCore.componentDidMount(): result: ${result}`
-                );
-                this.setState({
-                    barcodes: result
-                });
-            })
-            .catch((error) => {
-                console.error(
-                    `UserScansRootCore.componentDidMount(): error: ${error}`
-                );
-            });
+        
+
+        this.getUserScans({user: this.user, isInitial: true});
+
+        if (process.env.REACT_APP_DISABLE_POLLING !== "true") {
+            this.pollingID = setInterval(() => {
+                this.getUserScans({user: this.user, isInitial: false});
+            }, 2_000);
+        }
 
         // this.socket.onopen = (event) => {
         //     console.log(
@@ -178,6 +183,61 @@ class UserScansRootCore extends Component {
         //         `UserScansRootCore.componentDidMount(): socket.onmessage(): event: ${event}`
         //     );
         // }
+
+        // setTimeout(() => {
+        //     this.socket.send(
+        //         "Hello from REACT UserScansRootCore.componentDidMount()"
+        //     );
+        // }, 6_000);
+
+    }
+
+    autoCopyIfEnabled = () => {
+        if (this.state.autoCopy) {
+            console.log("Auto-copying most recent barcode");
+            const mostRecentBarcode = this.state.barcodes[0];
+            const barcodeText = mostRecentBarcode.barcode;
+            navigator.clipboard.writeText(barcodeText);
+            console.log(
+                `AUTO-Copied barcode to clipboard: "${barcodeText}"`
+            );
+        }
+        else {
+            console.log("Auto-copy is disabled; not copying latest barcode");
+        }
+    }
+
+    // Get the user's scans
+    // isInitial: `true` if this is the first time the scans are being fetched;
+    // else, false.
+    getUserScans = ({user, isInitial}) => {
+
+        let date = Date().toString();
+        console.log(`Getting scans for user: ${user} at date: ${date}`);
+
+        this.context.api.getUserScans(this.user).then((result) => {
+            
+            console.log(
+                `UserScansRootCore.getUserScans(): result: ${result}`
+            );
+
+            this.setState({
+                barcodes: result
+            });
+
+            console.log(
+                "UserScansRootCore.getUserScans(): " +
+                "calling autoCopyIfEnabled()"
+            );
+
+            this.autoCopyIfEnabled();
+
+        })
+        .catch((error) => {
+            console.error(
+                `UserScansRootCore.componentDidMount(): error: ${error}`
+            );
+        });
 
     }
 
@@ -207,10 +267,10 @@ class UserScansRootCore extends Component {
     }
 
 
-
     render() {
         return (
             <div>
+                <MainNavbar/> 
 
                 <h1><strong>Scanned Barcodes for {this.user}</strong></h1>
 
@@ -239,10 +299,11 @@ class UserScansRootCore extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        {this.state.barcodes.map((barcode) =>
+                        {this.state.barcodes.map((barcode, index) =>
                             <UserScansRow
-                                key={barcode.id} 
-                                barcode={barcode} 
+                                key={barcode.id}
+                                index={index}
+                                barcode={barcode}
                                 user={this.user}
                                 removeBarcodeFromState={
                                     this.removeBarcodeFromState
