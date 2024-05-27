@@ -4,7 +4,7 @@ import { Axios } from "axios";
 export default class Backend {
 
     constructor() {
-        this.backendUrl = new URL(process.env.REACT_APP_BACKEND_URL);
+        this.backendURL = new URL(process.env.REACT_APP_BACKEND_URL);
         this.httpClient = axios.create();
     }
 
@@ -100,7 +100,7 @@ export default class Backend {
         headers
     }) {
         let response = await this.httpClient.request({
-            baseURL: this.backendUrl.toString(),
+            baseURL: this.backendURL.toString(),
             method: method,
             url: path,
             headers: headers,

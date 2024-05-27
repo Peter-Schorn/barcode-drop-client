@@ -119,13 +119,24 @@ class UserScansRootCore extends Component {
 
     constructor(props) {
         super(props);
+        
         this.state = {
             barcodes: []
             // barcodes: UserScansRootCore.sampleBarcodes
             // barcodes: props.barcodes
             // context: props.context
         };
+
         this.user = props.router.params.user;
+        
+        this.backendURL = new URL(process.env.REACT_APP_BACKEND_URL);
+        
+        // this.socketURL = this.backendURL
+        // this.socketURL.pathname = `/watch/${this.user}`;
+        // console.log(`UserScansRootCore.constructor(): socketURL: ${this.socketURL}`);
+        // this.socket = new WebSocket(this.socketURL);
+
+
         if (this.user) {
             console.log(
                 `UserScansRootCore.constructor(): user: ${this.user}`
@@ -155,6 +166,19 @@ class UserScansRootCore extends Component {
                     `UserScansRootCore.componentDidMount(): error: ${error}`
                 );
             });
+
+        // this.socket.onopen = (event) => {
+        //     console.log(
+        //         `UserScansRootCore.componentDidMount(): socket.onopen(): event: ${event}`
+        //     );
+        // }
+
+        // this.socket.onmessage = (event) => {
+        //     console.log(
+        //         `UserScansRootCore.componentDidMount(): socket.onmessage(): event: ${event}`
+        //     );
+        // }
+
     }
 
     clearAllUserBarcodes = (e) => {
