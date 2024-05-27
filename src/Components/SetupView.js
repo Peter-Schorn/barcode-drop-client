@@ -15,7 +15,7 @@ export default class SetupView extends Component {
                     <p>
                         Make a POST request to the following URL
                         in your barcode scanner app
-                        ("replace {"<user>"} with your username"):
+                        {`("replace {"<user>"} with your username)`):
                     </p>
                     <a href="https://api.barcodedrop.com/scan/<user>">
                         {"https://api.barcodedrop.com/scan/<user>"}
@@ -42,7 +42,7 @@ export default class SetupView extends Component {
 
 
                     <p className="pt-5">
-                        Access your scanned barcodes at the following URL ("replace {"<user>"} with your username"):
+                        Access your scanned barcodes at the following URL {`(replace {"<user>"} with your username)`}:
                     </p>
                     <a href="https://barcodedrop.com/scans/<user>">
                         {"https://barcodedrop.com/scans/<user>"}
