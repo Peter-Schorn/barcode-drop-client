@@ -272,7 +272,11 @@ class UserScansRootCore extends Component {
             <div>
                 <MainNavbar/> 
 
-                <h1><strong>Scanned Barcodes for {this.user}</strong></h1>
+                <h2 style={{margin: "30px 10px 10px 0px"}}>
+                    <strong>
+                        Scanned Barcodes for <em style={{color: "gray"}}>{this.user}</em>
+                    </strong>
+                </h2>
 
 
                 {/* Delete All */}
