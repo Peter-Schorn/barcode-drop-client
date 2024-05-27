@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { Component } from "react";
 
-import UserScansTable from "./Components/UserScansTable";
+import UserScansRoot from "./Components/UserScansRoot";
 
 import { AppContext } from './Model/AppContext';
 
@@ -39,7 +39,7 @@ export default class App extends Component {
                         {/* User Scans Table */}
                         <Route 
                             path="/scans/:user" 
-                            element={<UserScansTable/>}
+                            element={<UserScansRoot/>}
                         />
 
 

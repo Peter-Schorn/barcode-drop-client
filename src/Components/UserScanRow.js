@@ -83,7 +83,7 @@ export default class UserScansRow extends Component {
             console.log(`Deleting barcode: "${barcode}"`);
             const barcodeID = barcode.id;
 
-            this.props.removeBarcodeFromState(e);
+            this.props.removeBarcodeFromState(barcodeID);
             
             this.context.api.deleteScans([barcodeID])
                 .then((result) => {
