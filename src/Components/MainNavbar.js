@@ -18,7 +18,7 @@ export default class MainNavbar extends Component {
                                 fontFamily: "monospace",
                             }}>
                                 Barcode Drop
-                                <i style={{margin: "20px"}} class="fa-solid fa-barcode"></i>
+                                <i style={{margin: "20px"}} className="fa-solid fa-barcode"></i>
                             </strong>
                         </a>
                     </div>

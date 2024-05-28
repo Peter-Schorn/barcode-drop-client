@@ -136,10 +136,12 @@ class UserScansRootCore extends Component {
         this.backendURL = new URL(process.env.REACT_APP_BACKEND_URL);
         
         // this.socketURL = this.backendURL
-        // this.socketURL.pathname = `/watch/${this.user}`;
-        // console.log(`UserScansRootCore.constructor(): socketURL: ${this.socketURL}`);
+        // // this.socketURL.pathname = `/watch/${this.user}`;
+        // this.socketURL.pathname = `/ws-test`;
+        // console.log(
+        //     `UserScansRootCore.constructor(): socketURL: ${this.socketURL}`
+        // );
         // this.socket = new WebSocket(this.socketURL);
-
 
         if (this.user) {
             console.log(
@@ -224,7 +226,7 @@ class UserScansRootCore extends Component {
             this.setState({
                 barcodes: result
             });
-
+ 
             // console.log(
             //     "UserScansRootCore.getUserScans(): " +
             //     "calling autoCopyIfEnabled()"

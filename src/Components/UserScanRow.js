@@ -120,6 +120,7 @@ export default class UserScansRow extends Component {
                     textAlign: "center",
                 }}>
                     <Button
+                        className="copy-button"
                         style={{ margin: "5px 5px" }}
                         onClick={this.onClickCopyButton(
                             this.props.barcode
