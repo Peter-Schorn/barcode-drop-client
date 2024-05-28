@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { AppContext } from "../Model/AppContext";
 
-import { Button, Table } from 'react-bootstrap';
+import { Button, Table, Form } from 'react-bootstrap';
 
 import UserScansRow from "./UserScanRow";
 import UserScansTable from "./UserScansTable";
@@ -122,8 +122,8 @@ class UserScansRootCore extends Component {
         super(props);
         
         this.state = {
-            barcodes: []
-            // autoCopy: false
+            barcodes: [],
+            autoCopy: false
             // barcodes: UserScansRootCore.sampleBarcodes
             // barcodes: props.barcodes
             // context: props.context
@@ -192,20 +192,49 @@ class UserScansRootCore extends Component {
 
     }
 
-    // autoCopyIfEnabled = () => {
-    //     if (this.state.autoCopy) {
-    //         console.log("Auto-copying most recent barcode");
-    //         const mostRecentBarcode = this.state.barcodes[0];
-    //         const barcodeText = mostRecentBarcode.barcode;
-    //         navigator.clipboard.writeText(barcodeText);
-    //         console.log(
-    //             `AUTO-Copied barcode to clipboard: "${barcodeText}"`
-    //         );
-    //     }
-    //     else {
-    //         console.log("Auto-copy is disabled; not copying latest barcode");
-    //     }
-    // }
+    autoCopyIfEnabled = () => {
+
+        console.log(
+            `UserScansRootCore.autoCopyIfEnabled(): this.state.autoCopy: ` +
+            `${this.state.autoCopy}`
+        );
+
+        // if this.state.autoCopy
+
+        if (document.hasFocus()) {
+            console.log("Auto-copying most recent barcode");
+            const mostRecentBarcode = this.state.barcodes[0];
+            const barcodeText = mostRecentBarcode.barcode;
+
+            try {
+                navigator.permissions.query({name: "clipboard-write"}).then((result) => {
+                    console.log(`Clipboard permissions: ${result.state}`);
+                    if (result.state === "granted") {
+                        navigator.clipboard.writeText(barcodeText);
+                        console.log(
+                            `Copied barcode to clipboard: "${barcodeText}"`
+                        );
+                    }
+                });
+               
+            } catch (error) {
+                console.error(
+                    `Error copying barcode to clipboard: "${barcodeText}": ` +
+                    `${error}`
+                );
+            }
+
+            console.log(
+                `AUTO-Copied barcode to clipboard: "${barcodeText}"`
+            );
+        }
+        else {
+            console.log("Document does not have focus; not copying barcode");
+        }
+        
+        // console.log("Auto-copy is disabled; not copying latest barcode");
+
+    }
 
     // Get the user's scans
     // isInitial: `true` if this is the first time the scans are being fetched;
@@ -225,12 +254,12 @@ class UserScansRootCore extends Component {
                 barcodes: result
             });
 
-            // console.log(
-            //     "UserScansRootCore.getUserScans(): " +
-            //     "calling autoCopyIfEnabled()"
-            // );
+            console.log(
+                "UserScansRootCore.getUserScans(): " +
+                "calling autoCopyIfEnabled()"
+            );
 
-            // this.autoCopyIfEnabled();
+            this.autoCopyIfEnabled();
 
         })
         .catch((error) => {
@@ -266,6 +295,20 @@ class UserScansRootCore extends Component {
         });
     }
 
+      
+    handleAutoCopyCheckboxChange(event) {
+        console.log(`handleAutoCopyCheckboxChange: event: ${event}`);
+        // const target = event.target;
+        // const autoCopyIsChecked = target.autoCopy;
+        const autoCopyIsChecked = event.target.checked;
+        console.log(`autoCopyIsChecked: ${autoCopyIsChecked}`);
+        this.setState({
+            "autoCopy": !autoCopyIsChecked
+        });
+        
+    }
+
+
 
     render() {
         return (
@@ -283,13 +326,22 @@ class UserScansRootCore extends Component {
 
                 <Button
                     variant="danger"
-                    style={{ margin: "15px 0px" }}
+                    style={{ margin: "10px 0px" }}
                     onClick={this.clearAllUserBarcodes}
                 >
                     Delete All Barcodes
                 </Button>
 
-                {/* spacer */}
+                <Form.Check // prettier-ignore
+                    type="checkbox"
+                    id="auto-copy-checkbox"
+                    // checked={this.state.autoCopy}
+                    label={`Enable Auto-Copy`}
+                    style={{ margin: "15px 0px" }}
+                    onChange={this.handleAutoCopyCheckboxChange.bind(this)}
+                />
+
+                {/* // TODO: spacer */}
 
                 {/* Table of Barcodes */}
 
