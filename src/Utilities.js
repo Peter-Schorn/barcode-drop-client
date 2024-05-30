@@ -71,3 +71,16 @@ export function dateDifferenceFromNow(date) {
     return diffString + " ago";
    
 }
+
+// MARK: setIntervalImmediately()
+/**
+ * Calls the function immediately, then calls it every `interval` milliseconds.
+ * 
+ * @param {Function} func The function to call.
+ * @param {number} interval The interval in milliseconds.
+ * @returns The interval ID. (The same value returned by `setInterval()`.)
+ */
+export function setIntervalImmediately(func, interval) {
+    func();
+    return setInterval(func, interval);
+}

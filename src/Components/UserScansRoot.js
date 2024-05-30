@@ -9,6 +9,7 @@ import { Button, Table } from 'react-bootstrap';
 import UserScansRow from "./UserScanRow";
 import UserScansTable from "./UserScansTable";
 import MainNavbar from "./MainNavbar";
+import { setIntervalImmediately } from "../Utilities";
 
 export default function UserScansRoot(props) {
 
@@ -164,34 +165,70 @@ class UserScansRootCore extends Component {
     componentDidMount() {
         console.log("UserScansRootCore.componentDidMount():");
         console.log(`context.api: ${this.context.api}`);
-        
 
-        this.getUserScans({user: this.user, isInitial: true});
+        this.getUserScans({user: this.user});
+        
+        console.log(
+            `REACT_APP_DISABLE_POLLING: ` +
+            `${process.env.REACT_APP_DISABLE_POLLING}`
+        );
 
         if (process.env.REACT_APP_DISABLE_POLLING !== "true") {
-            this.pollingID = setInterval(() => {
-                this.getUserScans({user: this.user, isInitial: false});
-            }, 2_000);
+            console.log("Polling is enabled");
+            this.beginPolling();
         }
+        else {
+            console.log("Polling is disabled");
+            this.getUserScans({user: this.user});
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            console.log(
+                `visibilitychange: document.hidden: ${document.hidden}`
+            );
+            if (document.hidden) {
+                console.log("visibilitychange: Clearing polling interval");
+                clearInterval(this.pollingID);
+            }
+            else {
+                console.log("visibilitychange: calling beginPolling()");
+                this.beginPolling();
+            }
+          });
 
         // this.socket.onopen = (event) => {
         //     console.log(
-        //         `UserScansRootCore.componentDidMount(): socket.onopen(): event: ${event}`
+        //         `socket.onopen(): event: ${event}`
         //     );
         // }
-
+        //
         // this.socket.onmessage = (event) => {
         //     console.log(
-        //         `UserScansRootCore.componentDidMount(): socket.onmessage(): event: ${event}`
+        //         `socket.onmessage(): event: ${event}`
         //     );
         // }
-
+        //
         // setTimeout(() => {
         //     this.socket.send(
         //         "Hello from REACT UserScansRootCore.componentDidMount()"
         //     );
         // }, 6_000);
 
+    }
+
+    beginPolling = () => {
+        console.log("UserScansRootCore.beginPolling():");
+        // MARK: IMPORTANT: CLEAR any previously created polling intervals 
+        // MARK: before creating a new one
+        // otherwise, multiple polling intervals will be created and execute
+        // concurrently
+        if (this.pollingID) {
+            console.log("Clearing previous polling interval");
+            clearInterval(this.pollingID);
+        }
+        this.pollingID = setIntervalImmediately(() => {
+            this.getUserScans({user: this.user});
+        }, 2_000);
     }
 
     // autoCopyIfEnabled = () => {
@@ -212,7 +249,7 @@ class UserScansRootCore extends Component {
     // Get the user's scans
     // isInitial: `true` if this is the first time the scans are being fetched;
     // else, false.
-    getUserScans = ({user, isInitial}) => {
+    getUserScans = ({user}) => {
 
         let date = Date().toString();
         console.log(`Getting scans for user: ${user} at date: ${date}`);
