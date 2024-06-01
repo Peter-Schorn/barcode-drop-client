@@ -133,6 +133,7 @@ class UserScansRootCore extends Component {
 
         this.pollingID = null;
 
+        
         this.user = props.router.params.user;
         
         if (this.user) {
@@ -155,6 +156,7 @@ class UserScansRootCore extends Component {
         this.socketURL.pathname = `/watch/${this.user}`;
         // this.socketURL.pathname = `/ws-test`;
         
+        this.socket = React.createRef();
         // this.socket = new WebSocket(this.socketURL);
         
         console.log(
@@ -219,32 +221,34 @@ class UserScansRootCore extends Component {
 
     configureSocket = () => {
 
-        this.socket = new WebSocket(this.socketURL);
+        this.socket.current = new WebSocket(this.socketURL);
 
-        this.socket.onopen = (event) => {
+        this.socket.current.onopen = (event) => {
             console.log(
                 "socket.onopen(): event:", event
             );
         }
 
-        this.socket.onclose = (event) => {
+        this.socket.current.onclose = (event) => {
             console.log(
-                "socket.onclose(): event:", event
+                `[${Date()}] socket.onclose(): event:`, event
             );
-            console.log("Attempting to re-connect to WebSocket...");
+            console.log(
+                `[${Date()}] Attempting to re-connect to WebSocket...`
+            );
             setTimeout(() => {
                 this.getUserScans({user: this.user});
                 this.configureSocket();
             }, 500);
         };
 
-        this.socket.onerror = (event) => {
+        this.socket.current.onerror = (event) => {
             console.error(
                 "socket.onerror(): event:", event
             );
         }
         
-        this.socket.onmessage = (event) => {
+        this.socket.current.onmessage = (event) => {
             this.receiveSocketMessage(event);
         }
         
@@ -288,6 +292,7 @@ class UserScansRootCore extends Component {
 
             });
         }
+        // MARK: Delete scan
         else if (
             message?.type === SocketMessageTypes.deleteScan &&
             message?.id
