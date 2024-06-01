@@ -155,7 +155,7 @@ class UserScansRootCore extends Component {
         this.socketURL.pathname = `/watch/${this.user}`;
         // this.socketURL.pathname = `/ws-test`;
         
-        this.socket = new WebSocket(this.socketURL);
+        // this.socket = new WebSocket(this.socketURL);
         
         console.log(
             `UserScansRootCore.constructor(): socketURL: ${this.socketURL}`
@@ -179,8 +179,8 @@ class UserScansRootCore extends Component {
         this.getUserScans({user: this.user});
 
         //
-        // // call getUserScans() again after 500ms to update the state quickly
-        // setTimeout(() => { this.getUserScans({user: this.user}); }, 500);
+        // // call getUserScans() again after 1 second to update the state quickly
+        // setTimeout(() => { this.getUserScans({user: this.user}); }, 1_000);
         //        
         // console.log(
         //     `REACT_APP_DISABLE_POLLING: ` +
@@ -213,7 +213,13 @@ class UserScansRootCore extends Component {
         //     }
         // });
 
-        // MARK: - WebSockets -
+        this.configureSocket();        
+
+    }
+
+    configureSocket = () => {
+
+        this.socket = new WebSocket(this.socketURL);
 
         this.socket.onopen = (event) => {
             console.log(
@@ -225,12 +231,26 @@ class UserScansRootCore extends Component {
             console.log(
                 "socket.onclose(): event:", event
             );
+            console.log("Attempting to re-connect to WebSocket...");
+            setTimeout(() => {
+                this.getUserScans({user: this.user});
+                this.configureSocket();
+            }, 500);
         };
+
+        this.socket.onerror = (event) => {
+            console.error(
+                "socket.onerror(): event:", event
+            );
+        }
         
         this.socket.onmessage = (event) => {
             this.receiveSocketMessage(event);
         }
         
+        
+
+
 
     }
 
@@ -254,7 +274,10 @@ class UserScansRootCore extends Component {
             ); 
             this.setState(state => {
                 // MARK: insert the new scan in sorted order by date
-                const newBarcodes = [newScan, ...state.barcodes]
+                // and remove any existing scan with the same ID
+                const newBarcodes = state.barcodes
+                    .filter((barcode) => barcode.id !== newScan.id)
+                    .concat(newScan)
                     .toSorted((lhs, rhs) => {
                         return new Date(rhs.date) - new Date(lhs.date); 
                     });
@@ -262,6 +285,7 @@ class UserScansRootCore extends Component {
                 return {
                     barcodes: newBarcodes
                 }
+
             });
         }
         else if (
