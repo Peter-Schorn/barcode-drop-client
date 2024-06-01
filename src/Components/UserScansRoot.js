@@ -10,6 +10,7 @@ import UserScansRow from "./UserScanRow";
 import UserScansTable from "./UserScansTable";
 import MainNavbar from "./MainNavbar";
 import { setIntervalImmediately } from "../Utilities";
+import { SocketMessageTypes } from "../Model/SocketMessages";
 
 export default function UserScansRoot(props) {
 
@@ -134,16 +135,6 @@ class UserScansRootCore extends Component {
 
         this.user = props.router.params.user;
         
-        this.backendURL = new URL(process.env.REACT_APP_BACKEND_URL);
-        
-        // this.socketURL = this.backendURL
-        // // this.socketURL.pathname = `/watch/${this.user}`;
-        // this.socketURL.pathname = `/ws-test`;
-        // console.log(
-        //     `UserScansRootCore.constructor(): socketURL: ${this.socketURL}`
-        // );
-        // this.socket = new WebSocket(this.socketURL);
-
         if (this.user) {
             console.log(
                 `UserScansRootCore.constructor(): user: ${this.user}`
@@ -154,65 +145,118 @@ class UserScansRootCore extends Component {
                 `UserScansRootCore.constructor(): invalid user: ${this.user}`
             );
         }
+
+        // MARK: - WebSockets -
+
+        const backendURL = new URL(process.env.REACT_APP_BACKEND_URL);
+        
+        this.socketURL = backendURL
+        
+        this.socketURL.pathname = `/watch/${this.user}`;
+        // this.socketURL.pathname = `/ws-test`;
+        
+        this.socket = new WebSocket(this.socketURL);
+        
+        console.log(
+            `UserScansRootCore.constructor(): socketURL: ${this.socketURL}`
+        );
+       
     }
 
     componentWillUnmount() {
-        console.log("UserScansRootCore.componentWillUnmount():");
+        // console.log("UserScansRootCore.componentWillUnmount():");
         // this.socket.close();
         clearInterval(this.pollingID);
     }
 
     componentDidMount() {
+
         console.log("UserScansRootCore.componentDidMount():");
-        console.log(`context.api: ${this.context.api}`);
 
+        // always make one initial call to getUserScans() to get the initial 
+        // state
         this.getUserScans({user: this.user});
-        
-        console.log(
-            `REACT_APP_DISABLE_POLLING: ` +
-            `${process.env.REACT_APP_DISABLE_POLLING}`
-        );
 
-        if (process.env.REACT_APP_DISABLE_POLLING !== "true") {
-            console.log("Polling is enabled");
-            this.beginPolling();
-        }
-        else {
-            console.log("Polling is disabled");
-            this.getUserScans({user: this.user});
-        }
+        //
+        // // call getUserScans() again after 500ms to update the state quickly
+        // setTimeout(() => { this.getUserScans({user: this.user}); }, 500);
+        //        
+        // console.log(
+        //     `REACT_APP_DISABLE_POLLING: ` +
+        //     `${process.env.REACT_APP_DISABLE_POLLING}`
+        // );
+        //
+        // if (process.env.REACT_APP_DISABLE_POLLING !== "true") {
+        //     console.log("Polling is enabled");
+        //     this.beginPolling();
+        // }
+        // else {
+        //     console.log("Polling is disabled");
+        //     this.getUserScans({user: this.user});
+        // }
+        //
+        // document.addEventListener("visibilitychange", () => {
+        //     console.log(
+        //         `visibilitychange: document.hidden: ${document.hidden}`
+        //     );
+        //     if (document.hidden) {
+        //         console.log("visibilitychange: Clearing polling interval");
+        //         clearInterval(this.pollingID);
+        //     }
+        //     else {
+        //         console.log("visibilitychange: calling beginPolling()");
+        //         // call getUserScans() again after 500ms to update the state 
+        //         // quickly
+        //         setTimeout(() => { this.getUserScans({user: this.user}); }, 500);
+        //         this.beginPolling();
+        //     }
+        // });
 
-        document.addEventListener("visibilitychange", () => {
+        // MARK: - WebSockets -
+
+        this.socket.onopen = (event) => {
             console.log(
-                `visibilitychange: document.hidden: ${document.hidden}`
+                "socket.onopen(): event:", event
             );
-            if (document.hidden) {
-                console.log("visibilitychange: Clearing polling interval");
-                clearInterval(this.pollingID);
-            }
-            else {
-                console.log("visibilitychange: calling beginPolling()");
-                this.beginPolling();
-            }
-          });
+        }
+        
+        this.socket.onmessage = (event) => {
+            console.log(
+                "socket received message: event:", event
+            );
+            const message = JSON.parse(event.data);
+            if (
+                message?.type === SocketMessageTypes.insertNewScan && 
+                message?.newScan
+            ) {
+                const newScan = message.newScan;
+                console.log(
+                    `socket will insert newScan for user ${this.user}:`, 
+                    newScan
+                ); 
+                this.setState(state => {
+                    // MARK: insert the new scan in sorted order by date
+                    const newBarcodes = [newScan, ...state.barcodes]
+                        .toSorted((lhs, rhs) => {
+                            return new Date(rhs.date) - new Date(lhs.date); 
+                        });
 
-        // this.socket.onopen = (event) => {
-        //     console.log(
-        //         `socket.onopen(): event: ${event}`
-        //     );
-        // }
-        //
-        // this.socket.onmessage = (event) => {
-        //     console.log(
-        //         `socket.onmessage(): event: ${event}`
-        //     );
-        // }
-        //
+                    return {
+                        barcodes: newBarcodes
+                    }
+                });
+            }
+            
+        }
+        
+        // const delay = 6_000;
         // setTimeout(() => {
+        //     console.log(`Sending message to socket at ${Date().toString()}`);
         //     this.socket.send(
-        //         "Hello from REACT UserScansRootCore.componentDidMount()"
+        //         `Hello from REACT UserScansRootCore.componentDidMount() ` +
+        //         `(${delay / 1_000} seconds later at ${Date().toString()}`
         //     );
-        // }, 6_000);
+        // }, delay);
 
     }
 
@@ -246,9 +290,7 @@ class UserScansRootCore extends Component {
     //     }
     // }
 
-    // Get the user's scans
-    // isInitial: `true` if this is the first time the scans are being fetched;
-    // else, false.
+    /** Get the user's scans */
     getUserScans = ({user}) => {
 
         let date = Date().toString();
@@ -256,8 +298,10 @@ class UserScansRootCore extends Component {
 
         this.context.api.getUserScans(this.user).then((result) => {
             
+            const jsonString = JSON.stringify(result);
+
             console.log(
-                `UserScansRootCore.getUserScans(): result: ${result}`
+                `UserScansRootCore.getUserScans(): result: ${jsonString}`
             );
 
             this.setState({
