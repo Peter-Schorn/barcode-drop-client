@@ -28,7 +28,7 @@ export default class SetupView extends Component {
                     <p className="">
                         Query string/form-url-encoded in the body: 
                         <span style={{padding: "0px 10px", fontFamily: "'Courier New', monospace"}}>
-                            {"?barcode=<barcode> or ?text=<barcode>"}
+                            {"barcode=<barcode> or text=<barcode>"}
                         </span>
                     </p>
 
