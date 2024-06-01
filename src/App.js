@@ -7,6 +7,7 @@ import { Component } from "react";
 
 import UserScansRoot from "./Components/UserScansRoot";
 import SetupView from "./Components/SetupView";
+import MainNavbar from "./Components/MainNavbar";
 
 import { AppContext } from './Model/AppContext';
 
@@ -34,6 +35,7 @@ export default class App extends Component {
     render() {
         return (
             <AppContext.Provider value={this.state}>
+                <MainNavbar/> 
                 <BrowserRouter>
                     <Routes>
 

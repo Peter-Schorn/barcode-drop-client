@@ -17,9 +17,19 @@ code {
     color: black !important;
 }
 
-#user-scans-root {
-    padding: 20px 50px;
+.navbar-brand {
+    font-size: 1.5rem !important;
 }
+
+@media screen and (min-width: 600px) {
+    .navbar-brand {
+        font-size: 2.5rem !important;
+    }
+}
+
+/* #user-scans-root {
+
+} */
 
 .barcode-table {
     /* width: 100%; */
