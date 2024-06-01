@@ -8,11 +8,40 @@ import { Button } from 'react-bootstrap';
 
 export default class UserScansRow extends Component {
 
-    // constructor(props) {
-    //     super(props);
-    // }
+    constructor(props) {
+        super(props);
+
+        const dateDifference = this.dateDifferenceFromNow(
+            this.props.barcode.date
+        );
+
+        this.state = {
+            dateDifference: dateDifference
+        };
+
+    }
 
     static contextType = AppContext;
+
+    componentDidMount() {
+        this.intervalID = setInterval(
+            () => this.tick(),
+            5_000
+        );
+    }
+
+    tick = () => {
+        this.updateDateDifference();
+    }
+
+    updateDateDifference = () => {
+        const dateDifference = this.dateDifferenceFromNow(
+            this.props.barcode.date
+        );
+        this.setState({
+            dateDifference: dateDifference
+        });
+    }
 
     rowStyleClassName = () => {
         // TODO: figure out why table variants cover borders
@@ -137,7 +166,7 @@ export default class UserScansRow extends Component {
                     data-placement="top"
                     title={this.formattedDateString(this.props.barcode.date)}
                 >
-                    {this.dateDifferenceFromNow(this.props.barcode.date)}
+                    {this.state.dateDifference}
                 </td>
                 <td 
                     style={{

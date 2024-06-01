@@ -164,7 +164,8 @@ class UserScansRootCore extends Component {
     }
 
     componentWillUnmount() {
-        // console.log("UserScansRootCore.componentWillUnmount():");
+        console.log("UserScansRootCore.componentWillUnmount():");
+        
         // this.socket.close();
         clearInterval(this.pollingID);
     }
@@ -219,44 +220,61 @@ class UserScansRootCore extends Component {
                 "socket.onopen(): event:", event
             );
         }
+
+        this.socket.onclose = (event) => {
+            console.log(
+                "socket.onclose(): event:", event
+            );
+        };
         
         this.socket.onmessage = (event) => {
-            console.log(
-                "socket received message: event:", event
-            );
-            const message = JSON.parse(event.data);
-            if (
-                message?.type === SocketMessageTypes.insertNewScan && 
-                message?.newScan
-            ) {
-                const newScan = message.newScan;
-                console.log(
-                    `socket will insert newScan for user ${this.user}:`, 
-                    newScan
-                ); 
-                this.setState(state => {
-                    // MARK: insert the new scan in sorted order by date
-                    const newBarcodes = [newScan, ...state.barcodes]
-                        .toSorted((lhs, rhs) => {
-                            return new Date(rhs.date) - new Date(lhs.date); 
-                        });
-
-                    return {
-                        barcodes: newBarcodes
-                    }
-                });
-            }
-            
+            this.receiveSocketMessage(event);
         }
         
-        // const delay = 6_000;
-        // setTimeout(() => {
-        //     console.log(`Sending message to socket at ${Date().toString()}`);
-        //     this.socket.send(
-        //         `Hello from REACT UserScansRootCore.componentDidMount() ` +
-        //         `(${delay / 1_000} seconds later at ${Date().toString()}`
-        //     );
-        // }, delay);
+
+    }
+
+    receiveSocketMessage = (event) => {
+
+        console.log(
+            `UserScansRootCore.receiveSocketMessage(): event:`, event
+        );
+
+        const message = JSON.parse(event.data);
+        
+        // MARK: Insert new scan
+        if (
+            message?.type === SocketMessageTypes.insertNewScan && 
+            message?.newScan
+        ) {
+            const newScan = message.newScan;
+            console.log(
+                `socket will insert newScan for user ${this.user}:`, 
+                newScan
+            ); 
+            this.setState(state => {
+                // MARK: insert the new scan in sorted order by date
+                const newBarcodes = [newScan, ...state.barcodes]
+                    .toSorted((lhs, rhs) => {
+                        return new Date(rhs.date) - new Date(lhs.date); 
+                    });
+
+                return {
+                    barcodes: newBarcodes
+                }
+            });
+        }
+        else if (
+            message?.type === SocketMessageTypes.deleteScan &&
+            message?.id
+        ) {
+            const id = message.id;
+            console.log(
+                `socket will delete barcode with ID: ${id}`
+            );
+            this.removeBarcodeFromState(id);
+
+        }
 
     }
 
@@ -273,7 +291,7 @@ class UserScansRootCore extends Component {
         this.pollingID = setIntervalImmediately(() => {
             this.getUserScans({user: this.user});
         }, 2_000);
-    }
+    };
 
     // autoCopyIfEnabled = () => {
     //     if (this.state.autoCopy) {
@@ -337,7 +355,7 @@ class UserScansRootCore extends Component {
         });
 
         console.log("Cleared all user barcodes");
-    };
+    }
 
     removeBarcodeFromState = (barcodeID) => {
         console.log(`Removing barcode with ID: ${barcodeID}`);
