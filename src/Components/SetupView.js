@@ -17,9 +17,15 @@ export default class SetupView extends Component {
                         in your barcode scanner app
                         (replace {"<user>"} with your username):
                     </p>
-                    <a href="https://api.barcodedrop.com/scan/<user>">
+
+                    {/* <code style={{ all: "revert"}}> */}
+                    <code>
                         {"https://api.barcodedrop.com/scan/<user>"}
-                    </a>
+                    </code>
+
+                    {/* <a href="https://api.barcodedrop.com/scan/<user>">
+                        {"https://api.barcodedrop.com/scan/<user>"}
+                    </a> */}
 
                     <p className="pt-3">
                         <strong>Request Body:</strong>
@@ -39,17 +45,16 @@ export default class SetupView extends Component {
                         </span>
                     </p>
 
-
-
                     <p className="pt-5">
                         <strong>
                             Access your scanned barcodes at the following URL 
                             (replace {"<user>"} with your username):
                         </strong>
                     </p>
-                    <a href="https://barcodedrop.com/scans/<user>">
+
+                    <code>
                         {"https://barcodedrop.com/scans/<user>"}
-                    </a>
+                    </code>
 
                 </div>
             </Container>
