@@ -7,8 +7,8 @@ import { AppContext } from "../Model/AppContext";
 import { Button, Table, Container } from 'react-bootstrap';
 
 import UserScansRow from "./UserScanRow";
-import UserScansTable from "./UserScansTable";
 import MainNavbar from "./MainNavbar";
+// import UserScansTable from "./UserScansTable";
 import { setIntervalImmediately } from "../Utilities";
 import { SocketMessageTypes } from "../Model/SocketMessages";
 
@@ -400,62 +400,65 @@ class UserScansRootCore extends Component {
 
     render() {
         return (
-            <Container fluid="md">
+            <div>
+                <MainNavbar/>
+                <Container fluid="md">
 
-                <h2 style={{margin: "30px 10px 10px 0px"}}>
-                    <strong>
-                        Scanned Barcodes for <em style={{color: "gray"}}>{this.user}</em>
-                    </strong>
-                </h2>
+                    <h2 style={{margin: "30px 10px 10px 0px"}}>
+                        <strong className="scans-for-user-text">
+                            Scanned Barcodes for <em style={{color: "gray"}}>{this.user}</em>
+                        </strong>
+                    </h2>
 
 
-                {/* Delete All */}
+                    {/* Delete All */}
 
-                <Button
-                    variant="danger"
-                    style={{ margin: "15px 0px" }}
-                    onClick={this.clearAllUserBarcodes}
-                >
-                    Delete All Barcodes
-                </Button>
+                    <Button
+                        variant="danger"
+                        style={{ margin: "15px 0px" }}
+                        onClick={this.clearAllUserBarcodes}
+                    >
+                        Delete All Barcodes
+                    </Button>
 
-                {/* spacer */}
+                    {/* spacer */}
 
-                {/* Table of Barcodes */}
+                    {/* Table of Barcodes */}
 
-                <Table className="barcode-table border-dark" striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th style={{width: "60px"}}>{/* copy button */}</th>
-                            <th>Barcode</th>
-                            <th>Time</th>
-                            <th style={{width: "80px"}}>Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {this.state.barcodes.map((barcode, index) =>
-                            <UserScansRow
-                                key={barcode.id}
-                                index={index}
-                                barcode={barcode}
-                                user={this.user}
-                                removeBarcodeFromState={
-                                    this.removeBarcodeFromState
-                                }
-                            />
-                        )}
-                    </tbody>
-                </Table>
+                    <Table className="barcode-table border-dark" striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th style={{width: "60px"}}>{/* copy button */}</th>
+                                <th>Barcode</th>
+                                <th>Time</th>
+                                <th style={{width: "80px"}}>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {this.state.barcodes.map((barcode, index) =>
+                                <UserScansRow
+                                    key={barcode.id}
+                                    index={index}
+                                    barcode={barcode}
+                                    user={this.user}
+                                    removeBarcodeFromState={
+                                        this.removeBarcodeFromState
+                                    }
+                                />
+                            )}
+                        </tbody>
+                    </Table>
 
-                {/* <UserScansTable
-                    barcodes={this.state.barcodes}
-                    router
-                    removeBarcodeFromState={
-                        this.removeBarcodeFromState
-                    }
-                /> */}
-            
-            </Container>
+                    {/* <UserScansTable
+                        barcodes={this.state.barcodes}
+                        router
+                        removeBarcodeFromState={
+                            this.removeBarcodeFromState
+                        }
+                    /> */}
+                
+                </Container>
+            </div>
         );
     }
 

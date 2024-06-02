@@ -21,15 +21,30 @@ code {
     font-size: 1.5rem !important;
 }
 
+.scans-for-user-text {
+    font-size: 1.25rem;
+}
+
 @media screen and (min-width: 600px) {
     .navbar-brand {
-        font-size: 2.5rem !important;
+        font-size: 2rem !important;
+    }
+    .scans-for-user-text {
+        font-size: 1.5rem;
     }
 }
 
-/* #user-scans-root {
+@media screen and (min-width: 1000px) {
+    .navbar-brand {
+        font-size: 2.5rem !important;
+    }
+    .scans-for-user-text {
+        font-size: 1.75rem;
+    }
+}
 
-} */
+
+
 
 .barcode-table {
     /* width: 100%; */
@@ -53,3 +68,4 @@ code {
     transform: translateY(3px);
     /* background-color: blue !important; */
 }
+

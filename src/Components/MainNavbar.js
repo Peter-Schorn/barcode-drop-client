@@ -10,16 +10,16 @@ export default class MainNavbar extends Component {
     render() {
         return (
             <nav className="navbar navbar-expand-lg bg-light">
-                {/* <div className="container-fluid"> */}
-                    <div className="container text-center">
+                <div className="container-md">
+                    {/* <div className="container text-center"> */}
                         <a className="navbar-brand" href="/">
-                            {/* <strong style={{
-                                fontSize: "2rem",
-                                fontFamily: "monospace",
-                            }}> */}
                             <strong>
                                 Barcode Drop
-                                <i style={{margin: "0px 20px"}} className="fa-solid fa-barcode"></i>
+                                <i 
+                                    style={{margin: "0px 20px"}} 
+                                    className="fa-solid fa-barcode"
+                                >
+                                </i>
                             </strong>
                         </a>
                     {/* </div> */}
@@ -38,22 +38,22 @@ export default class MainNavbar extends Component {
                         className="collapse navbar-collapse" 
                         id="navbarSupportedContent"
                     >
-                        <ul 
-                            className="navbar-nav me-auto mb-2 mb-lg-0"
-                        >
-                            <li className="nav-item">
-                            <a 
-                                className="nav-link active" 
-                                // aria-current="page" 
-                                href="/setup"
+                        <div className="ms-auto">
+                            <ul
+                                className="navbar-nav me-auto mb-2 mb-lg-0"
                             >
-                                Setup
-                            </a>
-                            </li>
-                            {/* <li className="nav-item">
-                            <a className="nav-link" href="#">Link</a>
-                            </li> */}
-                        </ul>
+                                <li className="nav-item">
+                                    <a
+                                        className="nav-link active"
+                                        // aria-current="page"
+                                        href="/setup"
+                                    >
+                                        Setup
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
                     </div>
                 </div>
             </nav>

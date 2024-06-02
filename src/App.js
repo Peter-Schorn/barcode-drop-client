@@ -5,9 +5,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { Component } from "react";
 
+import MainNavbar from "./Components/MainNavbar";
+import HomeView from "./Components/HomeView";
 import UserScansRoot from "./Components/UserScansRoot";
 import SetupView from "./Components/SetupView";
-import MainNavbar from "./Components/MainNavbar";
 
 import { AppContext } from './Model/AppContext';
 
@@ -35,9 +36,14 @@ export default class App extends Component {
     render() {
         return (
             <AppContext.Provider value={this.state}>
-                <MainNavbar/> 
                 <BrowserRouter>
                     <Routes>
+
+                        {/* Home */}
+                        <Route 
+                            path="/" 
+                            element={<HomeView/>}
+                        />
 
                         {/* Setup Instructions */}
                         <Route
