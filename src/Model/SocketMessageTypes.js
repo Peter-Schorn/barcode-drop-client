@@ -1,5 +1,6 @@
 
 export const SocketMessageTypes = Object.freeze({
-    insertNewScan: "insertNewScan",
+    upsertScan: "upsertScan",
     deleteScan: "deleteScan",
+    replaceAllScans: "replaceAllScans",
 });

@@ -36,14 +36,22 @@ export default class SetupView extends Component {
                     <p className="">
                         Query string/form-url-encoded in the body: 
                         <span style={{padding: "0px 10px", fontFamily: "'Courier New', monospace"}}>
-                            {"barcode=<barcode> or text=<barcode>"}
+                            {"barcode=<barcode>"}
+                        </span>
+                        <span dangerouslySetInnerHTML={{__html: " or "}} />
+                        <span style={{padding: "0px 10px", fontFamily: "'Courier New', monospace"}}>
+                            {"text=<barcode>"}
                         </span>
                     </p>
 
                     <p className="pb-2">
                         In the body as JSON:
                         <span style={{padding: "0px 10px", fontFamily: "'Courier New', monospace"}}>
-                        {`{ "barcode": "<barcode>" } or { "text": "<barcode>" }`}
+                        {`{ "barcode": "<barcode>" }`}
+                        </span>
+                        <span dangerouslySetInnerHTML={{__html: " or "}} />
+                        <span style={{padding: "0px 10px", fontFamily: "'Courier New', monospace"}}>
+                        {`{ "text": "<barcode>" }`}
                         </span>
                     </p>
 

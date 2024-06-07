@@ -10,7 +10,7 @@ import UserScansRow from "./UserScanRow";
 import MainNavbar from "./MainNavbar";
 // import UserScansTable from "./UserScansTable";
 import { setIntervalImmediately } from "../Utilities";
-import { SocketMessageTypes } from "../Model/SocketMessages";
+import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 export default function UserScansRoot(props) {
 
@@ -149,10 +149,10 @@ class UserScansRootCore extends Component {
 
         // MARK: - WebSockets -
 
-        const backendURL = new URL(process.env.REACT_APP_BACKEND_URL);
-        backendURL.protocol = "wss";
+        const socketURL = new URL(process.env.REACT_APP_BACKEND_URL);
+        socketURL.protocol = "wss";
         
-        this.socketURL = backendURL
+        this.socketURL = socketURL
         
         this.socketURL.pathname = `/watch/${this.user}`;
         // this.socketURL.pathname = `/ws-test`;
@@ -253,7 +253,11 @@ class UserScansRootCore extends Component {
             this.receiveSocketMessage(event);
         }
         
-        
+        // this.socket.current.onping = (event) => {
+        //     console.log(
+        //         `[${Date()}] socket.onping(): event:`, event
+        //     );
+        // }
 
 
 
@@ -270,7 +274,7 @@ class UserScansRootCore extends Component {
         
         // MARK: Insert new scan
         if (
-            message?.type === SocketMessageTypes.insertNewScan && 
+            message?.type === SocketMessageTypes.upsertScan && 
             message?.newScan
         ) {
             const newScan = message.newScan;

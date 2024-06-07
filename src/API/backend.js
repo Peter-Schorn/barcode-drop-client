@@ -45,7 +45,6 @@ export default class Backend {
      * @returns the response from the server
      */
     async deleteUserScans({user, olderThan}) {
-
         if (olderThan) {
             return await this._apiRequest({
                 method: "DELETE",
@@ -61,7 +60,6 @@ export default class Backend {
                 path: `/scans/${user}`
             });
         }
-
     }
 
     /**
