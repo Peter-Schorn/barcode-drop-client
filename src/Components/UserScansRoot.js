@@ -436,12 +436,16 @@ class UserScansRootCore extends Component {
             this.setState(state => {
                 // MARK: insert the new scan in sorted order by date
                 // and remove any existing scan with the same ID
-                const newBarcodes = state.barcodes
+                let newBarcodes = state.barcodes
                     .filter((barcode) => barcode.id !== newScan.id)
                     .concat(newScan)
-                    .toSorted((lhs, rhs) => {
-                        return new Date(rhs.date) - new Date(lhs.date);
-                    });
+                    // .toSorted((lhs, rhs) => {
+                    //     return new Date(rhs.date) - new Date(lhs.date);
+                    // });
+
+                newBarcodes.sort((lhs, rhs) => {
+                    return new Date(rhs.date) - new Date(lhs.date);
+                });
 
                 return {
                     barcodes: newBarcodes
