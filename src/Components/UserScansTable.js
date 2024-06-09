@@ -10,6 +10,8 @@ import UserScansRow from "./UserScanRow";
 
 import Badge from 'react-bootstrap/Badge';
 
+// MARK: - NOT ACTUALLY BEING USED -
+
 export default function UserScansTable(props) {
 
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it

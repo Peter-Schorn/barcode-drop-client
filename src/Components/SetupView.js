@@ -8,7 +8,7 @@ export default class SetupView extends Component {
 
     render() {
         return (
-            <div>
+            <div className="vw-100 vh-100">
                 <MainNavbar/> 
                 <Container className="text-center pb-4" fluid="lg">
 

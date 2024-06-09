@@ -32,7 +32,7 @@ export default class UserScansRow extends Component {
 
     tick = () => {
         this.updateDateDifference();
-    }
+    };
 
     updateDateDifference = () => {
         const dateDifference = this.dateDifferenceFromNow(
@@ -41,13 +41,13 @@ export default class UserScansRow extends Component {
         this.setState({
             dateDifference: dateDifference
         });
-    }
+    };
 
     rowStyleClassName = () => {
         // TODO: figure out why table variants cover borders
         // return this.props.index === 0 ? "table-success" : "";
         return "";
-    }
+    };
 
     dateDifferenceFromNow(date) {
 
@@ -106,7 +106,7 @@ export default class UserScansRow extends Component {
 
     onClickCopyButton = (barcode) => {
         return (e) => {
-            const barcodeText = barcode.barcode
+            const barcodeText = barcode.barcode;
             navigator.clipboard.writeText(barcodeText);
             console.log(`Copied barcode to clipboard: "${barcodeText}"`);
         };
@@ -114,12 +114,12 @@ export default class UserScansRow extends Component {
 
     onClickDeleteButton = (barcode) => {
         return (e) => {
-            
+
             console.log(`Deleting barcode: "${barcode}"`);
             const barcodeID = barcode.id;
 
             this.props.removeBarcodeFromState(barcodeID);
-            
+
             this.context.api.deleteScans([barcodeID])
                 .then((result) => {
                     console.log(
@@ -132,16 +132,36 @@ export default class UserScansRow extends Component {
                     );
                 });
         };
-    }
+    };
 
     formattedDateString(date) {
         const dateObj = new Date(date);
         return dateObj.toLocaleTimeString();
     }
 
+    barcodeIDdebugText() {
+        const queryParams = this.props.router.searchParams;
+
+        if (queryParams.get("debug") === "true") {
+            return (
+                <span
+                    className="text-secondary" 
+                    style={{fontSize: "12px"}}
+                >
+                    {" "}({this.props.barcode.id})
+                </span>
+            );
+        }
+        else {
+            return null;
+        }
+        
+    }
+
     render() {
         return (
-            <tr 
+            <tr
+                data-barcode-id={this.props.barcode.id}
                 key={this.props.barcode.id}
                 className={this.rowStyleClassName()}
             >
@@ -158,9 +178,16 @@ export default class UserScansRow extends Component {
                         Copy
                     </Button>
                 </td>
+                {/* Barcode Cell */}
                 <td>
+                    <span className="barcode-text">
                     {this.props.barcode.barcode}
+                    </span>
+                    {/* BARCODE ID */}
+                    {this.barcodeIDdebugText()}
+
                 </td>
+
                 <td
                     data-toggle="tooltip"
                     data-placement="top"
@@ -168,7 +195,7 @@ export default class UserScansRow extends Component {
                 >
                     {this.state.dateDifference}
                 </td>
-                <td 
+                <td
                     style={{
                         textAlign: "center",
                     }}
@@ -177,7 +204,7 @@ export default class UserScansRow extends Component {
                     title="Delete this barcode"
                 >
                     <Button
-                        style={{ 
+                        style={{
                             margin: "5px 5px",
                         }}
                         onClick={this.onClickDeleteButton(

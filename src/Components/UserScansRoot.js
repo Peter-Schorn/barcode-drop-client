@@ -1,6 +1,6 @@
 import React from 'react';
 import { Component } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { AppContext } from "../Model/AppContext";
 
@@ -12,18 +12,25 @@ import MainNavbar from "./MainNavbar";
 import { setIntervalImmediately } from "../Utilities";
 import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
+import { WebSocket } from "partysocket";
+
 export default function UserScansRoot(props) {
 
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
 
     let params = useParams();
+    let [searchParams, setSearchParams] = useSearchParams();
     // let location = useLocation();
     // let navigate = useNavigate();
 
     return (
         <UserScansRootCore
             {...props}
-            router={{ params }}
+            router={{
+                params: params,
+                searchParams: searchParams,
+                setSearchParams: setSearchParams
+            }}
         />
     );
 
@@ -122,9 +129,12 @@ class UserScansRootCore extends Component {
 
     constructor(props) {
         super(props);
-        
+
         this.state = {
-            barcodes: []
+            barcodes: [],
+            deleteIDs: [],
+            pingPongInterval: null,
+            lastPongDate: null
             // autoCopy: false
             // barcodes: UserScansRootCore.sampleBarcodes
             // barcodes: props.barcodes
@@ -133,9 +143,9 @@ class UserScansRootCore extends Component {
 
         this.pollingID = null;
 
-        
+
         this.user = props.router.params.user;
-        
+
         if (this.user) {
             console.log(
                 `UserScansRootCore.constructor(): user: ${this.user}`
@@ -150,25 +160,28 @@ class UserScansRootCore extends Component {
         // MARK: - WebSockets -
 
         const socketURL = new URL(process.env.REACT_APP_BACKEND_URL);
-        socketURL.protocol = "wss";
-        
-        this.socketURL = socketURL
-        
+        if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+            socketURL.protocol = "ws";
+        }
+        else {
+            socketURL.protocol = "wss";
+        }
+
+        this.socketURL = socketURL;
+
         this.socketURL.pathname = `/watch/${this.user}`;
-        // this.socketURL.pathname = `/ws-test`;
-        
+
         this.socket = React.createRef();
-        // this.socket = new WebSocket(this.socketURL);
-        
+
         console.log(
             `UserScansRootCore.constructor(): socketURL: ${this.socketURL}`
         );
-       
+
     }
 
     componentWillUnmount() {
         console.log("UserScansRootCore.componentWillUnmount():");
-        
+
         // this.socket.close();
         clearInterval(this.pollingID);
     }
@@ -177,14 +190,6 @@ class UserScansRootCore extends Component {
 
         console.log("UserScansRootCore.componentDidMount():");
 
-        // always make one initial call to getUserScans() to get the initial 
-        // state
-        this.getUserScans({user: this.user});
-
-        //
-        // // call getUserScans() again after 1 second to update the state quickly
-        // setTimeout(() => { this.getUserScans({user: this.user}); }, 1_000);
-        //        
         // console.log(
         //     `REACT_APP_DISABLE_POLLING: ` +
         //     `${process.env.REACT_APP_DISABLE_POLLING}`
@@ -196,72 +201,213 @@ class UserScansRootCore extends Component {
         // }
         // else {
         //     console.log("Polling is disabled");
-        //     this.getUserScans({user: this.user});
+        this.getUserScans({ user: this.user });
         // }
         //
-        // document.addEventListener("visibilitychange", () => {
-        //     console.log(
-        //         `visibilitychange: document.hidden: ${document.hidden}`
-        //     );
-        //     if (document.hidden) {
-        //         console.log("visibilitychange: Clearing polling interval");
-        //         clearInterval(this.pollingID);
-        //     }
-        //     else {
-        //         console.log("visibilitychange: calling beginPolling()");
-        //         // call getUserScans() again after 500ms to update the state 
-        //         // quickly
-        //         setTimeout(() => { this.getUserScans({user: this.user}); }, 500);
-        //         this.beginPolling();
-        //     }
-        // });
 
-        this.configureSocket();        
+        // MARK: Configure WebSocket
+        this.configureSocket();
 
     }
 
     configureSocket = () => {
 
-        this.socket.current = new WebSocket(this.socketURL);
+        /*
+         https://www.npmjs.com/package/partysocket#available-options
+
+         For each reconnection attempt, the delay is calculated as follows:
+
+            delay = minReconnectionDelay *  
+                Math.pow(reconnectionDelayGrowFactor, this._retryCount - 1);
+
+            if (delay > maxReconnectionDelay) {
+                delay = maxReconnectionDelay;
+            }
+         
+         The first reconnection attempt will have a delay of 
+         minReconnectionDelay, the second will have a delay of 
+         minReconnectionDelay * reconnectionDelayGrowFactor, and the max
+         delay will be maxReconnectionDelay.
+
+         https://www.desmos.com/calculator/cv5yene4jw
+            
+         */
+        const wsOptions = {
+            minReconnectionDelay: 500,  // half a second
+            maxReconnectionDelay: 10_000,  // 10 seconds
+            debug: true
+        };
+
+        this.socket.current = new WebSocket(
+            this.socketURL.href,
+            [],
+            wsOptions
+        );
 
         this.socket.current.onopen = (event) => {
+
             console.log(
                 `[${Date()}] socket.onopen(): event:`, event
             );
-        }
+
+            this.getUserScans({ user: this.user });
+
+            // this.setState((state) => {
+
+            //     const pingPongInterval = this.configurePingPongInterval(state);
+
+            //     return {
+            //         pingPongInterval: pingPongInterval,
+            //         // connecting to the websocket is equivalent to receiving
+            //         // a pong from the client
+            //         lastPongDate: new Date()
+            //     };
+
+            // });
+
+        };
+
+        this.socket.current.onmessage = (event) => {
+            this.receiveSocketMessage(event);
+        };
 
         this.socket.current.onclose = (event) => {
+
             console.log(
                 `[${Date()}] socket.onclose(): event:`, event
             );
-            console.log(
-                `[${Date()}] Attempting to re-connect to WebSocket...`
-            );
-            setTimeout(() => {
-                this.getUserScans({user: this.user});
-                this.configureSocket();
-            }, 500);
+
+            this.setState((state) => {
+                clearInterval(state.pingPongInterval);
+                return {
+                    pingPongInterval: null,
+                    lastPongDate: null
+                };
+            });
+
         };
 
-        this.socket.current.onerror = (event) => {
-            console.error(
-                `[${Date()}] socket.onerror(): event:`, event
+        document.addEventListener("visibilitychange", () => {
+            console.log(
+                `visibilitychange: document.hidden: ${document.hidden}`
             );
-        }
-        
-        this.socket.current.onmessage = (event) => {
-            this.receiveSocketMessage(event);
-        }
-        
-        // this.socket.current.onping = (event) => {
+            if (document.hidden) {
+                // console.log("visibilitychange: Clearing polling interval");
+                // clearInterval(this.pollingID);
+            }
+            else {
+                // console.log("visibilitychange: calling beginPolling()");
+                // this.beginPolling();
+                console.log(
+                    "visibilitychange: will reconnect to websocket if needed"
+                );
+                if (this.socket.current.readyState === WebSocket.CLOSED) {
+                    console.log(
+                        `visibilitychange: re-connecting to WebSocket ` +
+                        `(readyState: ${this.socket.current.readyState})`
+                    );
+                    this.socket.current.reconnect();
+                }
+                else {
+                    console.log(
+                        `visibilitychange: WebSocket is already ` +
+                        `connected/connecting ` +
+                        `(readyState: ${this.socket.current.readyState})`
+                    );
+                }
+            }
+        });
+
+        // this.socket.current.onopen = (event) => {
+        // console.log(
+        //     `[${Date()}] socket.onopen(): event:`, event
+        // );
+        // this.getUserScans({user: this.user});
+        // }
+
+        // this.socket.current.onclose = (event) => {
         //     console.log(
-        //         `[${Date()}] socket.onping(): event:`, event
+        //         `[${Date()}] socket.onclose(): event:`, event
+        //     );
+        //     console.log(
+        //         `[${Date()}] Attempting to re-connect to WebSocket...`
+        //     );
+        //     setTimeout(() => {
+        //         this.configureSocket();
+        //         this.getUserScans({user: this.user});
+        //     }, 500);
+        // };
+
+        // this.socket.current.onerror = (event) => {
+        //     console.error(
+        //         `[${Date()}] socket.onerror(): event:`, event
         //     );
         // }
 
+    };
 
+    configurePingPongInterval = (state) => {
 
-    }
+        if (state?.pingPongInterval) {
+            clearInterval(state.pingPongInterval);
+        }
+
+        const pingPongInterval = setInterval(() => {
+
+            console.log(
+                `[${new Date()}] ` +
+                `Sending ping to WebSocket server`
+            );
+
+            this.socket.current.send("ping");
+
+            const lastPongDate = state.lastPongDate;
+            let diffMS;
+
+            if (lastPongDate) {
+                const now = new Date();
+                diffMS = now - lastPongDate;
+            }
+            else {
+                // lastPongDate is `null`, so the server has not responded to
+                // *ANY* pings
+                diffMS = null;
+            }
+
+            if (diffMS === null || diffMS > 10_000) {
+                // The server has *NOT* responded to a ping within the last 10
+                // seconds. The effective tolerance is 10-15 seconds because
+                // this function is only called every 5 seconds.
+                console.error(
+                    `[${new Date()}] ` +
+                    `server has *NOT* responded to a ping in over 10 seconds ` +
+                    `(diffMS: ${diffMS}; lastPongDate: ${lastPongDate}); ` +
+                    `trying to RECONNECT...`
+                );
+                this.socket.current.reconnect();
+            }
+            else {
+                console.log(
+                    `[${new Date()}] ` +
+                    `server *HAS* responded to a ping within the last 10 ` +
+                    `seconds (diffMS: ${diffMS}; lastPongDate: ${lastPongDate})`
+                );
+            }
+
+        }, 5_000);
+
+        return pingPongInterval;
+
+    };
+
+    handlePong = (event) => {
+        console.log(
+            `[${Date()}] UserScansRootCore.handlePong(): event:`, event
+        );
+        this.setState({
+            lastPongDate: new Date()
+        });
+    };
 
     receiveSocketMessage = (event) => {
 
@@ -270,18 +416,23 @@ class UserScansRootCore extends Component {
             `event:`, event
         );
 
+        if (event.data === "pong") {
+            this.handlePong(event);
+            return;
+        }
+
         const message = JSON.parse(event.data);
-        
+
         // MARK: Insert new scan
         if (
-            message?.type === SocketMessageTypes.upsertScan && 
+            message?.type === SocketMessageTypes.upsertScan &&
             message?.newScan
         ) {
             const newScan = message.newScan;
             console.log(
-                `socket will insert newScan for user ${this.user}:`, 
+                `socket will insert newScan for user ${this.user}:`,
                 newScan
-            ); 
+            );
             this.setState(state => {
                 // MARK: insert the new scan in sorted order by date
                 // and remove any existing scan with the same ID
@@ -289,12 +440,12 @@ class UserScansRootCore extends Component {
                     .filter((barcode) => barcode.id !== newScan.id)
                     .concat(newScan)
                     .toSorted((lhs, rhs) => {
-                        return new Date(rhs.date) - new Date(lhs.date); 
+                        return new Date(rhs.date) - new Date(lhs.date);
                     });
 
                 return {
                     barcodes: newBarcodes
-                }
+                };
 
             });
         }
@@ -311,7 +462,7 @@ class UserScansRootCore extends Component {
 
         }
 
-    }
+    };
 
     beginPolling = () => {
         console.log("UserScansRootCore.beginPolling():");
@@ -324,7 +475,7 @@ class UserScansRootCore extends Component {
             clearInterval(this.pollingID);
         }
         this.pollingID = setIntervalImmediately(() => {
-            this.getUserScans({user: this.user});
+            this.getUserScans({ user: this.user });
         }, 2_000);
     };
 
@@ -344,13 +495,17 @@ class UserScansRootCore extends Component {
     // }
 
     /** Get the user's scans */
-    getUserScans = ({user}) => {
+    getUserScans = ({ user }) => {
 
         let date = Date().toString();
-        console.log(`Getting scans for user: ${user} at date: ${date}`);
+
+        console.log(
+            `UserScansRootCore.getUserScans(): Getting scans for ` +
+            `user: ${user} at date: ${date}`
+        );
 
         this.context.api.getUserScans(this.user).then((result) => {
-            
+
             const jsonString = JSON.stringify(result);
 
             console.log(
@@ -360,7 +515,7 @@ class UserScansRootCore extends Component {
             this.setState({
                 barcodes: result
             });
- 
+
             // console.log(
             //     "UserScansRootCore.getUserScans(): " +
             //     "calling autoCopyIfEnabled()"
@@ -375,7 +530,7 @@ class UserScansRootCore extends Component {
             );
         });
 
-    }
+    };
 
     clearAllUserBarcodes = (e) => {
         console.log("Clearing all user barcodes");
@@ -390,28 +545,43 @@ class UserScansRootCore extends Component {
         });
 
         console.log("Cleared all user barcodes");
-    }
+    };
 
     removeBarcodeFromState = (barcodeID) => {
-        console.log(`Removing barcode with ID: ${barcodeID}`);
-        const newBarcodes = this.state.barcodes.filter(
-            (barcode) => barcode.id !== barcodeID
-        );
-        this.setState({
-            barcodes: newBarcodes
+        console.log(`Removing barcode with ID from state: ${barcodeID}`);
+
+        // this.setState((state) => {
+        //     return {
+        //         deleteIDs: [...state.deleteIDs, barcodeID]
+        //     }
+        // });
+
+        this.setState((state) => {
+            const newBarcodes = state.barcodes.filter(
+                (barcode) => barcode.id !== barcodeID
+            );
+
+            return {
+                barcodes: newBarcodes
+            };
         });
-    }
+
+    };
 
 
     render() {
         return (
-            <div>
-                <MainNavbar/>
-                <Container fluid="md">
+            <div className="vw-100 vh-100">
+                <MainNavbar />
+                <Container fluid="md" style={{
+                    maxWidth: "1000px"
+                    // maxWidth: "300px"
+                    // maxWidth: "vw-100"
+                }}>
 
-                    <h2 style={{margin: "30px 10px 10px 0px"}}>
+                    <h2 style={{ margin: "30px 10px 10px 0px" }}>
                         <strong className="scans-for-user-text">
-                            Scanned Barcodes for <em style={{color: "gray"}}>{this.user}</em>
+                            Scanned Barcodes for <em style={{ color: "gray" }}>{this.user}</em>
                         </strong>
                     </h2>
 
@@ -430,13 +600,17 @@ class UserScansRootCore extends Component {
 
                     {/* Table of Barcodes */}
 
-                    <Table className="barcode-table border-dark" striped bordered hover>
+                    <Table 
+                        className="barcode-table border-dark" 
+                        striped bordered hover
+                        style={{maxWidth: "100%"}}
+                    >
                         <thead>
                             <tr>
-                                <th style={{width: "60px"}}>{/* copy button */}</th>
+                                <th style={{ width: "60px" }}>{/* copy button */}</th>
                                 <th>Barcode</th>
                                 <th>Time</th>
-                                <th style={{width: "80px"}}>Delete</th>
+                                <th style={{ width: "80px" }}>Delete</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -446,6 +620,7 @@ class UserScansRootCore extends Component {
                                     index={index}
                                     barcode={barcode}
                                     user={this.user}
+                                    router={this.props.router}
                                     removeBarcodeFromState={
                                         this.removeBarcodeFromState
                                     }
@@ -461,7 +636,7 @@ class UserScansRootCore extends Component {
                             this.removeBarcodeFromState
                         }
                     /> */}
-                
+
                 </Container>
             </div>
         );

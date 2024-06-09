@@ -22,12 +22,14 @@ export default class App extends Component {
 
     constructor(props) {
         super(props);
+
         const api = new Backend();
+
         this.state = {
             api: api
         };
-    }
 
+    }
 
     componentDidMount() {
         console.log("App.componentDidMount():");
