@@ -252,18 +252,18 @@ class UserScansRootCore extends Component {
 
             this.getUserScans({ user: this.user });
 
-            // this.setState((state) => {
+            this.setState((state) => {
 
-            //     const pingPongInterval = this.configurePingPongInterval(state);
+                const pingPongInterval = this.configurePingPongInterval(state);
 
-            //     return {
-            //         pingPongInterval: pingPongInterval,
-            //         // connecting to the websocket is equivalent to receiving
-            //         // a pong from the client
-            //         lastPongDate: new Date()
-            //     };
+                return {
+                    pingPongInterval: pingPongInterval,
+                    // connecting to the websocket is equivalent to receiving
+                    // a pong from the client
+                    lastPongDate: new Date()
+                };
 
-            // });
+            });
 
         };
 
@@ -348,7 +348,7 @@ class UserScansRootCore extends Component {
 
     configurePingPongInterval = (state) => {
 
-        if (state?.pingPongInterval) {
+        if (state?.pingPongInterval) { 
             clearInterval(state.pingPongInterval);
         }
 
@@ -359,40 +359,43 @@ class UserScansRootCore extends Component {
                 `Sending ping to WebSocket server`
             );
 
+            // MARK: By merely sending a high-level ping to the server, 
+            // MARK: the websocket will detect if it has been disconnected
+            // MARK: and will automatically attempt to reconnect
             this.socket.current.send("ping");
 
-            const lastPongDate = state.lastPongDate;
-            let diffMS;
+            // const lastPongDate = state.lastPongDate;
+            // let diffMS;
 
-            if (lastPongDate) {
-                const now = new Date();
-                diffMS = now - lastPongDate;
-            }
-            else {
-                // lastPongDate is `null`, so the server has not responded to
-                // *ANY* pings
-                diffMS = null;
-            }
+            // if (lastPongDate) {
+            //     const now = new Date();
+            //     diffMS = now - lastPongDate;
+            // }
+            // else {
+            //     // lastPongDate is `null`, so the server has not responded to
+            //     // *ANY* pings
+            //     diffMS = null;
+            // }
 
-            if (diffMS === null || diffMS > 10_000) {
-                // The server has *NOT* responded to a ping within the last 10
-                // seconds. The effective tolerance is 10-15 seconds because
-                // this function is only called every 5 seconds.
-                console.error(
-                    `[${new Date()}] ` +
-                    `server has *NOT* responded to a ping in over 10 seconds ` +
-                    `(diffMS: ${diffMS}; lastPongDate: ${lastPongDate}); ` +
-                    `trying to RECONNECT...`
-                );
-                this.socket.current.reconnect();
-            }
-            else {
-                console.log(
-                    `[${new Date()}] ` +
-                    `server *HAS* responded to a ping within the last 10 ` +
-                    `seconds (diffMS: ${diffMS}; lastPongDate: ${lastPongDate})`
-                );
-            }
+            // if (diffMS === null || diffMS > 10_000) {
+            //     // The server has *NOT* responded to a ping within the last 10
+            //     // seconds. The effective tolerance is 10-15 seconds because
+            //     // this function is only called every 5 seconds.
+            //     console.error(
+            //         `[${new Date()}] ` +
+            //         `server has *NOT* responded to a ping in over 10 seconds ` +
+            //         `(diffMS: ${diffMS}; lastPongDate: ${lastPongDate}); ` +
+            //         `trying to RECONNECT...`
+            //     );
+            //     this.socket.current.reconnect();
+            // }
+            // else {
+            //     console.log(
+            //         `[${new Date()}] ` +
+            //         `server *HAS* responded to a ping within the last 10 ` +
+            //         `seconds (diffMS: ${diffMS}; lastPongDate: ${lastPongDate})`
+            //     );
+            // }
 
         }, 5_000);
 
