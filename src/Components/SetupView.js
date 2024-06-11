@@ -2,7 +2,7 @@ import React from 'react';
 import { Component } from "react";
 import { Container } from "react-bootstrap";
 import MainNavbar from "./MainNavbar";
-
+// import PostBarcodeIcloudShortcut from "./postBarcodeIcloudShortcut.svg";
 
 export default class SetupView extends Component {
 
@@ -10,9 +10,23 @@ export default class SetupView extends Component {
         return (
             <div className="vw-100 vh-100">
                 <MainNavbar/> 
-                <Container className="text-center pb-4" fluid="lg">
+                <Container className="text-center pb-5" fluid="lg">
 
                     <h1 className="p-5">Setup</h1>
+
+
+                    <p>
+                        To scan barcodes with your <strong>iPhone</strong>, 
+                        you can use the following iCloud Shortcut:
+                    </p>
+                    <img 
+                        src="postBarcodeIcloudShortcut.svg" 
+                        alt="Post Barcode iCloud Shortcut"
+                        className="mb-5"
+                        style={{maxWidth: "175px", maxHeight: "175px", padding: "10px"}}
+                    />
+
+                    <h3>API Request</h3>
 
                     <p>
                         Make a POST request to the following URL
@@ -55,14 +69,16 @@ export default class SetupView extends Component {
                         </span>
                     </p>
 
-                    <p className="pt-5">
+                    <hr />
+
+                    <p className="pt-1">
                         <strong>
                             Access your scanned barcodes at the following URL 
                             (replace {"<user>"} with your username):
                         </strong>
                     </p>
 
-                    <code>
+                    <code className="">
                         {"https://barcodedrop.com/scans/<user>"}
                     </code>
 

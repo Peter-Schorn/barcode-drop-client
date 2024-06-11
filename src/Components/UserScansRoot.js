@@ -132,7 +132,7 @@ class UserScansRootCore extends Component {
 
         this.state = {
             barcodes: [],
-            deleteIDs: [],
+            deleteIDs: new Set(),
             pingPongInterval: null,
             lastPongDate: null
             // autoCopy: false
@@ -436,12 +436,10 @@ class UserScansRootCore extends Component {
             this.setState(state => {
                 // MARK: insert the new scan in sorted order by date
                 // and remove any existing scan with the same ID
+
                 let newBarcodes = state.barcodes
                     .filter((barcode) => barcode.id !== newScan.id)
                     .concat(newScan)
-                    // .toSorted((lhs, rhs) => {
-                    //     return new Date(rhs.date) - new Date(lhs.date);
-                    // });
 
                 newBarcodes.sort((lhs, rhs) => {
                     return new Date(rhs.date) - new Date(lhs.date);
@@ -459,6 +457,9 @@ class UserScansRootCore extends Component {
             message?.id
         ) {
             const id = message.id;
+
+
+
             console.log(
                 `socket will delete barcode with ID: ${id}`
             );
@@ -561,13 +562,19 @@ class UserScansRootCore extends Component {
         // });
 
         this.setState((state) => {
-            const newBarcodes = state.barcodes.filter(
-                (barcode) => barcode.id !== barcodeID
-            );
+
+            const deleteIDs = state.deleteIDs;
+            deleteIDs.add(barcodeID);
+
+            const newBarcodes = state.barcodes.filter((barcode) => { 
+                return !deleteIDs.has(barcode.id);
+            });
 
             return {
-                barcodes: newBarcodes
+                barcodes: newBarcodes,
+                deleteIDs: deleteIDs
             };
+            
         });
 
     };
