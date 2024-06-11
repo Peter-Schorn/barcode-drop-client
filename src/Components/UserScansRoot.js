@@ -458,13 +458,35 @@ class UserScansRootCore extends Component {
         ) {
             const id = message.id;
 
-
-
             console.log(
                 `socket will delete barcode with ID: ${id}`
             );
             this.removeBarcodeFromState(id);
 
+        }
+        // MARK: Replace all scans
+        else if (
+            message?.type === SocketMessageTypes.replaceAllScans &&
+            message?.scans
+        ) {
+            const scans = message.scans;
+
+            console.log(
+                `socket will replace all scans for user ${this.user}:`,
+                scans
+            );
+
+            this.setState({
+                barcodes: scans,
+                deleteIDs: new Set()
+            });
+
+        }
+        else {
+            console.warning(
+                `UserScansRootCore.receiveSocketMessage(): ` +
+                `socket could not handle message:`, message
+            );
         }
 
     };
@@ -555,16 +577,14 @@ class UserScansRootCore extends Component {
     removeBarcodeFromState = (barcodeID) => {
         console.log(`Removing barcode with ID from state: ${barcodeID}`);
 
-        // this.setState((state) => {
-        //     return {
-        //         deleteIDs: [...state.deleteIDs, barcodeID]
-        //     }
-        // });
-
         this.setState((state) => {
 
             const deleteIDs = state.deleteIDs;
             deleteIDs.add(barcodeID);
+            console.log(
+                `removeBarcodeFromState(): ${deleteIDs.size} deleteIDs:`, 
+                deleteIDs
+            );
 
             const newBarcodes = state.barcodes.filter((barcode) => { 
                 return !deleteIDs.has(barcode.id);
@@ -574,7 +594,7 @@ class UserScansRootCore extends Component {
                 barcodes: newBarcodes,
                 deleteIDs: deleteIDs
             };
-            
+
         });
 
     };
