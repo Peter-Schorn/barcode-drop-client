@@ -53,7 +53,7 @@ class UserScansTableCore extends Component {
 
     componentDidMount() {
         console.log("UserScansTableCore.componentDidMount():");
-        console.log(`context.api: ${this.context.api}`);
+        // console.log(`context.api: ${this.context.api}`);
     }
 
 

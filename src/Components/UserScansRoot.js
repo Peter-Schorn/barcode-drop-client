@@ -570,11 +570,22 @@ class UserScansRootCore extends Component {
             barcodes: []
         });
 
-        this.context.api.deleteUserScans({
-            user: this.user
-        });
+            this.context.api.deleteUserScans({
+                user: this.user
+            })
+            .then((result) => {
+                console.log(
+                    `UserScansRootCore.clearAllUserBarcodes(): ` +
+                    `result: ${result}`
+                );
+            })
+            .catch((error) => {
+                console.error(
+                    `UserScansRootCore.clearAllUserBarcodes(): ` +
+                    `could not delete all user barcodes: ${error}`
+                );
+            });
 
-        console.log("Cleared all user barcodes");
     };
 
     removeBarcodeFromState = (barcodeID) => {
