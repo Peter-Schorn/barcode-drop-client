@@ -247,7 +247,7 @@ class UserScansRootCore extends Component {
         this.socket.current.onopen = (event) => {
 
             console.log(
-                `[${Date()}] socket.onopen(): event:`, event
+                `[${new Date().toISOString()}] socket.onopen(): event:`, event
             );
 
             this.getUserScans({ user: this.user });
@@ -274,7 +274,8 @@ class UserScansRootCore extends Component {
         this.socket.current.onclose = (event) => {
 
             console.log(
-                `[${Date()}] socket.onclose(): event:`, event
+                `[${new Date().toISOString()}] socket.onclose(): event:`, 
+                event
             );
 
             this.setState((state) => {
@@ -320,17 +321,17 @@ class UserScansRootCore extends Component {
 
         // this.socket.current.onopen = (event) => {
         // console.log(
-        //     `[${Date()}] socket.onopen(): event:`, event
+        //     `[${new Date().toISOString()}] socket.onopen(): event:`, event
         // );
         // this.getUserScans({user: this.user});
         // }
 
         // this.socket.current.onclose = (event) => {
         //     console.log(
-        //         `[${Date()}] socket.onclose(): event:`, event
+        //         `[${new Date().toISOString()}] socket.onclose(): event:`, event
         //     );
         //     console.log(
-        //         `[${Date()}] Attempting to re-connect to WebSocket...`
+        //         `[${new Date().toISOString()}] Attempting to re-connect to WebSocket...`
         //     );
         //     setTimeout(() => {
         //         this.configureSocket();
@@ -340,7 +341,7 @@ class UserScansRootCore extends Component {
 
         // this.socket.current.onerror = (event) => {
         //     console.error(
-        //         `[${Date()}] socket.onerror(): event:`, event
+        //         `[${new Date().toISOString()}] socket.onerror(): event:`, event
         //     );
         // }
 
@@ -355,7 +356,7 @@ class UserScansRootCore extends Component {
         const pingPongInterval = setInterval(() => {
 
             console.log(
-                `[${new Date()}] ` +
+                `[${new Date().toISOString()}] ` +
                 `Sending ping to WebSocket server`
             );
 
@@ -382,7 +383,7 @@ class UserScansRootCore extends Component {
             //     // seconds. The effective tolerance is 10-15 seconds because
             //     // this function is only called every 5 seconds.
             //     console.error(
-            //         `[${new Date()}] ` +
+            //         `[${new Date().toISOString()}] ` +
             //         `server has *NOT* responded to a ping in over 10 seconds ` +
             //         `(diffMS: ${diffMS}; lastPongDate: ${lastPongDate}); ` +
             //         `trying to RECONNECT...`
@@ -391,7 +392,7 @@ class UserScansRootCore extends Component {
             // }
             // else {
             //     console.log(
-            //         `[${new Date()}] ` +
+            //         `[${new Date().toISOString()}] ` +
             //         `server *HAS* responded to a ping within the last 10 ` +
             //         `seconds (diffMS: ${diffMS}; lastPongDate: ${lastPongDate})`
             //     );
@@ -405,7 +406,7 @@ class UserScansRootCore extends Component {
 
     handlePong = (event) => {
         console.log(
-            `[${Date()}] UserScansRootCore.handlePong(): event:`, event
+            `[${new Date().toISOString()}] UserScansRootCore.handlePong(): event:`, event
         );
         this.setState({
             lastPongDate: new Date()
@@ -415,7 +416,7 @@ class UserScansRootCore extends Component {
     receiveSocketMessage = (event) => {
 
         console.log(
-            `[${Date()}] UserScansRootCore.receiveSocketMessage(): ` +
+            `[${new Date().toISOString()}] UserScansRootCore.receiveSocketMessage(): ` +
             `event:`, event
         );
 
@@ -527,7 +528,7 @@ class UserScansRootCore extends Component {
     /** Get the user's scans */
     getUserScans = ({ user }) => {
 
-        let date = Date().toString();
+        let date = new Date().toISOString();
 
         console.log(
             `UserScansRootCore.getUserScans(): Getting scans for ` +
