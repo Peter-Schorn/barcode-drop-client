@@ -207,17 +207,18 @@ class UserScansRootCore extends Component {
         this.configureSocket();
 
         // MARK: Prompt for clipboard permissions
+        console.log("componentDidMount(): Prompting for clipboard permissions")        
         this.promptForClipboardPermission()
             .then(() => {
-                // console.log("Clipboard permissions granted");
+                console.log(
+                    "componentDidMount(): Clipboard permissions granted"
+                );
             })
             .catch((error) => {
-                // console.error(
-                //     `Clipboard permissions denied: ${error}`
-                // );
+                console.error(
+                    `componentDidMount(): Clipboard permissions denied: ${error}`
+                );
             });
-
-
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -245,6 +246,7 @@ class UserScansRootCore extends Component {
 
 
     promptForClipboardPermission = () => {
+        console.log("promptForClipboardPermission");
         return navigator.permissions.query({ name: "clipboard-write" }).then(result => {
             if (result.state === "granted" || result.state === "prompt") {
                 console.log(
