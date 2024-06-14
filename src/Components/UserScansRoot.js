@@ -207,7 +207,7 @@ class UserScansRootCore extends Component {
         this.configureSocket();
 
         // MARK: Prompt for clipboard permissions
-        console.log("componentDidMount(): Prompting for clipboard permissions")        
+        console.log("componentDidMount(): Prompting for clipboard permissions");
         this.promptForClipboardPermission()
             .then(() => {
                 console.log(
@@ -402,43 +402,14 @@ class UserScansRootCore extends Component {
                 `Sending ping to WebSocket server`
             );
 
-            // MARK: By merely sending a high-level ping to the server, 
-            // MARK: the websocket will detect if it has been disconnected
-            // MARK: and will automatically attempt to reconnect
+            // MARK: - Send a ping to the server -
             this.socket.current.send("ping");
 
-            // const lastPongDate = state.lastPongDate;
-            // let diffMS;
-
-            // if (lastPongDate) {
-            //     const now = new Date();
-            //     diffMS = now - lastPongDate;
-            // }
-            // else {
-            //     // lastPongDate is `null`, so the server has not responded to
-            //     // *ANY* pings
-            //     diffMS = null;
-            // }
-
-            // if (diffMS === null || diffMS > 10_000) {
-            //     // The server has *NOT* responded to a ping within the last 10
-            //     // seconds. The effective tolerance is 10-15 seconds because
-            //     // this function is only called every 5 seconds.
-            //     console.error(
-            //         `[${new Date().toISOString()}] ` +
-            //         `server has *NOT* responded to a ping in over 10 seconds ` +
-            //         `(diffMS: ${diffMS}; lastPongDate: ${lastPongDate}); ` +
-            //         `trying to RECONNECT...`
-            //     );
-            //     this.socket.current.reconnect();
-            // }
-            // else {
-            //     console.log(
-            //         `[${new Date().toISOString()}] ` +
-            //         `server *HAS* responded to a ping within the last 10 ` +
-            //         `seconds (diffMS: ${diffMS}; lastPongDate: ${lastPongDate})`
-            //     );
-            // }
+            console.log(
+                `[${new Date().toISOString()}] configurePingPongInterval: ` +
+                `calling checkWebSocketConnection()`
+            );
+            this.checkWebSocketConnection();
 
         }, 5_000);
 
@@ -446,10 +417,57 @@ class UserScansRootCore extends Component {
 
     };
 
+    checkWebSocketConnection = () => {
+
+        console.log(
+            `[${new Date().toISOString()}] ` +
+            `serScansRootCore.checkWebSocketConnection():`
+        );
+
+        const now = new Date();
+        const nowString = now.toISOString();
+
+        const lastPongDate = this.state.lastPongDate;
+        const lastPongDateString = lastPongDate?.toISOString();
+
+        let diffMS;
+
+        if (lastPongDate) {
+            diffMS = now - lastPongDate;
+        }
+        else {
+            // lastPongDate is `null`, so the server has not responded to
+            // *ANY* pings
+            diffMS = null;
+        }
+
+        if (diffMS === null || diffMS > 10_000) {
+            // The server has *NOT* responded to a ping within the last 10
+            // seconds. The effective tolerance is 10-15 seconds because
+            // this function is only called every 5 seconds.
+            console.error(
+                `[${nowString}] ` +
+                `server has *NOT* responded to a ping in over 10 seconds ` +
+                `(diffMS: ${diffMS}; lastPongDate: ${lastPongDateString}); ` +
+                `TRYING TO RECONNECT...`
+            );
+            // MARK: - Attempt to reconnect the WebSocket -
+            this.socket.current.reconnect();
+        }
+        else {
+            console.log(
+                `[${nowString}] ` +
+                `server *HAS* responded to a ping within the last 10 ` +
+                `seconds (diffMS: ${diffMS}; lastPongDate: ${lastPongDateString})`
+            );
+        }
+
+    };
+
     handlePong = (event) => {
         console.log(
             `[${new Date().toISOString()}] UserScansRootCore.handlePong(): ` +
-            `(updating lastPongDate) event:`,
+            `Received pong (updating lastPongDate): event:`,
             event
         );
         this.setState({
@@ -571,7 +589,7 @@ class UserScansRootCore extends Component {
                         `"${barcodeText}": ${error}`
                     );
                 });
-                    
+
         }
         else {
             console.log("Auto-copy is disabled; not copying latest barcode");
@@ -660,6 +678,16 @@ class UserScansRootCore extends Component {
 
     };
 
+    handleAutoCopyChange = (e) => {
+        console.log(
+            `UserScansRootCore.handleAutoCopyChange(): ` +
+            `e.target.checked (enable auto-copy): ${e.target.checked}`
+        );
+        this.setState({
+            autoCopy: e.target.checked
+        });
+
+    };
 
     render() {
         return (
@@ -687,6 +715,27 @@ class UserScansRootCore extends Component {
                     >
                         Delete All Barcodes
                     </Button>
+
+                    {/* Auto-Copy */}
+
+                    <label 
+                        style={{padding: "5px 20px"}} 
+                        className=""
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="Automatically copy the most recent barcode to the clipboard"
+                    >
+                        <input 
+                            type="checkbox" 
+                            name="enable-auto-copy" 
+                            id="enable-auto-copy"
+                            checked={this.state.autoCopy}
+                            onChange={this.handleAutoCopyChange}
+                        />
+                        <span style={{ marginLeft: "5px" }}>
+                            Auto-Copy
+                        </span>
+                    </label>
 
                     {/* spacer */}
 
@@ -732,6 +781,6 @@ class UserScansRootCore extends Component {
                 </Container>
             </div>
         );
-    }
+    };
 
 }
