@@ -132,13 +132,11 @@ class UserScansRootCore extends Component {
 
         this.state = {
             barcodes: [],
+            // barcodes: UserScansRootCore.sampleBarcodes,
             deleteIDs: new Set(),
             pingPongInterval: null,
-            lastPongDate: null
-            // autoCopy: false
-            // barcodes: UserScansRootCore.sampleBarcodes
-            // barcodes: props.barcodes
-            // context: props.context
+            lastPongDate: null,
+            autoCopy: true
         };
 
         this.pollingID = null;
@@ -208,7 +206,59 @@ class UserScansRootCore extends Component {
         // MARK: Configure WebSocket
         this.configureSocket();
 
+        // MARK: Prompt for clipboard permissions
+        this.promptForClipboardPermission()
+            .then(() => {
+                // console.log("Clipboard permissions granted");
+            })
+            .catch((error) => {
+                // console.error(
+                //     `Clipboard permissions denied: ${error}`
+                // );
+            });
+
+
     }
+
+    componentDidUpdate(prevProps, prevState) {
+        console.log("UserScansRootCore.componentDidUpdate():");
+
+        const previousBarcode = prevState.barcodes[0]?.barcode;
+        const currentBarcode = this.state.barcodes[0]?.barcode;
+        if (currentBarcode && currentBarcode !== previousBarcode) {
+
+            console.log(
+                "UserScansRootCore.componentDidUpdate(): " +
+                "most recent barcode has changed from " +
+                `"${previousBarcode}" to "${currentBarcode}"`
+            );
+            this.autoCopyIfEnabled();
+        }
+        else {
+            console.log(
+                "UserScansRootCore.componentDidUpdate(): " +
+                "most recent barcode has *NOT* changed"
+            );
+        }
+
+    };
+
+
+    promptForClipboardPermission = () => {
+        return navigator.permissions.query({ name: "clipboard-write" }).then(result => {
+            if (result.state === "granted" || result.state === "prompt") {
+                console.log(
+                    `Clipboard permissions granted: ${result.state}`
+                );
+            }
+            else {
+                console.error(
+                    `Clipboard permissions denied: ${result.state}`
+                );
+            }
+            throw new Error("Clipboard permissions denied");
+        });
+    };
 
     configureSocket = () => {
 
@@ -274,8 +324,24 @@ class UserScansRootCore extends Component {
         this.socket.current.onclose = (event) => {
 
             console.log(
-                `[${new Date().toISOString()}] socket.onclose(): event:`, 
+                `[${new Date().toISOString()}] socket.onclose(): event:`,
                 event
+            );
+
+            this.setState((state) => {
+                clearInterval(state.pingPongInterval);
+                return {
+                    pingPongInterval: null,
+                    lastPongDate: null
+                };
+            });
+
+        };
+
+        this.socket.current.onerror = (event) => {
+
+            console.error(
+                `[${new Date().toISOString()}] socket.onerror(): event:`, event
             );
 
             this.setState((state) => {
@@ -319,37 +385,11 @@ class UserScansRootCore extends Component {
             }
         });
 
-        // this.socket.current.onopen = (event) => {
-        // console.log(
-        //     `[${new Date().toISOString()}] socket.onopen(): event:`, event
-        // );
-        // this.getUserScans({user: this.user});
-        // }
-
-        // this.socket.current.onclose = (event) => {
-        //     console.log(
-        //         `[${new Date().toISOString()}] socket.onclose(): event:`, event
-        //     );
-        //     console.log(
-        //         `[${new Date().toISOString()}] Attempting to re-connect to WebSocket...`
-        //     );
-        //     setTimeout(() => {
-        //         this.configureSocket();
-        //         this.getUserScans({user: this.user});
-        //     }, 500);
-        // };
-
-        // this.socket.current.onerror = (event) => {
-        //     console.error(
-        //         `[${new Date().toISOString()}] socket.onerror(): event:`, event
-        //     );
-        // }
-
     };
 
     configurePingPongInterval = (state) => {
 
-        if (state?.pingPongInterval) { 
+        if (state?.pingPongInterval) {
             clearInterval(state.pingPongInterval);
         }
 
@@ -445,7 +485,7 @@ class UserScansRootCore extends Component {
 
                 let newBarcodes = state.barcodes
                     .filter((barcode) => barcode.id !== newScan.id)
-                    .concat(newScan)
+                    .concat(newScan);
 
                 newBarcodes.sort((lhs, rhs) => {
                     return new Date(rhs.date) - new Date(lhs.date);
@@ -512,20 +552,29 @@ class UserScansRootCore extends Component {
         }, 2_000);
     };
 
-    // autoCopyIfEnabled = () => {
-    //     if (this.state.autoCopy) {
-    //         console.log("Auto-copying most recent barcode");
-    //         const mostRecentBarcode = this.state.barcodes[0];
-    //         const barcodeText = mostRecentBarcode.barcode;
-    //         navigator.clipboard.writeText(barcodeText);
-    //         console.log(
-    //             `AUTO-Copied barcode to clipboard: "${barcodeText}"`
-    //         );
-    //     }
-    //     else {
-    //         console.log("Auto-copy is disabled; not copying latest barcode");
-    //     }
-    // }
+    autoCopyIfEnabled = () => {
+        if (this.state.autoCopy) {
+            console.log("Auto-copying most recent barcode");
+            const mostRecentBarcode = this.state.barcodes[0];
+            const barcodeText = mostRecentBarcode.barcode;
+            navigator.clipboard.writeText(barcodeText)
+                .then(() => {
+                    console.log(
+                        `AUTO-Copied barcode to clipboard: "${barcodeText}"`
+                    );
+                })
+                .catch((error) => {
+                    console.error(
+                        `AUTO-Copy failed: could not copy barcode: ` +
+                        `"${barcodeText}": ${error}`
+                    );
+                });
+                    
+        }
+        else {
+            console.log("Auto-copy is disabled; not copying latest barcode");
+        }
+    };
 
     /** Get the user's scans */
     getUserScans = ({ user }) => {
@@ -549,13 +598,6 @@ class UserScansRootCore extends Component {
                 barcodes: result
             });
 
-            // console.log(
-            //     "UserScansRootCore.getUserScans(): " +
-            //     "calling autoCopyIfEnabled()"
-            // );
-
-            // this.autoCopyIfEnabled();
-
         })
         .catch((error) => {
             console.error(
@@ -573,21 +615,21 @@ class UserScansRootCore extends Component {
             barcodes: []
         });
 
-            this.context.api.deleteUserScans({
-                user: this.user
-            })
-            .then((result) => {
-                console.log(
-                    `UserScansRootCore.clearAllUserBarcodes(): ` +
-                    `result: ${result}`
-                );
-            })
-            .catch((error) => {
-                console.error(
-                    `UserScansRootCore.clearAllUserBarcodes(): ` +
-                    `could not delete all user barcodes: ${error}`
-                );
-            });
+        this.context.api.deleteUserScans({
+            user: this.user
+        })
+        .then((result) => {
+            console.log(
+                `UserScansRootCore.clearAllUserBarcodes(): ` +
+                `result: ${result}`
+            );
+        })
+        .catch((error) => {
+            console.error(
+                `UserScansRootCore.clearAllUserBarcodes(): ` +
+                `could not delete all user barcodes: ${error}`
+            );
+        });
 
     };
 
@@ -599,11 +641,11 @@ class UserScansRootCore extends Component {
             const deleteIDs = state.deleteIDs;
             deleteIDs.add(barcodeID);
             console.log(
-                `removeBarcodeFromState(): ${deleteIDs.size} deleteIDs:`, 
+                `removeBarcodeFromState(): ${deleteIDs.size} deleteIDs:`,
                 deleteIDs
             );
 
-            const newBarcodes = state.barcodes.filter((barcode) => { 
+            const newBarcodes = state.barcodes.filter((barcode) => {
                 return !deleteIDs.has(barcode.id);
             });
 
@@ -648,10 +690,10 @@ class UserScansRootCore extends Component {
 
                     {/* Table of Barcodes */}
 
-                    <Table 
-                        className="barcode-table border-dark" 
+                    <Table
+                        className="barcode-table border-dark"
                         striped bordered hover
-                        style={{maxWidth: "100%"}}
+                        style={{ maxWidth: "100%" }}
                     >
                         <thead>
                             <tr>
