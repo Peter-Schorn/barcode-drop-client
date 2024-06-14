@@ -406,7 +406,9 @@ class UserScansRootCore extends Component {
 
     handlePong = (event) => {
         console.log(
-            `[${new Date().toISOString()}] UserScansRootCore.handlePong(): event:`, event
+            `[${new Date().toISOString()}] UserScansRootCore.handlePong(): ` +
+            `(updating lastPongDate) event:`,
+            event
         );
         this.setState({
             lastPongDate: new Date()
