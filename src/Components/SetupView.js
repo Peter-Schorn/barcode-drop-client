@@ -6,14 +6,29 @@ import MainNavbar from "./MainNavbar";
 
 export default class SetupView extends Component {
 
+    componentDidMount() {
+        document.title = `Setup | BarcodeDrop`;
+    }
+
+    newTabLink = (url, body) => {
+        return (
+            <a 
+                href={url} 
+                target="_blank" 
+                rel="noreferrer"
+            >
+                {body}
+            </a>
+        );
+    }
+
     render() {
         return (
             <div className="vw-100 vh-100">
                 <MainNavbar/> 
-                <Container className="text-center pb-5" fluid="lg">
+                <Container className="text-center px-3 pb-5" fluid="md">
 
                     <h1 className="p-5">Setup</h1>
-
 
                     <p>
                         To scan barcodes with your <strong>iPhone</strong>, 
@@ -26,10 +41,58 @@ export default class SetupView extends Component {
                         style={{maxWidth: "175px", maxHeight: "175px", padding: "10px"}}
                     />
 
-                    <h3>API Request</h3>
+                    <h3>Mobile Apps</h3>
 
                     <p>
-                        Make a POST request to the following URL
+                        You can use the following apps to scan barcodes:
+                    </p>
+
+                    {/* QR Bot */}
+                    <p>
+                        {this.newTabLink("https://qrbot.net", <strong>QR Bot</strong>)}{" "}
+                        <span className="text-secondary">(iOS and Android)</span>
+                    </p>
+                    <img 
+                        src="QRBot.svg" 
+                        alt="QR Bot App QR Code"
+                        className="mb-3"
+                        style={{maxWidth: "175px", maxHeight: "175px", padding: "10px"}}
+                    />
+                    <p className="text-secondary">
+                        In the settings, enable the business scanner mode and
+                        configure the URL as specified in the API Request 
+                        section below. Enter the following for the body:
+                    </p>
+                    <span style={{padding: "0px 0px", fontFamily: "'Courier New', monospace"}}>
+                        {"code={barcode}"}
+                    </span>
+
+                    <hr />
+
+                    {/* QR & Barcode Scanner */}
+                    <p className="">
+                        {this.newTabLink(
+                            "https://play.google.com/store/apps/details?id=com.scanner.kataykin.icamesscaner.free", 
+                            <strong>QR & Barcode Scanner</strong>
+                        )}{" "}
+                        <span className="text-secondary">(Android)</span>
+                    </p>
+                    <img 
+                        src="QRBarcodeScanner.svg" 
+                        alt="QR Bot App QR Code"
+                        className="mb-3"
+                        style={{maxWidth: "175px", maxHeight: "175px", padding: "10px"}}
+                    />
+                    <p className="text-secondary">
+                        In the settings, Select the "POST" option, and enter the
+                        URL as specified in the API Request section below. No
+                        additional parameters need to be supplied.
+                    </p>
+
+                    <h3 className="pt-3">API Request</h3>
+
+                    <p>
+                        Make a POST request to the following endpoint
                         in your barcode scanner app
                         (replace {"<user>"} with your username):
                     </p>
@@ -48,7 +111,7 @@ export default class SetupView extends Component {
                     </p>
 
                     <p className="">
-                        Query string/form-url-encoded in the body: 
+                        URL Query string/form-url-encoded in the body: 
                         <span style={{padding: "0px 10px", fontFamily: "'Courier New', monospace"}}>
                             {"barcode=<barcode>"}
                         </span>

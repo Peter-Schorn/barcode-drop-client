@@ -30,6 +30,10 @@ class HomeViewCore extends Component {
 
     }
 
+    componentDidMount() {
+        document.title = `BarcodeDrop`;
+    }
+
     onSubmitForm = (event) => {
         event.preventDefault();
         console.log(`HomeView.onSubmitForm(): user: "${this.state.user}"`);

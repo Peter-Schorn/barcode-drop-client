@@ -15,6 +15,8 @@ import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import { WebSocket } from "partysocket";
 
+import toast, { Toaster, ToastBar } from 'react-hot-toast';
+
 export default function UserScansRoot(props) {
 
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
@@ -131,6 +133,7 @@ class UserScansRootCore extends Component {
     constructor(props) {
         super(props);
 
+        // MARK: - URL Fragment Parameters -
         // the parameters in the URL fragment; e.g.: `auto-copy=true` in
         // https://www.barcodedrop.com/scans/schornpe#auto-copy=true
         const urlFragmentParams = new URLSearchParams(
@@ -157,6 +160,9 @@ class UserScansRootCore extends Component {
         this.pollingID = null;
 
         this.user = props.router.params.user;
+
+        // MARK: Document Title
+        document.title = `Scans for ${this.user} | BarcodeDrop`;
 
         if (this.user) {
             console.log(
@@ -628,6 +634,13 @@ class UserScansRootCore extends Component {
                     autoCopiedBarcode: mostRecentBarcode,
                     showToast: true
                 });
+
+                let barcodeTextMessage = mostRecentBarcode.barcode;
+                if (barcodeTextMessage.length >= 27 /* 27 chars + 3 periods = 30 chars */) {
+                    barcodeTextMessage = barcodeText.slice(0, 27) + "...";
+                }
+
+                toast.success(`Copied "${barcodeTextMessage}" to Clipboard`);
                 
                 clearTimeout(this.removeAutoCopiedBarcodeTimer);
                 this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
@@ -764,8 +777,18 @@ class UserScansRootCore extends Component {
         // });
 
         return (
-            <div style={{ height: "50px"}}>
-                <Toast
+            <div style={{ /* height: "50px" */}}>
+                
+                <Toaster 
+                    gutter={10}
+                    toastOptions={{
+                        style: {
+                            background: "lightblue",
+                        }
+                    }}
+                />
+                
+                {/* <Toast
                     show={this.state.showToast}
                     onClose={() => this.setState({ showToast: false })}
                     autohide
@@ -779,7 +802,8 @@ class UserScansRootCore extends Component {
                     <Toast.Body>
                         Copied "{barcodeText}" to Clipboard
                     </Toast.Body>
-                </Toast>
+                </Toast> */}
+
             </div>
         );
     }
