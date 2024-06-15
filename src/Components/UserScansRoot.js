@@ -153,7 +153,7 @@ class UserScansRootCore extends Component {
             showToast: false
         };
 
-        this.barcodeIDsWhenHidden = [];
+        this.barcodeIDsWhenUnfocused = [];
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
@@ -205,7 +205,12 @@ class UserScansRootCore extends Component {
         clearInterval(this.pollingID);
         clearInterval(this.pingPongInterval);
         clearTimeout(this.removeAutoCopiedBarcodeTimer);
-        window.removeEventListener("hashchange", this.handleHashChange);
+        clearTimeout(this.copyBarcodeAfterDelayTimeout);
+        
+        document.removeEventListener("hashchange", this.handleHashChange);
+        document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+        document.removeEventListener("focusin", this.handleFocusIn);
+        document.removeEventListener("focusout", this.handleFocusOut);
     }
 
     componentDidMount() {
@@ -219,6 +224,9 @@ class UserScansRootCore extends Component {
 
         // MARK: Configure visibility change listener
         this.configureVisibilityChangeListener();
+
+        // MARK: Configure focus change listeners
+        this.configureFocusChangeListeners();
 
         // MARK: Configure WebSocket
         this.configureSocket();
@@ -286,18 +294,81 @@ class UserScansRootCore extends Component {
         });
     };
 
+    configureFocusChangeListeners = () => {
+        
+        document.addEventListener("focusout", () => {
+
+            console.log(
+                `focusout: document does NOT have focus; ` +
+                `visibility: ${document.visibilityState}`
+            );
+            // this.barcodeIDsWhenUnfocused = this.state.barcodes.map((barcode) => barcode.id);
+            // console.log(
+            //     `focusout: barcodes when NOT focused: ` +
+            //     `${JSON.stringify(this.barcodeIDsWhenUnfocused)}`
+            // );
+
+        });
+
+        document.addEventListener("focusin", () => {
+
+            console.log(
+                `focusin: document has focus; ` +
+                `visibility: ${document.visibilityState}`
+            );
+
+            // const barcodesSinceRefocused = this.state.barcodes.filter((barcode) => {
+            //     return !this.barcodeIDsWhenUnfocused.includes(barcode.id)
+            // });
+
+            // if (barcodesSinceRefocused.length > 0) {
+            //     console.log(
+            //         `focusin: barcodesSinceRefocused: ` +
+            //         `${JSON.stringify(barcodesSinceRefocused)}`
+            //     );
+            //     let lastBarcodeWhenHiddenID = this.barcodeIDsWhenUnfocused[0];
+            //     let previousBarcode = this.state.barcodes.find((barcode) => {
+            //         return barcode?.id === lastBarcodeWhenHiddenID
+            //     });
+            //     let currentBarcode = barcodesSinceRefocused[0];
+
+            //     if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
+            //         this.barcodesSinceRefocused = [];
+            //         // MARK: auto-copy the most recent barcode
+            //         // this.copyBarcodeAfterDelayTimeout = setTimeout(() => {
+            //             this.autoCopyIfEnabled();
+            //         // }, 500);
+            //     }
+            //     else {
+            //         console.log(
+            //             `focusin: latest barcode did not change`
+            //         )
+            //     }
+
+            // }
+            // else {
+            //     console.log(
+            //         `focusin: no new barcodes since refocused`
+            //     );
+            // }
+
+        });
+
+    }
+
     configureVisibilityChangeListener = () => {
 
         document.addEventListener("visibilitychange", () => {
             console.log(
-                `visibilitychange: document.hidden: ${document.hidden}`
+                `visibilitychange: document.hidden: ${document.hidden}; ` +
+                `focused: ${document.hasFocus()}`
             );
             if (document.hidden) {
-                this.barcodeIDsWhenHidden = this.state.barcodes.map((barcode) => barcode.id);
-                console.log(
-                    `visibilitychange: barcodes when hidden: ` +
-                    `${JSON.stringify(this.barcodeIDsWhenHidden)}`
-                );
+                // this.barcodeIDsWhenUnfocused = this.state.barcodes.map((barcode) => barcode.id);
+                // console.log(
+                //     `visibilitychange: barcodes when hidden: ` +
+                //     `${JSON.stringify(this.barcodeIDsWhenUnfocused)}`
+                // );
             }
             else {
                 console.log(
@@ -318,44 +389,43 @@ class UserScansRootCore extends Component {
                     );
                 }
 
-                // MARK: Check for barcodes scanned since visibility changed
-                // MARK: back to visible
-
-                const barcodesSinceUnhidden = this.state.barcodes.filter((barcode) => {
-                    return !this.barcodeIDsWhenHidden.includes(barcode.id)
-                });
-
-                if (barcodesSinceUnhidden.length > 0) {
-                    console.log(
-                        `visibilitychange: barcodesSinceUnhidden: ` +
-                        `${JSON.stringify(barcodesSinceUnhidden)}`
-                    );
-                    let lastBarcodeWhenHiddenID = this.barcodeIDsWhenHidden[0];
-                    let previousBarcode = this.state.barcodes.find((barcode) => {
-                        return barcode?.id === lastBarcodeWhenHiddenID
-                    });
-                    let currentBarcode = barcodesSinceUnhidden[0];
-
-                    if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
-                        this.barcodesSinceUnhidden = [];
-                        // MARK: auto-copy the most recent barcode
-                        this.copyBarcodeAfterDelayTimeout = setTimeout(() => {
-                            this.autoCopyIfEnabled();
-                        }, 500);
-                    }
-                    else {
-                        console.log(
-                            `visibilitychange: latest barcode did not change`
-                        )
-                    }
-
-                }
-                else {
-                    console.log(
-                        `visibilitychange: no new barcodes since unhidden`
-                    );
-                }
-
+                // // Check for barcodes scanned since visibility changed
+                // // back to visible
+                //
+                // const barcodesSinceRefocused = this.state.barcodes.filter((barcode) => {
+                //     return !this.barcodeIDsWhenUnfocused.includes(barcode.id)
+                // });
+                //
+                // if (barcodesSinceRefocused.length > 0) {
+                //     console.log(
+                //         `visibilitychange: barcodesSinceRefocused: ` +
+                //         `${JSON.stringify(barcodesSinceRefocused)}`
+                //     );
+                //     let lastBarcodeWhenHiddenID = this.barcodeIDsWhenUnfocused[0];
+                //     let previousBarcode = this.state.barcodes.find((barcode) => {
+                //         return barcode?.id === lastBarcodeWhenHiddenID
+                //     });
+                //     let currentBarcode = barcodesSinceRefocused[0];
+                //
+                //     if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
+                //         this.barcodesSinceRefocused = [];
+                //         // MARK: auto-copy the most recent barcode
+                //         this.copyBarcodeAfterDelayTimeout = setTimeout(() => {
+                //             this.autoCopyIfEnabled();
+                //         }, 500);
+                //     }
+                //     else {
+                //         console.log(
+                //             `visibilitychange: latest barcode did not change`
+                //         )
+                //     }
+                //
+                // }
+                // else {
+                //     console.log(
+                //         `visibilitychange: no new barcodes since unhidden`
+                //     );
+                // }
 
             }
         });
@@ -675,9 +745,9 @@ class UserScansRootCore extends Component {
 
         const mostRecentBarcode = this.state.barcodes[0];
         const barcodeText = mostRecentBarcode?.barcode;
-        if (!barcodeText) {
+        if (barcodeText == null) {
             console.error(
-                "AUTO-Copy failed: most recent barcode is null or empty"
+                "AUTO-Copy failed: most recent barcode is null or undefined"
             );
             return;
         }
