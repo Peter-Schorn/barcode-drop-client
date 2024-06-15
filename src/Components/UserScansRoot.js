@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { AppContext } from "../Model/AppContext";
 
 import { Button, Table, Container } from 'react-bootstrap';
+import Toast from 'react-bootstrap/Toast';
 
 import UserScansRow from "./UserScanRow";
 import MainNavbar from "./MainNavbar";
@@ -139,13 +140,14 @@ class UserScansRootCore extends Component {
         const enableAutoCopy = urlFragmentParams.get("auto-copy") === "true";
         console.log(
             `UserScansRootCore.constructor(): enableAutoCopy: ${enableAutoCopy}`
-        )
+        );
 
         this.state = {
             barcodes: [],
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
-            autoCopiedBarcodeID: null
+            autoCopiedBarcode: null,
+            showToast: false
         };
 
         this.deleteIDs = new Set();
@@ -228,21 +230,47 @@ class UserScansRootCore extends Component {
     componentDidUpdate(prevProps, prevState) {
         console.log("UserScansRootCore.componentDidUpdate():");
 
-        const previousBarcodeID = prevState.barcodes[0]?.id;
-        const currentBarcodeID = this.state.barcodes[0]?.id;
-        if (currentBarcodeID && currentBarcodeID !== previousBarcodeID) {
+        const previousBarcode = prevState.barcodes[0];
+        const currentBarcode = this.state.barcodes[0];
+        if (!currentBarcode?.id || currentBarcode?.id === previousBarcode?.id) {
+            console.log(
+                `UserScansRootCore.componentDidUpdate(): ` +
+                `most recent barcode has *NOT* changed at all/is null: ` +
+                `${JSON.stringify(currentBarcode)}`
+            );
+            return;
+        }
 
+        /*
+         We only want to auto-copy the most recent barcode if the most recent
+         barcode is **NEWER** than the previously auto-copied barcode.
+
+         For example, if the user deletes a barcode, then the most recent
+         barcode will older than the previously auto-copied barcode. In this
+         case, we do *NOT* want to auto-copy the most recent barcode.
+         */
+
+        // currentBarcode?.date should always be non-null
+        // previousBarcode?.date may be null because previousBarcode may be null
+
+        if (
+            !previousBarcode ||
+            new Date(currentBarcode.date) >= new Date(previousBarcode.date)
+        ) {
             console.log(
                 "UserScansRootCore.componentDidUpdate(): " +
-                "most recent barcode ID has changed from " +
-                `"${previousBarcodeID}" to "${currentBarcodeID}"`
+                "most *RECENT* barcode has changed from " +
+                `${JSON.stringify(previousBarcode)} to ` +
+                `${JSON.stringify(currentBarcode)}`
             );
             this.autoCopyIfEnabled();
         }
         else {
             console.log(
                 "UserScansRootCore.componentDidUpdate(): " +
-                "most recent barcode has *NOT* changed"
+                "most *RECENT* barcode has *NOT* changed from " +
+                `${JSON.stringify(previousBarcode)} to ` +
+                `${JSON.stringify(currentBarcode)}`
             );
         }
 
@@ -569,45 +597,53 @@ class UserScansRootCore extends Component {
         }, 2_000);
     };
 
+    // MARK: - Auto-Copy -
+    // copies the most recent barcode to the clipboard
     autoCopyIfEnabled = () => {
-        if (this.state.enableAutoCopy) {
-            console.log("Auto-copying most recent barcode");
-            const mostRecentBarcode = this.state.barcodes[0];
-            const barcodeText = mostRecentBarcode?.barcode;
-            if (!barcodeText) {
-                console.error(
-                    "AUTO-Copy failed: most recent barcode is null or empty"
+
+        if (!this.state.enableAutoCopy) {
+            console.log(
+                "Auto-copy is disabled; not copying latest barcode"
+            );
+            return;
+        }
+
+        console.log("Auto-copying most recent barcode");
+        const mostRecentBarcode = this.state.barcodes[0];
+        const barcodeText = mostRecentBarcode?.barcode;
+        if (!barcodeText) {
+            console.error(
+                "AUTO-Copy failed: most recent barcode is null or empty"
+            );
+            return;
+        }
+        navigator.clipboard.writeText(barcodeText)
+            .then(() => {
+
+                console.log(
+                    `AUTO-Copied barcode to clipboard: "${barcodeText}"`
                 );
-                return;
-            }
-            navigator.clipboard.writeText(barcodeText)
-                .then(() => {
 
-                    console.log(
-                        `AUTO-Copied barcode to clipboard: "${barcodeText}"`
-                    );
-
-                    this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
-                        this.setState({
-                            autoCopiedBarcodeID: null
-                        });
-                    }, 5_000);
-
-                    this.setState({
-                        autoCopiedBarcodeID: mostRecentBarcode?.id
-                    });
-                })
-                .catch((error) => {
-                    console.error(
-                        `AUTO-Copy failed: could not copy barcode: ` +
-                        `"${barcodeText}": ${error}`
-                    );
+                this.setState({
+                    autoCopiedBarcode: mostRecentBarcode,
+                    showToast: true
                 });
+                
+                clearTimeout(this.removeAutoCopiedBarcodeTimer);
+                this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
+                    this.setState({
+                        autoCopiedBarcode: null
+                    });
+                }, 5_000);
 
-        }
-        else {
-            console.log("Auto-copy is disabled; not copying latest barcode");
-        }
+            })
+            .catch((error) => {
+                console.error(
+                    `AUTO-Copy failed: could not copy barcode: ` +
+                    `"${barcodeText}": ${error}`
+                );
+            });
+
     };
 
     /** Get the user's scans */
@@ -702,7 +738,7 @@ class UserScansRootCore extends Component {
         );
         urlFragmentParams.set("auto-copy", enableAutoCopy);
         window.location.hash = urlFragmentParams.toString();
-        
+
         console.log(
             `UserScansRootCore.handleAutoCopyChange(): ` +
             `set URL fragment to: ${window.location.hash}`
@@ -713,6 +749,39 @@ class UserScansRootCore extends Component {
         });
 
     };
+
+    renderToast() {
+
+        const latestBarcode = this.state.barcodes[0];
+        let barcodeText = latestBarcode?.barcode ?? "";
+        if (barcodeText.length >= 27 /* 27 chars + 3 periods = 30 chars */) {
+            barcodeText = barcodeText.slice(0, 27) + "...";
+        }
+
+        // this.setState({
+        //     // showToast: this.state.autoCopiedBarcode !== null
+        //     showToast: true
+        // });
+
+        return (
+            <Toast
+                // show={this.state.autoCopiedBarcode !== null}
+                show={this.state.showToast}
+                onClose={() => this.setState({ showToast: false })}
+                autohide
+                delay={5_000}
+                style={{ 
+                    width: "100%",
+                    backgroundColor: "lightblue",
+                    backdropFilter: "blur(10px)"
+                }}
+            >
+                <Toast.Body>
+                    Copied "{barcodeText}" to Clipboard
+                </Toast.Body>
+            </Toast>
+        );
+    }
 
     render() {
         return (
@@ -730,6 +799,7 @@ class UserScansRootCore extends Component {
                         </strong>
                     </h2>
 
+                    {this.renderToast()}
 
                     {/* Delete All */}
 
@@ -743,16 +813,16 @@ class UserScansRootCore extends Component {
 
                     {/* Auto-Copy */}
 
-                    <label 
-                        style={{padding: "5px 20px"}} 
+                    <label
+                        style={{ padding: "5px 20px" }}
                         className=""
                         data-toggle="tooltip"
                         data-placement="top"
                         title="Automatically copy the most recent barcode to the clipboard"
                     >
-                        <input 
-                            type="checkbox" 
-                            name="enable-auto-copy" 
+                        <input
+                            type="checkbox"
+                            name="enable-auto-copy"
                             id="enable-auto-copy"
                             checked={this.state.enableAutoCopy}
                             onChange={this.handleAutoCopyChange}
@@ -786,7 +856,7 @@ class UserScansRootCore extends Component {
                                     index={index}
                                     barcode={barcode}
                                     user={this.user}
-                                    isAutoCopied={this.state.autoCopiedBarcodeID === barcode.id}
+                                    isAutoCopied={this.state.autoCopiedBarcode?.id === barcode.id}
                                     router={this.props.router}
                                     removeBarcodeFromState={
                                         this.removeBarcodeFromState
