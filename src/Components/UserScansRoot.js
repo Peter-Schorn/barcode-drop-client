@@ -153,6 +153,7 @@ class UserScansRootCore extends Component {
             showToast: false
         };
 
+        this.barcodeIDsWhenHidden = new Set();
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
@@ -214,6 +215,9 @@ class UserScansRootCore extends Component {
 
         // MARK: Handle change to URL fragment
         window.addEventListener("hashchange", this.handleHashChange);
+
+        // MARK: Configure visibility change listener
+        this.configureVisibilityChangeListener();
 
         // MARK: Configure WebSocket
         this.configureSocket();
@@ -318,6 +322,70 @@ class UserScansRootCore extends Component {
         });
     };
 
+    configureVisibilityChangeListener = () => {
+
+        document.addEventListener("visibilitychange", () => {
+            console.log(
+                `visibilitychange: document.hidden: ${document.hidden}`
+            );
+            if (document.hidden) {
+                this.barcodeIDsWhenHidden = new Set(
+                    this.state.barcodes.map((barcode) => barcode.id)
+                );
+                console.log(
+                    `visibilitychange: barcodes when hidden: ` +
+                    `${JSON.stringify(this.barcodeIDsWhenHidden)}`
+                );
+            }
+            else {
+                console.log(
+                    "visibilitychange: will reconnect to websocket if needed"
+                );
+                if (this.socket.current.readyState === WebSocket.CLOSED) {
+                    console.log(
+                        `visibilitychange: re-connecting to WebSocket ` +
+                        `(readyState: ${this.socket.current.readyState})`
+                    );
+                    this.socket.current.reconnect();
+                }
+                else {
+                    console.log(
+                        `visibilitychange: WebSocket is already ` +
+                        `connected/connecting ` +
+                        `(readyState: ${this.socket.current.readyState})`
+                    );
+                }
+
+                // MARK: Check for barcodes scanned since visibility changed
+                // MARK: back to visible
+
+                const barcodesSinceUnhidden = this.state.barcodes.filter((barcode) => {
+                    return !this.barcodeIDsWhenHidden.has(barcode.id)
+                });
+
+                if (barcodesSinceUnhidden.length > 0) {
+                    console.log(
+                        `visibilitychange: barcodesSinceUnhidden: ` +
+                        `${JSON.stringify(barcodesSinceUnhidden)}`
+                    );
+                    console.log(
+                        `visibilitychange: auto-copying most recent barcode`    
+                    );
+                    // MARK: auto-copy the most recent barcode
+                    this.autoCopyIfEnabled();
+                }
+                else {
+                    console.log(
+                        `visibilitychange: no new barcodes since unhidden`
+                    );
+                }
+
+
+            }
+        });
+
+    };
+
     configureSocket = () => {
 
         /*
@@ -390,37 +458,6 @@ class UserScansRootCore extends Component {
             this.lastPongDate = null;
 
         };
-
-        document.addEventListener("visibilitychange", () => {
-            console.log(
-                `visibilitychange: document.hidden: ${document.hidden}`
-            );
-            if (document.hidden) {
-                // console.log("visibilitychange: Clearing polling interval");
-                // clearInterval(this.pollingID);
-            }
-            else {
-                // console.log("visibilitychange: calling beginPolling()");
-                // this.beginPolling();
-                console.log(
-                    "visibilitychange: will reconnect to websocket if needed"
-                );
-                if (this.socket.current.readyState === WebSocket.CLOSED) {
-                    console.log(
-                        `visibilitychange: re-connecting to WebSocket ` +
-                        `(readyState: ${this.socket.current.readyState})`
-                    );
-                    this.socket.current.reconnect();
-                }
-                else {
-                    console.log(
-                        `visibilitychange: WebSocket is already ` +
-                        `connected/connecting ` +
-                        `(readyState: ${this.socket.current.readyState})`
-                    );
-                }
-            }
-        });
 
     };
 

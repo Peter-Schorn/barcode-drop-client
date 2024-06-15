@@ -73,3 +73,11 @@ hr {
     width: 10% !important;
     margin: 40px auto !important;
 }
+
+.dropdown-toggle {
+    background-color: rgb(157, 157, 157) !important;
+}
+
+.dropdown-toggle::after {
+    display: none !important;
+}
