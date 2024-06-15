@@ -640,7 +640,12 @@ class UserScansRootCore extends Component {
                     barcodeTextMessage = barcodeText.slice(0, 27) + "...";
                 }
 
-                toast.success(`Copied "${barcodeTextMessage}" to Clipboard`);
+                toast.success(
+                    `Copied "${barcodeTextMessage}" to Clipboard`,
+                    {
+                        duration: 10_000
+                    }
+                );
                 
                 clearTimeout(this.removeAutoCopiedBarcodeTimer);
                 this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
