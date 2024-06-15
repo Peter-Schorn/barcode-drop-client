@@ -764,22 +764,23 @@ class UserScansRootCore extends Component {
         // });
 
         return (
-            <Toast
-                // show={this.state.autoCopiedBarcode !== null}
-                show={this.state.showToast}
-                onClose={() => this.setState({ showToast: false })}
-                autohide
-                delay={5_000}
-                style={{ 
-                    width: "100%",
-                    backgroundColor: "lightblue",
-                    backdropFilter: "blur(10px)"
-                }}
-            >
-                <Toast.Body>
-                    Copied "{barcodeText}" to Clipboard
-                </Toast.Body>
-            </Toast>
+            <div style={{ height: "50px"}}>
+                <Toast
+                    show={this.state.showToast}
+                    onClose={() => this.setState({ showToast: false })}
+                    autohide
+                    delay={5_000}
+                    style={{
+                        width: "100%",
+                        backgroundColor: "lightblue",
+                        backdropFilter: "blur(10px)"
+                    }}
+                >
+                    <Toast.Body>
+                        Copied "{barcodeText}" to Clipboard
+                    </Toast.Body>
+                </Toast>
+            </div>
         );
     }
 
