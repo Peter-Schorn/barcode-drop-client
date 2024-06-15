@@ -153,14 +153,15 @@ class UserScansRootCore extends Component {
             showToast: false
         };
 
-        this.barcodeIDsWhenHidden = new Set();
+        this.barcodeIDsWhenHidden = [];
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
         this.removeAutoCopiedBarcodeTimer = null;
         this.pollingID = null;
-
+        this.copyBarcodeAfterDelayTimeout = null;
         this.user = props.router.params.user;
+        this.lastAutoCopiedBarcode = null;
 
         // MARK: Document Title
         document.title = `Scans for ${this.user} | BarcodeDrop`;
@@ -242,46 +243,9 @@ class UserScansRootCore extends Component {
 
         const previousBarcode = prevState.barcodes[0];
         const currentBarcode = this.state.barcodes[0];
-        if (!currentBarcode?.id || currentBarcode?.id === previousBarcode?.id) {
-            console.log(
-                `UserScansRootCore.componentDidUpdate(): ` +
-                `most recent barcode has *NOT* changed at all/is null: ` +
-                `${JSON.stringify(currentBarcode)}`
-            );
-            return;
-        }
-
-        /*
-         We only want to auto-copy the most recent barcode if the most recent
-         barcode is **NEWER** than the previously auto-copied barcode.
-
-         For example, if the user deletes a barcode, then the most recent
-         barcode will older than the previously auto-copied barcode. In this
-         case, we do *NOT* want to auto-copy the most recent barcode.
-         */
-
-        // currentBarcode?.date should always be non-null
-        // previousBarcode?.date may be null because previousBarcode may be null
-
-        if (
-            !previousBarcode ||
-            new Date(currentBarcode.date) >= new Date(previousBarcode.date)
-        ) {
-            console.log(
-                "UserScansRootCore.componentDidUpdate(): " +
-                "most *RECENT* barcode has changed from " +
-                `${JSON.stringify(previousBarcode)} to ` +
-                `${JSON.stringify(currentBarcode)}`
-            );
+        
+        if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
             this.autoCopyIfEnabled();
-        }
-        else {
-            console.log(
-                "UserScansRootCore.componentDidUpdate(): " +
-                "most *RECENT* barcode has *NOT* changed from " +
-                `${JSON.stringify(previousBarcode)} to ` +
-                `${JSON.stringify(currentBarcode)}`
-            );
         }
 
     };
@@ -329,9 +293,7 @@ class UserScansRootCore extends Component {
                 `visibilitychange: document.hidden: ${document.hidden}`
             );
             if (document.hidden) {
-                this.barcodeIDsWhenHidden = new Set(
-                    this.state.barcodes.map((barcode) => barcode.id)
-                );
+                this.barcodeIDsWhenHidden = this.state.barcodes.map((barcode) => barcode.id);
                 console.log(
                     `visibilitychange: barcodes when hidden: ` +
                     `${JSON.stringify(this.barcodeIDsWhenHidden)}`
@@ -360,7 +322,7 @@ class UserScansRootCore extends Component {
                 // MARK: back to visible
 
                 const barcodesSinceUnhidden = this.state.barcodes.filter((barcode) => {
-                    return !this.barcodeIDsWhenHidden.has(barcode.id)
+                    return !this.barcodeIDsWhenHidden.includes(barcode.id)
                 });
 
                 if (barcodesSinceUnhidden.length > 0) {
@@ -368,11 +330,25 @@ class UserScansRootCore extends Component {
                         `visibilitychange: barcodesSinceUnhidden: ` +
                         `${JSON.stringify(barcodesSinceUnhidden)}`
                     );
-                    console.log(
-                        `visibilitychange: auto-copying most recent barcode`    
-                    );
-                    // MARK: auto-copy the most recent barcode
-                    this.autoCopyIfEnabled();
+                    let lastBarcodeWhenHiddenID = this.barcodeIDsWhenHidden[0];
+                    let previousBarcode = this.state.barcodes.find((barcode) => {
+                        return barcode?.id === lastBarcodeWhenHiddenID
+                    });
+                    let currentBarcode = barcodesSinceUnhidden[0];
+
+                    if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
+                        this.barcodesSinceUnhidden = [];
+                        // MARK: auto-copy the most recent barcode
+                        this.copyBarcodeAfterDelayTimeout = setTimeout(() => {
+                            this.autoCopyIfEnabled();
+                        }, 500);
+                    }
+                    else {
+                        console.log(
+                            `visibilitychange: latest barcode did not change`
+                        )
+                    }
+
                 }
                 else {
                     console.log(
@@ -640,6 +616,52 @@ class UserScansRootCore extends Component {
         }, 2_000);
     };
 
+    latestBarcodeChanged = (previousBarcode, currentBarcode) => {
+
+        if (!currentBarcode?.id || currentBarcode?.id === previousBarcode?.id) {
+            console.log(
+                `UserScansRootCore.latestBarcodeChanged(): ` +
+                `most recent barcode has *NOT* changed at all/is null: ` +
+                `${JSON.stringify(currentBarcode)}`
+            );
+            return false;
+        }
+
+        /*
+         We only want to auto-copy the most recent barcode if the most recent
+         barcode is **NEWER** than the previously auto-copied barcode.
+
+         For example, if the user deletes a barcode, then the most recent
+         barcode will older than the previously auto-copied barcode. In this
+         case, we do *NOT* want to auto-copy the most recent barcode.
+         */
+
+        // currentBarcode?.date should always be non-null
+        // previousBarcode?.date may be null because previousBarcode may be null
+
+        if (
+            !previousBarcode ||
+            new Date(currentBarcode.date) >= new Date(previousBarcode.date)
+        ) {
+            console.log(
+                "UserScansRootCore.latestBarcodeChanged(): " +
+                "most *RECENT* barcode has changed from " +
+                `${JSON.stringify(previousBarcode)} to ` +
+                `${JSON.stringify(currentBarcode)}`
+            );
+            return true;
+        }
+        else {
+            console.log(
+                "UserScansRootCore.latestBarcodeChanged(): " +
+                "most *RECENT* barcode has *NOT* changed from " +
+                `${JSON.stringify(previousBarcode)} to ` +
+                `${JSON.stringify(currentBarcode)}`
+            );
+            return false;
+        }
+    };
+
     // MARK: - Auto-Copy -
     // copies the most recent barcode to the clipboard
     autoCopyIfEnabled = () => {
@@ -651,7 +673,6 @@ class UserScansRootCore extends Component {
             return;
         }
 
-        console.log("Auto-copying most recent barcode");
         const mostRecentBarcode = this.state.barcodes[0];
         const barcodeText = mostRecentBarcode?.barcode;
         if (!barcodeText) {
@@ -660,6 +681,18 @@ class UserScansRootCore extends Component {
             );
             return;
         }
+
+        if (this.lastAutoCopiedBarcode?.id === mostRecentBarcode?.id) {
+            console.log(
+                "AUTO-Copy failed: most recent barcode is the same as the " +
+                "previously auto-copied barcode"
+            );
+            return;
+        }
+        this.lastAutoCopiedBarcode = mostRecentBarcode;
+
+        console.log(`Auto-copying most recent barcode: "${barcodeText}"`);
+
         navigator.clipboard.writeText(barcodeText)
             .then(() => {
 
