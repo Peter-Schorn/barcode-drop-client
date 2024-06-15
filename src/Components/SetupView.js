@@ -84,7 +84,7 @@ export default class SetupView extends Component {
                         style={{maxWidth: "175px", maxHeight: "175px", padding: "10px"}}
                     />
                     <p className="text-secondary">
-                        In the settings, Select the "POST" option, and enter the
+                        In the settings, select the "POST" option, and enter the
                         URL as specified in the API Request section below. No
                         additional parameters need to be supplied.
                     </p>

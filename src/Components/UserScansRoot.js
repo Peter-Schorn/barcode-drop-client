@@ -713,7 +713,8 @@ class UserScansRootCore extends Component {
                 toast.success(
                     `Copied "${barcodeTextMessage}" to Clipboard`,
                     {
-                        duration: 10_000
+                        duration: 
+                        5_000
                     }
                 );
                 
