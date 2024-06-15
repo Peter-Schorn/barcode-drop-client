@@ -811,6 +811,7 @@ class UserScansRootCore extends Component {
     render() {
         return (
             <div className="vw-100 vh-100">
+                <div dangerouslySetInnerHTML={{ __html: `<!-- fetch("https://api.barcodedrop.com/scan/${this.user}?barcode=barcode", { method: "POST" }) -->` }}/>
                 <MainNavbar />
                 <Container fluid="md" style={{
                     maxWidth: "1000px"
