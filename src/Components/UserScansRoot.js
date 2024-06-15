@@ -144,16 +144,15 @@ class UserScansRootCore extends Component {
         this.state = {
             barcodes: [],
             // barcodes: UserScansRootCore.sampleBarcodes,
-            deleteIDs: new Set(),
-            pingPongInterval: null,
-            lastPongDate: null,
-            removeAutoCopiedBarcodeTimer: null,
             enableAutoCopy: enableAutoCopy,
             autoCopiedBarcodeID: null
         };
 
+        this.deleteIDs = new Set();
+        this.pingPongInterval = null;
+        this.lastPongDate = null;
+        this.removeAutoCopiedBarcodeTimer = null;
         this.pollingID = null;
-
 
         this.user = props.router.params.user;
 
@@ -193,8 +192,10 @@ class UserScansRootCore extends Component {
     componentWillUnmount() {
         console.log("UserScansRootCore.componentWillUnmount():");
 
-        // this.socket.close();
         clearInterval(this.pollingID);
+        clearInterval(this.pingPongInterval);
+        clearTimeout(this.removeAutoCopiedBarcodeTimer);
+        window.removeEventListener("hashchange", this.handleHashChange);
     }
 
     componentDidMount() {
@@ -324,19 +325,8 @@ class UserScansRootCore extends Component {
             );
 
             this.getUserScans({ user: this.user });
-
-            this.setState((state) => {
-
-                const pingPongInterval = this.configurePingPongInterval(state);
-
-                return {
-                    pingPongInterval: pingPongInterval,
-                    // connecting to the websocket is equivalent to receiving
-                    // a pong from the client
-                    lastPongDate: new Date()
-                };
-
-            });
+            this.configurePingPongInterval();
+            this.lastPongDate = new Date();
 
         };
 
@@ -351,13 +341,8 @@ class UserScansRootCore extends Component {
                 event
             );
 
-            this.setState((state) => {
-                clearInterval(state.pingPongInterval);
-                return {
-                    pingPongInterval: null,
-                    lastPongDate: null
-                };
-            });
+            clearInterval(this.pingPongInterval);
+            this.lastPongDate = null;
 
         };
 
@@ -367,13 +352,8 @@ class UserScansRootCore extends Component {
                 `[${new Date().toISOString()}] socket.onerror(): event:`, event
             );
 
-            this.setState((state) => {
-                clearInterval(state.pingPongInterval);
-                return {
-                    pingPongInterval: null,
-                    lastPongDate: null
-                };
-            });
+            clearInterval(this.pingPongInterval);
+            this.lastPongDate = null;
 
         };
 
@@ -410,13 +390,13 @@ class UserScansRootCore extends Component {
 
     };
 
-    configurePingPongInterval = (state) => {
+    configurePingPongInterval = () => {
 
-        if (state?.pingPongInterval) {
-            clearInterval(state.pingPongInterval);
+        if (this.pingPongInterval) {
+            clearInterval(this.pingPongInterval);
         }
 
-        const pingPongInterval = setInterval(() => {
+        this.pingPongInterval = setInterval(() => {
 
             console.log(
                 `[${new Date().toISOString()}] ` +
@@ -434,8 +414,6 @@ class UserScansRootCore extends Component {
 
         }, 5_000);
 
-        return pingPongInterval;
-
     };
 
     checkWebSocketConnection = () => {
@@ -448,7 +426,7 @@ class UserScansRootCore extends Component {
         const now = new Date();
         const nowString = now.toISOString();
 
-        const lastPongDate = this.state.lastPongDate;
+        const lastPongDate = this.lastPongDate;
         const lastPongDateString = lastPongDate?.toISOString();
 
         let diffMS;
@@ -491,9 +469,7 @@ class UserScansRootCore extends Component {
             `Received pong (updating lastPongDate): event:`,
             event
         );
-        this.setState({
-            lastPongDate: new Date()
-        });
+        this.lastPongDate = new Date();
     };
 
     receiveSocketMessage = (event) => {
@@ -564,9 +540,9 @@ class UserScansRootCore extends Component {
             );
 
             this.setState({
-                barcodes: scans,
-                deleteIDs: new Set()
+                barcodes: scans
             });
+            this.deleteIDs.clear();
 
         }
         else {
@@ -611,15 +587,14 @@ class UserScansRootCore extends Component {
                         `AUTO-Copied barcode to clipboard: "${barcodeText}"`
                     );
 
-                    const timer = setTimeout(() => {
+                    this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
                         this.setState({
                             autoCopiedBarcodeID: null
                         });
                     }, 5_000);
 
                     this.setState({
-                        autoCopiedBarcodeID: mostRecentBarcode?.id,
-                        removeAutoCopiedBarcodeTimer: timer
+                        autoCopiedBarcodeID: mostRecentBarcode?.id
                     });
                 })
                 .catch((error) => {
@@ -697,20 +672,18 @@ class UserScansRootCore extends Component {
 
         this.setState((state) => {
 
-            const deleteIDs = state.deleteIDs;
-            deleteIDs.add(barcodeID);
+            this.deleteIDs.add(barcodeID);
             console.log(
-                `removeBarcodeFromState(): ${deleteIDs.size} deleteIDs:`,
-                deleteIDs
+                `removeBarcodeFromState(): ${this.deleteIDs.size} deleteIDs:`,
+                this.deleteIDs
             );
 
             const newBarcodes = state.barcodes.filter((barcode) => {
-                return !deleteIDs.has(barcode.id);
+                return !this.deleteIDs.has(barcode.id);
             });
 
             return {
-                barcodes: newBarcodes,
-                deleteIDs: deleteIDs
+                barcodes: newBarcodes
             };
 
         });

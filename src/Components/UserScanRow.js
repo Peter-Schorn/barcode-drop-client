@@ -30,6 +30,10 @@ export default class UserScansRow extends Component {
         );
     }
 
+    componentWillUnmount() {
+        clearInterval(this.intervalID);
+    }
+
     tick = () => {
         this.updateDateDifference();
     };
