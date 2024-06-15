@@ -227,14 +227,14 @@ class UserScansRootCore extends Component {
     componentDidUpdate(prevProps, prevState) {
         console.log("UserScansRootCore.componentDidUpdate():");
 
-        const previousBarcode = prevState.barcodes[0]?.barcode;
-        const currentBarcode = this.state.barcodes[0]?.barcode;
-        if (currentBarcode && currentBarcode !== previousBarcode) {
+        const previousBarcodeID = prevState.barcodes[0]?.id;
+        const currentBarcodeID = this.state.barcodes[0]?.id;
+        if (currentBarcodeID && currentBarcodeID !== previousBarcodeID) {
 
             console.log(
                 "UserScansRootCore.componentDidUpdate(): " +
-                "most recent barcode has changed from " +
-                `"${previousBarcode}" to "${currentBarcode}"`
+                "most recent barcode ID has changed from " +
+                `"${previousBarcodeID}" to "${currentBarcodeID}"`
             );
             this.autoCopyIfEnabled();
         }
