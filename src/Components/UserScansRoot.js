@@ -130,13 +130,26 @@ class UserScansRootCore extends Component {
     constructor(props) {
         super(props);
 
+        // the parameters in the URL fragment; e.g.: `auto-copy=true` in
+        // https://www.barcodedrop.com/scans/schornpe#auto-copy=true
+        const urlFragmentParams = new URLSearchParams(
+            window.location.hash.slice(1)
+        );
+
+        const enableAutoCopy = urlFragmentParams.get("auto-copy") === "true";
+        console.log(
+            `UserScansRootCore.constructor(): enableAutoCopy: ${enableAutoCopy}`
+        )
+
         this.state = {
             barcodes: [],
             // barcodes: UserScansRootCore.sampleBarcodes,
             deleteIDs: new Set(),
             pingPongInterval: null,
             lastPongDate: null,
-            autoCopy: true
+            removeAutoCopiedBarcodeTimer: null,
+            enableAutoCopy: enableAutoCopy,
+            autoCopiedBarcodeID: null
         };
 
         this.pollingID = null;
@@ -188,20 +201,10 @@ class UserScansRootCore extends Component {
 
         console.log("UserScansRootCore.componentDidMount():");
 
-        // console.log(
-        //     `REACT_APP_DISABLE_POLLING: ` +
-        //     `${process.env.REACT_APP_DISABLE_POLLING}`
-        // );
-        //
-        // if (process.env.REACT_APP_DISABLE_POLLING !== "true") {
-        //     console.log("Polling is enabled");
-        //     this.beginPolling();
-        // }
-        // else {
-        //     console.log("Polling is disabled");
         this.getUserScans({ user: this.user });
-        // }
-        //
+
+        // MARK: Handle change to URL fragment
+        window.addEventListener("hashchange", this.handleHashChange);
 
         // MARK: Configure WebSocket
         this.configureSocket();
@@ -244,6 +247,24 @@ class UserScansRootCore extends Component {
 
     };
 
+    handleHashChange = (e) => {
+        console.log(
+            `UserScansRootCore.handleHashChange(): ` +
+            `hash: ${window.location.hash}`
+        );
+        const urlFragmentParams = new URLSearchParams(
+            window.location.hash.slice(1)
+        );
+        const enableAutoCopy = urlFragmentParams.get("auto-copy") === "true";
+        console.log(
+            `UserScansRootCore.handleHashChange(): ` +
+            `enableAutoCopy: ${enableAutoCopy}`
+        );
+        this.setState({
+            enableAutoCopy: enableAutoCopy
+        });
+
+    };
 
     promptForClipboardPermission = () => {
         console.log("promptForClipboardPermission");
@@ -573,15 +594,33 @@ class UserScansRootCore extends Component {
     };
 
     autoCopyIfEnabled = () => {
-        if (this.state.autoCopy) {
+        if (this.state.enableAutoCopy) {
             console.log("Auto-copying most recent barcode");
             const mostRecentBarcode = this.state.barcodes[0];
-            const barcodeText = mostRecentBarcode.barcode;
+            const barcodeText = mostRecentBarcode?.barcode;
+            if (!barcodeText) {
+                console.error(
+                    "AUTO-Copy failed: most recent barcode is null or empty"
+                );
+                return;
+            }
             navigator.clipboard.writeText(barcodeText)
                 .then(() => {
+
                     console.log(
                         `AUTO-Copied barcode to clipboard: "${barcodeText}"`
                     );
+
+                    const timer = setTimeout(() => {
+                        this.setState({
+                            autoCopiedBarcodeID: null
+                        });
+                    }, 5_000);
+
+                    this.setState({
+                        autoCopiedBarcodeID: mostRecentBarcode?.id,
+                        removeAutoCopiedBarcodeTimer: timer
+                    });
                 })
                 .catch((error) => {
                     console.error(
@@ -679,12 +718,25 @@ class UserScansRootCore extends Component {
     };
 
     handleAutoCopyChange = (e) => {
+        const enableAutoCopy = e.target.checked;
         console.log(
             `UserScansRootCore.handleAutoCopyChange(): ` +
-            `e.target.checked (enable auto-copy): ${e.target.checked}`
+            `e.target.checked (enable auto-copy): ${enableAutoCopy}`
         );
+
+        const urlFragmentParams = new URLSearchParams(
+            window.location.hash.slice(1)
+        );
+        urlFragmentParams.set("auto-copy", enableAutoCopy);
+        window.location.hash = urlFragmentParams.toString();
+        
+        console.log(
+            `UserScansRootCore.handleAutoCopyChange(): ` +
+            `set URL fragment to: ${window.location.hash}`
+        );
+
         this.setState({
-            autoCopy: e.target.checked
+            enableAutoCopy: enableAutoCopy
         });
 
     };
@@ -729,7 +781,7 @@ class UserScansRootCore extends Component {
                             type="checkbox" 
                             name="enable-auto-copy" 
                             id="enable-auto-copy"
-                            checked={this.state.autoCopy}
+                            checked={this.state.enableAutoCopy}
                             onChange={this.handleAutoCopyChange}
                         />
                         <span style={{ marginLeft: "5px" }}>
@@ -761,6 +813,7 @@ class UserScansRootCore extends Component {
                                     index={index}
                                     barcode={barcode}
                                     user={this.user}
+                                    isAutoCopied={this.state.autoCopiedBarcodeID === barcode.id}
                                     router={this.props.router}
                                     removeBarcodeFromState={
                                         this.removeBarcodeFromState

@@ -158,6 +158,17 @@ export default class UserScansRow extends Component {
         
     }
 
+    copyButtonStyle() {
+        const isAutoCopied = this.props.isAutoCopied;
+        return {
+            margin: "5px 5px",
+            // backgroundColor: "green"
+            backgroundColor: isAutoCopied ? "green" : null,
+            border: isAutoCopied ? "1px solid green" : null,
+            transition: "all 0.5s ease-out"
+        };
+    }
+
     render() {
         return (
             <tr
@@ -170,7 +181,7 @@ export default class UserScansRow extends Component {
                 }}>
                     <Button
                         className="copy-button"
-                        style={{ margin: "5px 5px" }}
+                        style={this.copyButtonStyle()}
                         onClick={this.onClickCopyButton(
                             this.props.barcode
                         )}
