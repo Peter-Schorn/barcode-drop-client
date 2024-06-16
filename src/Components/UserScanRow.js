@@ -110,9 +110,22 @@ export default class UserScansRow extends Component {
 
     onClickCopyButton = (barcode) => {
         return (e) => {
+
             const barcodeText = barcode.barcode;
-            navigator.clipboard.writeText(barcodeText);
-            console.log(`Copied barcode to clipboard: "${barcodeText}"`);
+
+            navigator.clipboard.writeText(barcodeText)
+                .then(() => {
+                    console.log(
+                        `UserScansRow: Copied barcode to clipboard: ` +
+                        `"${barcodeText}"`
+                    );
+                })
+                .catch((error) => {
+                    console.error(
+                        `UserScansRow: Error copying barcode to clipboard: ` +
+                        `"${barcodeText}": ${error}`
+                    );
+                });
         };
     };
 

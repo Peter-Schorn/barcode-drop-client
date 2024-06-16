@@ -10,7 +10,7 @@ import Toast from 'react-bootstrap/Toast';
 import UserScansRow from "./UserScanRow";
 import MainNavbar from "./MainNavbar";
 // import UserScansTable from "./UserScansTable";
-import { setIntervalImmediately } from "../Utilities";
+import { setIntervalImmediately } from "../MiscellaneousUtilities";
 import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import { WebSocket } from "partysocket";
@@ -150,10 +150,9 @@ class UserScansRootCore extends Component {
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
             autoCopiedBarcode: null,
-            showToast: false
+            // showToast: false
         };
 
-        this.barcodeIDsWhenUnfocused = [];
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
@@ -208,9 +207,10 @@ class UserScansRootCore extends Component {
         clearTimeout(this.copyBarcodeAfterDelayTimeout);
         
         document.removeEventListener("hashchange", this.handleHashChange);
-        document.removeEventListener("visibilitychange", this.handleVisibilityChange);
         document.removeEventListener("focusin", this.handleFocusIn);
         document.removeEventListener("focusout", this.handleFocusOut);
+        document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+        document.removeEventListener("keydown", this.handleKeyDown);
     }
 
     componentDidMount() {
@@ -219,15 +219,14 @@ class UserScansRootCore extends Component {
 
         this.getUserScans({ user: this.user });
 
-        // MARK: Handle change to URL fragment
-        window.addEventListener("hashchange", this.handleHashChange);
+        // MARK: Configure event listeners
 
-        // MARK: Configure visibility change listener
-        this.configureVisibilityChangeListener();
-
-        // MARK: Configure focus change listeners
-        this.configureFocusChangeListeners();
-
+        document.addEventListener("hashchange", this.handleHashChange);
+        document.addEventListener("focusin", this.handleFocusIn);
+        document.addEventListener("focusout", this.handleFocusOut);
+        document.addEventListener("visibilitychange", this.handleVisibilityChange);
+        document.addEventListener("keydown", this.handleKeyDown);
+        
         // MARK: Configure WebSocket
         this.configureSocket();
 
@@ -294,143 +293,82 @@ class UserScansRootCore extends Component {
         });
     };
 
-    configureFocusChangeListeners = () => {
-        
-        document.addEventListener("focusout", () => {
+    handleKeyDown = (e) => {
+        console.log(
+            `UserScansRootCore.handleKeyDown(): key: ${e.key}; code: ${e.code}; ` +
+            `ctrlKey: ${e.ctrlKey}; metaKey: ${e.metaKey}; ` +
+            `altKey: ${e.altKey}; shiftKey: ${e.shiftKey}`
+        );
 
+        if (e.isPlatformModifierKey() && e.key === "k") {
             console.log(
-                `focusout: document does NOT have focus; ` +
-                `visibility: ${document.visibilityState}`
+                `UserScansRootCore.handleKeyDown(): ` +
+                `Platform modifier key + "k" pressed: copying barcode`
             );
-            // this.barcodeIDsWhenUnfocused = this.state.barcodes.map((barcode) => barcode.id);
-            // console.log(
-            //     `focusout: barcodes when NOT focused: ` +
-            //     `${JSON.stringify(this.barcodeIDsWhenUnfocused)}`
-            // );
-
-        });
-
-        document.addEventListener("focusin", () => {
-
-            console.log(
-                `focusin: document has focus; ` +
-                `visibility: ${document.visibilityState}`
-            );
-
-            // const barcodesSinceRefocused = this.state.barcodes.filter((barcode) => {
-            //     return !this.barcodeIDsWhenUnfocused.includes(barcode.id)
-            // });
-
-            // if (barcodesSinceRefocused.length > 0) {
-            //     console.log(
-            //         `focusin: barcodesSinceRefocused: ` +
-            //         `${JSON.stringify(barcodesSinceRefocused)}`
-            //     );
-            //     let lastBarcodeWhenHiddenID = this.barcodeIDsWhenUnfocused[0];
-            //     let previousBarcode = this.state.barcodes.find((barcode) => {
-            //         return barcode?.id === lastBarcodeWhenHiddenID
-            //     });
-            //     let currentBarcode = barcodesSinceRefocused[0];
-
-            //     if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
-            //         this.barcodesSinceRefocused = [];
-            //         // MARK: auto-copy the most recent barcode
-            //         // this.copyBarcodeAfterDelayTimeout = setTimeout(() => {
-            //             this.autoCopyIfEnabled();
-            //         // }, 500);
-            //     }
-            //     else {
-            //         console.log(
-            //             `focusin: latest barcode did not change`
-            //         )
-            //     }
-
-            // }
-            // else {
-            //     console.log(
-            //         `focusin: no new barcodes since refocused`
-            //     );
-            // }
-
-        });
-
-    }
-
-    configureVisibilityChangeListener = () => {
-
-        document.addEventListener("visibilitychange", () => {
-            console.log(
-                `visibilitychange: document.hidden: ${document.hidden}; ` +
-                `focused: ${document.hasFocus()}`
-            );
-            if (document.hidden) {
-                // this.barcodeIDsWhenUnfocused = this.state.barcodes.map((barcode) => barcode.id);
-                // console.log(
-                //     `visibilitychange: barcodes when hidden: ` +
-                //     `${JSON.stringify(this.barcodeIDsWhenUnfocused)}`
-                // );
+            const latestBarcode = this.state.barcodes[0]?.barcode;
+            if (latestBarcode != null) {
+                this.copyBarcodeToClipboard(latestBarcode, {
+                    showNotification: true
+                });
             }
             else {
                 console.log(
-                    "visibilitychange: will reconnect to websocket if needed"
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `latest barcode is null or undefined`
                 );
-                if (this.socket.current.readyState === WebSocket.CLOSED) {
-                    console.log(
-                        `visibilitychange: re-connecting to WebSocket ` +
-                        `(readyState: ${this.socket.current.readyState})`
-                    );
-                    this.socket.current.reconnect();
-                }
-                else {
-                    console.log(
-                        `visibilitychange: WebSocket is already ` +
-                        `connected/connecting ` +
-                        `(readyState: ${this.socket.current.readyState})`
-                    );
-                }
-
-                // // Check for barcodes scanned since visibility changed
-                // // back to visible
-                //
-                // const barcodesSinceRefocused = this.state.barcodes.filter((barcode) => {
-                //     return !this.barcodeIDsWhenUnfocused.includes(barcode.id)
-                // });
-                //
-                // if (barcodesSinceRefocused.length > 0) {
-                //     console.log(
-                //         `visibilitychange: barcodesSinceRefocused: ` +
-                //         `${JSON.stringify(barcodesSinceRefocused)}`
-                //     );
-                //     let lastBarcodeWhenHiddenID = this.barcodeIDsWhenUnfocused[0];
-                //     let previousBarcode = this.state.barcodes.find((barcode) => {
-                //         return barcode?.id === lastBarcodeWhenHiddenID
-                //     });
-                //     let currentBarcode = barcodesSinceRefocused[0];
-                //
-                //     if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
-                //         this.barcodesSinceRefocused = [];
-                //         // MARK: auto-copy the most recent barcode
-                //         this.copyBarcodeAfterDelayTimeout = setTimeout(() => {
-                //             this.autoCopyIfEnabled();
-                //         }, 500);
-                //     }
-                //     else {
-                //         console.log(
-                //             `visibilitychange: latest barcode did not change`
-                //         )
-                //     }
-                //
-                // }
-                // else {
-                //     console.log(
-                //         `visibilitychange: no new barcodes since unhidden`
-                //     );
-                // }
-
             }
-        });
+        }
+
 
     };
+
+    handleFocusOut = (e) => {
+        console.log(
+            `focusout: document does NOT have focus; ` +
+            `visibility: ${document.visibilityState}`
+        );
+    };
+
+    handleFocusIn = (e) => {
+        console.log(
+            `focusin: document has focus; ` +
+            `visibility: ${document.visibilityState}`
+        );
+    };
+
+    handleVisibilityChange = (e) => {
+        
+        console.log(
+            `visibilitychange: document.hidden: ${document.hidden}; ` +
+            `focused: ${document.hasFocus()}`
+        );
+        
+        console.log(
+            `visibilitychange: document.hidden: ${document.hidden}; ` +
+            `focused: ${document.hasFocus()}`
+        );
+
+        if (!document.hidden) {
+            console.log(
+                "visibilitychange: will reconnect to websocket if needed"
+            );
+            if (this.socket?.current?.readyState === WebSocket.CLOSED) {
+                console.log(
+                    `visibilitychange: re-connecting to WebSocket ` +
+                    `(readyState: ${this.socket.current.readyState})`
+                );
+                this.socket.current.reconnect();
+            }
+            else {
+                console.log(
+                    `visibilitychange: WebSocket is already ` +
+                    `connected/connecting ` +
+                    `(readyState: ${this.socket?.current?.readyState})`
+                );
+            }
+        }        
+
+    }
 
     configureSocket = () => {
 
@@ -686,6 +624,16 @@ class UserScansRootCore extends Component {
         }, 2_000);
     };
 
+    /**
+     * Determines if the current barcode is different from the previous barcode
+     * AND if the current barcode is *NEWER* than the previous barcode.
+     * 
+     * @param {*} previousBarcode the previous barcode
+     * @param {*} currentBarcode the current barcode
+     * @returns {boolean} `true` if the current barcode is different from the
+     * previous barcode AND if the current barcode is *NEWER* than the previous
+     * barcode; otherwise, `false`
+     */
     latestBarcodeChanged = (previousBarcode, currentBarcode) => {
 
         if (!currentBarcode?.id || currentBarcode?.id === previousBarcode?.id) {
@@ -761,7 +709,9 @@ class UserScansRootCore extends Component {
         }
         this.lastAutoCopiedBarcode = mostRecentBarcode;
 
-        console.log(`Auto-copying most recent barcode: "${barcodeText}"`);
+        console.log(
+            `Auto-copying most recent barcode: "${mostRecentBarcode}"`
+        );
 
         navigator.clipboard.writeText(barcodeText)
             .then(() => {
@@ -771,22 +721,10 @@ class UserScansRootCore extends Component {
                 );
 
                 this.setState({
-                    autoCopiedBarcode: mostRecentBarcode,
-                    showToast: true
+                    autoCopiedBarcode: mostRecentBarcode
                 });
 
-                let barcodeTextMessage = mostRecentBarcode.barcode;
-                if (barcodeTextMessage.length >= 27 /* 27 chars + 3 periods = 30 chars */) {
-                    barcodeTextMessage = barcodeText.slice(0, 27) + "...";
-                }
-
-                toast.success(
-                    `Copied "${barcodeTextMessage}" to Clipboard`,
-                    {
-                        duration: 
-                        5_000
-                    }
-                );
+                this.showBarcodeCopiedToast(barcodeText);
                 
                 clearTimeout(this.removeAutoCopiedBarcodeTimer);
                 this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
@@ -804,6 +742,56 @@ class UserScansRootCore extends Component {
             });
 
     };
+
+    showBarcodeCopiedToast = (barcode) => {
+        console.log(`showBarcodeCopiedToast(): barcode: ${barcode}`);
+
+        let barcodeTextMessage = barcode;
+        if (barcodeTextMessage.length >= 27 /* 27 chars + 3 periods = 30 chars */) {
+            barcodeTextMessage = barcode.slice(0, 27) + "...";
+        }
+
+        toast.success(
+            `Copied "${barcodeTextMessage}" to Clipboard`,
+            {
+                duration: 5_000
+            }
+        );
+
+    }
+
+    copyBarcodeToClipboard = (barcode, { showNotification }) => {
+        
+        if (barcode == null) {
+            console.log(
+                `copyBarcodeToClipboard: barcode is null or undefined`
+            );
+            return;
+        }
+
+        console.log(
+            `copyBarcodeToClipboard: Copying barcode to clipboard: "${barcode}"`
+        );
+        
+        navigator.clipboard.writeText(barcode)
+            .then(() => {
+                console.log(
+                    `copyBarcodeToClipboard: Copied barcode to clipboard: ` +
+                    `"${barcode}"`
+                );
+                if (showNotification) {
+                    this.showBarcodeCopiedToast(barcode);
+                }
+            })
+            .catch((error) => {
+                console.error(
+                    `copyBarcodeToClipboard: Could not copy barcode to ` +
+                    `clipboard: "${barcode}": ${error}`
+                );
+            });
+
+    };
+
 
     /** Get the user's scans */
     getUserScans = ({ user }) => {
@@ -910,21 +898,8 @@ class UserScansRootCore extends Component {
     };
 
     renderToast() {
-
-        const latestBarcode = this.state.barcodes[0];
-        let barcodeText = latestBarcode?.barcode ?? "";
-        if (barcodeText.length >= 27 /* 27 chars + 3 periods = 30 chars */) {
-            barcodeText = barcodeText.slice(0, 27) + "...";
-        }
-
-        // this.setState({
-        //     // showToast: this.state.autoCopiedBarcode !== null
-        //     showToast: true
-        // });
-
         return (
             <div style={{ /* height: "50px" */}}>
-                
                 <Toaster 
                     gutter={10}
                     toastOptions={{
@@ -933,23 +908,6 @@ class UserScansRootCore extends Component {
                         }
                     }}
                 />
-                
-                {/* <Toast
-                    show={this.state.showToast}
-                    onClose={() => this.setState({ showToast: false })}
-                    autohide
-                    delay={5_000}
-                    style={{
-                        width: "100%",
-                        backgroundColor: "lightblue",
-                        backdropFilter: "blur(10px)"
-                    }}
-                >
-                    <Toast.Body>
-                        Copied "{barcodeText}" to Clipboard
-                    </Toast.Body>
-                </Toast> */}
-
             </div>
         );
     }
@@ -957,7 +915,9 @@ class UserScansRootCore extends Component {
     render() {
         return (
             <div className="vw-100 vh-100">
+
                 <div dangerouslySetInnerHTML={{ __html: `<!-- fetch("https://api.barcodedrop.com/scan/${this.user}?barcode=barcode", { method: "POST" }) -->` }}/>
+                
                 <MainNavbar />
                 <Container fluid="md" style={{
                     maxWidth: "1000px"

@@ -84,3 +84,14 @@ export function setIntervalImmediately(func, interval) {
     func();
     return setInterval(func, interval);
 }
+
+export function isApplePlatform() {
+    return /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+}
+
+KeyboardEvent.prototype.isPlatformModifierKey = function() {
+    if (isApplePlatform()) {
+        return this.metaKey;
+    }
+    return this.ctrlKey;
+}
