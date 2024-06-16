@@ -64,7 +64,7 @@ export default class SetupView extends Component {
                         section below. Enter the following for the body:
                     </p>
                     <span style={{padding: "0px 0px", fontFamily: "'Courier New', monospace"}}>
-                        {"code={barcode}"}
+                        {"barcode={code}"}
                     </span>
 
                     <hr />
