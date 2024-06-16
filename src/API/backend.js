@@ -19,6 +19,23 @@ export default class Backend {
     }
 
     /**
+     * Scan a barcode for a user.
+     * 
+     * @param {string} user the user to scan the barcode for
+     * @param {string} barcode the barcode to scan
+     * @returns the response from the server
+     */
+    async scanBarcode({user, barcode}) {
+        return await this._apiRequest({
+            method: "POST",
+            path: `/scan/${user}`,
+            body: {
+                barcode: barcode
+            }
+        });
+    }
+
+    /**
      * Delete scans by ID.
      * 
      * @param {Array<String>} scanIds an array of scan IDs to delete

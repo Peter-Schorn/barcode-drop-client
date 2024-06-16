@@ -243,6 +243,28 @@ class UserScansRootCore extends Component {
                     `componentDidMount(): Clipboard permissions denied: ${error}`
                 );
             });
+
+        // can be called from the developer console
+        document.scan = (barcode) => {
+            console.log(`document.scan(): barcode: "${barcode}"`);
+            this.context.api.scanBarcode({
+                user: this.user,
+                barcode: barcode
+            })
+            .then((result) => {
+                console.log(
+                    `document.scan(): scanBarcode result ` +
+                    `(user: ${this.user}): ${result}`
+                );
+            })
+            .catch((error) => {
+                console.error(
+                    `document.scan(): could not scan barcode "${barcode}" ` +
+                    `for user ${this.user}: ${error}`
+                );
+            });
+        };
+
     }
 
     componentDidUpdate(prevProps, prevState) {
