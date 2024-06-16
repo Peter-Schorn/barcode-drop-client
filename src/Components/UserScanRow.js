@@ -1,10 +1,13 @@
-import React from 'react';
+import React from "react";
 import { Component } from "react";
 
 import { AppContext } from "../Model/AppContext";
 
-import { Button } from 'react-bootstrap';
+import { Button, Dropdown } from "react-bootstrap";
 
+import Modal from "react-modal";
+
+import bwipjs from "bwip-js";
 
 export default class UserScansRow extends Component {
 
@@ -15,8 +18,22 @@ export default class UserScansRow extends Component {
             this.props.barcode.date
         );
 
+        this.customStyles = {
+            content: {
+                top: "50%",
+                left: "50%",
+                right: "auto",
+                bottom: "auto",
+                marginRight: "-50%",
+                transform: "translate(-50%, -50%)",
+            },
+        };
+
+        this.canvasRef = React.createRef();
+
         this.state = {
-            dateDifference: dateDifference
+            dateDifference: dateDifference,
+            generateBarcodeModalIsOpen: false
         };
 
     }
@@ -28,6 +45,7 @@ export default class UserScansRow extends Component {
             () => this.tick(),
             5_000
         );
+        // this.drawBarcodeToCanvas();
     }
 
     componentWillUnmount() {
@@ -44,6 +62,80 @@ export default class UserScansRow extends Component {
         );
         this.setState({
             dateDifference: dateDifference
+        });
+    };
+
+    drawBarcodeToCanvas = () => {
+
+        // const canvas = document.getElementById("barcode-image-canvas");
+        const canvas = this.canvasRef.current;
+
+        if (!canvas) {
+            console.error(
+                "Barcode canvas element not found"
+            );
+            return;
+        }
+
+        const barcodeText = this.props.barcode.barcode;
+
+        // Cannot differentiate between UPC-E and EAN-8, so don't 
+        // automatically use either
+
+        let symbology;
+        let is2DSymbology = false;
+
+        if (/^[0-9]{12}$/.test(barcodeText)) {
+            symbology = "upca";
+        }
+        else if (/^[0-9]{13}$/.test(barcodeText)) {
+            symbology = "ean13";
+        }
+        else if (barcodeText.length <= 20) {
+            symbology = "code128";
+        }
+        else {
+            symbology = "datamatrix";
+            is2DSymbology = true;
+        }
+
+        let options = {
+            bcid: symbology,
+            text: barcodeText,
+            scale: 3,
+            includetext: true,
+            textxalign: "center",
+            textsize: 13,
+            textyoffset: 10,
+            paddingwidth: 10,
+            paddingheight: 10,
+        };
+
+
+
+        if (is2DSymbology) {
+            const size = 30;
+            options.width = size;
+            options.height = size;
+        }
+        else {
+            options.width = 60;
+            options.height = 20;
+        }
+
+        bwipjs.toCanvas(canvas, options, (error, canvas) => {
+
+            if (error) {
+                console.error(
+                    `Error drawing barcode "${barcodeText}" to canvas: ${error}`
+                );
+            }
+            else {
+                console.log(
+                    `Barcode drawn to canvas: "${barcodeText}"`
+                );
+            }
+
         });
     };
 
@@ -136,7 +228,7 @@ export default class UserScansRow extends Component {
             const barcodeID = barcode.id;
 
             this.props.removeBarcodeFromState(barcodeID);
-            
+
             this.context.api.deleteScans([barcodeID])
                 .then((result) => {
                     console.log(
@@ -162,17 +254,17 @@ export default class UserScansRow extends Component {
         if (queryParams.get("debug") === "true") {
             return (
                 <span
-                    className="text-secondary" 
-                    style={{fontSize: "12px"}}
+                    className="text-secondary"
+                    style={{ fontSize: "12px" }}
                 >
-                    {" "}({this.props.barcode.id})
+                    {` (${this.props.barcode.id})`}
                 </span>
             );
         }
         else {
             return null;
         }
-        
+
     }
 
     copyButtonStyle() {
@@ -186,6 +278,56 @@ export default class UserScansRow extends Component {
         };
     }
 
+    afterOpenGenerateBarcodeModal = () => {
+        console.log(
+            "Generate Barcode Modal is now open"
+        );
+        this.drawBarcodeToCanvas();
+    };
+
+    closeGenerateBarcodeModal = () => {
+        this.setState({
+            generateBarcodeModalIsOpen: false
+        });
+        console.log(
+            "Generate Barcode Modal is now closed"
+        );
+    };
+
+    didClickGenerateBarcode = (e) => {
+        console.log(
+            "Generate Barcode button was clicked:", e
+        );
+        this.setState({
+            generateBarcodeModalIsOpen: true
+        });
+    };
+
+    // MARK: - Components -
+
+    renderBarcodeImageModal() {
+        return (
+            <Modal
+                isOpen={this.state.generateBarcodeModalIsOpen}
+                onAfterOpen={this.afterOpenGenerateBarcodeModal}
+                onRequestClose={this.closeGenerateBarcodeModal}
+                style={this.customStyles}
+                contentLabel="Barcode"
+            >
+                <div
+                    className="barcode-image-modal text-center"
+                >
+                    {/* <h3>{barcodeText}</h3> */}
+                    <canvas
+                        class="barcode-image-canvas"
+                        ref={this.canvasRef}
+                    >
+                    </canvas>
+                </div>
+            </Modal>
+        );
+    }
+
     render() {
         return (
             <tr
@@ -193,6 +335,7 @@ export default class UserScansRow extends Component {
                 key={this.props.barcode.id}
                 className={this.rowStyleClassName()}
             >
+                {/* Copy Button */}
                 <td style={{
                     textAlign: "center",
                 }}>
@@ -206,14 +349,34 @@ export default class UserScansRow extends Component {
                         Copy
                     </Button>
                 </td>
+                {/* Context Menu */}
+                <td
+                    style={{
+                        textAlign: "center",
+                    }}
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="Show context menu"
+                >
+                    <Dropdown>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            <i className="fa fa-ellipsis-v px-2"></i>
+                        </Dropdown.Toggle>
+
+                        <Dropdown.Menu>
+                            <Dropdown.Item onClick={this.didClickGenerateBarcode} >Generate Barcode</Dropdown.Item>
+                            {/* <Dropdown.Item >Something else</Dropdown.Item> */}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                    {this.renderBarcodeImageModal()}
+                </td>
                 {/* Barcode Cell */}
                 <td>
                     <span className="barcode-text">
-                    {this.props.barcode.barcode}
+                        {this.props.barcode.barcode}
                     </span>
                     {/* BARCODE ID */}
                     {this.barcodeIDdebugText()}
-
                 </td>
 
                 <td

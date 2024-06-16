@@ -14,6 +14,10 @@ import { AppContext } from './Model/AppContext';
 
 import Backend from './API/backend';
 
+import Modal from "react-modal";
+
+Modal.setAppElement('#root');
+
 export default class App extends Component {
 
     static contextType = AppContext;

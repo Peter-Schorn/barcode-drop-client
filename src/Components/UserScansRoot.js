@@ -773,10 +773,7 @@ class UserScansRootCore extends Component {
     showBarcodeCopiedToast = (barcode) => {
         console.log(`showBarcodeCopiedToast(): barcode: ${barcode}`);
 
-        let barcodeTextMessage = barcode;
-        if (barcodeTextMessage.length >= 27 /* 27 chars + 3 periods = 30 chars */) {
-            barcodeTextMessage = barcode.slice(0, 27) + "...";
-        }
+        let barcodeTextMessage = barcode.truncated(30);
 
         toast.success(
             `Copied "${barcodeTextMessage}" to Clipboard`,
@@ -1002,7 +999,8 @@ class UserScansRootCore extends Component {
                     >
                         <thead>
                             <tr>
-                                <th style={{ width: "60px" }}>{/* copy button */}</th>
+                                <th style={{ width: "90px" }}>{/* copy button */}</th>
+                                <th style={{ width: "100px" }}>{/* context menu */}</th>
                                 <th>Barcode</th>
                                 <th>Time</th>
                                 <th style={{ width: "80px" }}>Delete</th>

@@ -101,3 +101,16 @@ KeyboardEvent.prototype.isPlatformModifierKey = function() {
     }
     return this.ctrlKey;
 }
+
+export function truncateString(str, maxLength) {
+    if (str.length <= maxLength) {
+        return str;
+    }
+    let length = Math.max(0, maxLength - 3);
+    return str.slice(0, length) + "...";
+}
+
+// eslint-disable-next-line no-extend-native
+String.prototype.truncated = function(maxLength) {
+    return truncateString(this, maxLength);
+}
