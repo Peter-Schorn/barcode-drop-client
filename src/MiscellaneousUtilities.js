@@ -85,6 +85,12 @@ export function setIntervalImmediately(func, interval) {
     return setInterval(func, interval);
 }
 
+/**
+ * Returns whether the platform is Apple. Apple platforms use the command key
+ * as the platform modifier key, while other platforms use the control key.
+ * 
+ * @returns {boolean} `true` if the platform is Apple, `false` otherwise.
+ */
 export function isApplePlatform() {
     return /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 }
