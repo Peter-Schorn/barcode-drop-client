@@ -10,7 +10,7 @@ import Toast from 'react-bootstrap/Toast';
 import UserScansRow from "./UserScanRow";
 import MainNavbar from "./MainNavbar";
 // import UserScansTable from "./UserScansTable";
-import { setIntervalImmediately } from "../MiscellaneousUtilities";
+import { isApplePlatform, setIntervalImmediately } from "../MiscellaneousUtilities";
 import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import { WebSocket } from "partysocket";
@@ -316,12 +316,15 @@ class UserScansRootCore extends Component {
     };
 
     handleKeyDown = (e) => {
+
         // console.log(
         //     `UserScansRootCore.handleKeyDown(): key: ${e.key}; code: ${e.code}; ` +
         //     `ctrlKey: ${e.ctrlKey}; metaKey: ${e.metaKey}; ` +
         //     `altKey: ${e.altKey}; shiftKey: ${e.shiftKey}`
         // );
 
+        // if the user is holding down a key, then events will repeatedly be
+        // generated; we only want to handle the first event
         if (e.repeat) {
             return;
         }
@@ -344,6 +347,14 @@ class UserScansRootCore extends Component {
                     `latest barcode is null or undefined`
                 );
             }
+        }
+        else if (e.isPlatformModifierKey() && e.key === "d") {
+            console.log(
+                `UserScansRootCore.handleKeyDown(): ` +
+                `Platform modifier key + "d" pressed: DELETING all barcodes`
+            );
+            this.deleteAllUserBarcodes(e);
+            e.preventDefault();
         }
 
 
@@ -502,7 +513,7 @@ class UserScansRootCore extends Component {
 
         console.log(
             `[${new Date().toISOString()}] ` +
-            `serScansRootCore.checkWebSocketConnection():`
+            `UserScansRootCore.checkWebSocketConnection():`
         );
 
         const now = new Date();
@@ -799,13 +810,22 @@ class UserScansRootCore extends Component {
         
         navigator.clipboard.writeText(barcode)
             .then(() => {
+
                 console.log(
                     `copyBarcodeToClipboard: Copied barcode to clipboard: ` +
                     `"${barcode}"`
                 );
+                
+                // set the last auto copied barcode to null whenever another
+                // barcode is copied to the clipboard manually
+                this.setState({
+                    autoCopiedBarcode: null
+                });
+
                 if (showNotification) {
                     this.showBarcodeCopiedToast(barcode);
                 }
+
             })
             .catch((error) => {
                 console.error(
@@ -848,10 +868,14 @@ class UserScansRootCore extends Component {
 
     };
 
-    clearAllUserBarcodes = (e) => {
-        console.log("Clearing all user barcodes");
+    deleteAllUserBarcodes = (e) => {
+        
+        console.log(
+            `UserScansRootCore.deleteAllUserBarcodes(): ` +
+            `Deleting all user barcodes`
+        );
 
-        // Clear the barcodes
+        // delete the barcodes
         this.setState({
             barcodes: []
         });
@@ -861,13 +885,13 @@ class UserScansRootCore extends Component {
         })
         .then((result) => {
             console.log(
-                `UserScansRootCore.clearAllUserBarcodes(): ` +
+                `UserScansRootCore.deleteAllUserBarcodes(): ` +
                 `result: ${result}`
             );
         })
         .catch((error) => {
             console.error(
-                `UserScansRootCore.clearAllUserBarcodes(): ` +
+                `UserScansRootCore.deleteAllUserBarcodes(): ` +
                 `could not delete all user barcodes: ${error}`
             );
         });
@@ -921,6 +945,10 @@ class UserScansRootCore extends Component {
 
     };
 
+    deleteAllUserBarcodesKeyboardShortcutString = () => {
+        return isApplePlatform() ? "Cmd + D" : "Ctrl + D";
+    };
+
     renderToast() {
         return (
             <div style={{ /* height: "50px" */}}>
@@ -958,11 +986,13 @@ class UserScansRootCore extends Component {
                     {this.renderToast()}
 
                     {/* Delete All */}
-
                     <Button
                         variant="danger"
                         style={{ margin: "15px 0px" }}
-                        onClick={this.clearAllUserBarcodes}
+                        onClick={this.deleteAllUserBarcodes}
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title={this.deleteAllUserBarcodesKeyboardShortcutString()}
                     >
                         Delete All Barcodes
                     </Button>

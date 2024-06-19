@@ -49,7 +49,9 @@ export default class SetupView extends Component {
 
                     {/* QR Bot */}
                     <p>
-                        {this.newTabLink("https://qrbot.net", <strong>QR Bot</strong>)}{" "}
+                        {this.newTabLink("https://qrbot.net", 
+                            <strong>QR Bot</strong>
+                        )}{" "}
                         <span className="text-secondary">(iOS and Android)</span>
                     </p>
                     <img 
@@ -67,10 +69,10 @@ export default class SetupView extends Component {
                         {"barcode={code}"}
                     </span>
 
-                    <hr />
+                    {/* <hr /> */}
 
                     {/* QR & Barcode Scanner */}
-                    <p className="">
+                    <p className="pt-4">
                         {this.newTabLink(
                             "https://play.google.com/store/apps/details?id=com.scanner.kataykin.icamesscaner.free", 
                             <strong>QR & Barcode Scanner</strong>
@@ -79,7 +81,7 @@ export default class SetupView extends Component {
                     </p>
                     <img 
                         src="QRBarcodeScanner.svg" 
-                        alt="QR Bot App QR Code"
+                        alt="QR & Barcode Scanner App QR Code"
                         className="mb-3"
                         style={{maxWidth: "175px", maxHeight: "175px", padding: "10px"}}
                     />
