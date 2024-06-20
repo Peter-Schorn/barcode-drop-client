@@ -17,6 +17,8 @@ import { WebSocket } from "partysocket";
 
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
 
+import UserScansTable from "./UserScansTable";
+
 export default function UserScansRoot(props) {
 
     // https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
@@ -971,6 +973,7 @@ class UserScansRootCore extends Component {
                 <div dangerouslySetInnerHTML={{ __html: `<!-- fetch("https://api.barcodedrop.com/scan/${this.user}?barcode=barcode", { method: "POST" }) -->` }}/>
                 
                 <MainNavbar />
+
                 <Container fluid="md" style={{
                     maxWidth: "1000px"
                     // maxWidth: "300px"
@@ -1022,44 +1025,15 @@ class UserScansRootCore extends Component {
 
                     {/* Table of Barcodes */}
 
-                    <Table
-                        className="barcode-table border-dark"
-                        striped bordered hover
-                        style={{ maxWidth: "100%" }}
-                    >
-                        <thead>
-                            <tr>
-                                <th style={{ width: "90px" }}>{/* copy button */}</th>
-                                <th style={{ width: "100px" }}>{/* context menu */}</th>
-                                <th>Barcode</th>
-                                <th>Time</th>
-                                <th style={{ width: "80px" }}>Delete</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.state.barcodes.map((barcode, index) =>
-                                <UserScansRow
-                                    key={barcode.id}
-                                    index={index}
-                                    barcode={barcode}
-                                    user={this.user}
-                                    isAutoCopied={this.state.autoCopiedBarcode?.id === barcode.id}
-                                    router={this.props.router}
-                                    removeBarcodeFromState={
-                                        this.removeBarcodeFromState
-                                    }
-                                />
-                            )}
-                        </tbody>
-                    </Table>
-
-                    {/* <UserScansTable
+                    <UserScansTable
                         barcodes={this.state.barcodes}
-                        router
+                        user={this.user}
+                        autoCopiedBarcode={this.state.autoCopiedBarcode}
+                        router={this.props.router}
                         removeBarcodeFromState={
                             this.removeBarcodeFromState
                         }
-                    /> */}
+                    />
 
                 </Container>
             </div>
@@ -1067,3 +1041,35 @@ class UserScansRootCore extends Component {
     };
 
 }
+
+
+// <Table
+//     className="barcode-table border-dark"
+//     striped bordered hover
+//     style={{ maxWidth: "100%" }}
+// >
+//     <thead>
+//         <tr>
+//             <th style={{ width: "90px" }}>{/* copy button */}</th>
+//             <th style={{ width: "100px" }}>{/* context menu */}</th>
+//             <th>Barcode</th>
+//             <th>Time</th>
+//             <th style={{ width: "80px" }}>Delete</th>
+//         </tr>
+//     </thead>
+//     <tbody>
+//         {this.state.barcodes.map((barcode, index) =>
+//             <UserScansRow
+//                 key={barcode.id}
+//                 index={index}
+//                 barcode={barcode}
+//                 user={this.user}
+//                 isAutoCopied={this.state.autoCopiedBarcode?.id === barcode.id}
+//                 router={this.props.router}
+//                 removeBarcodeFromState={
+//                     this.removeBarcodeFromState
+//                 }
+//             />
+//         )}
+//     </tbody>
+// </Table>
