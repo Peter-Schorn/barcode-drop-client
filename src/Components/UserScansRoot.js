@@ -331,34 +331,36 @@ class UserScansRootCore extends Component {
             return;
         }
 
-        if (e.isPlatformModifierKey() && e.key === "k") {
-            console.log(
-                `UserScansRootCore.handleKeyDown(): ` +
-                `Platform modifier key + "k" pressed: copying barcode`
-            );
-            const latestBarcode = this.state.barcodes[0]?.barcode;
-            if (latestBarcode != null) {
-                this.copyBarcodeToClipboard(latestBarcode, {
-                    showNotification: true
-                });
-                e.preventDefault();
-            }
-            else {
+        if (e.isPlatformModifierKey()) {
+
+            if (e.key === "k" && !e.shiftKey && !e.altKey) {
                 console.log(
                     `UserScansRootCore.handleKeyDown(): ` +
-                    `latest barcode is null or undefined`
+                    `Platform modifier key + "k" pressed: copying barcode`
                 );
+                const latestBarcode = this.state.barcodes[0]?.barcode;
+                if (latestBarcode != null) {
+                    this.copyBarcodeToClipboard(latestBarcode, {
+                        showNotification: true
+                    });
+                    e.preventDefault();
+                }
+                else {
+                    console.log(
+                        `UserScansRootCore.handleKeyDown(): ` +
+                        `latest barcode is null or undefined`
+                    );
+                }
+            }
+            else if (e.key === "d" && !e.shiftKey && !e.altKey) {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + "d" pressed: DELETING all barcodes`
+                );
+                this.deleteAllUserBarcodes(e);
+                e.preventDefault();
             }
         }
-        else if (e.isPlatformModifierKey() && e.key === "d") {
-            console.log(
-                `UserScansRootCore.handleKeyDown(): ` +
-                `Platform modifier key + "d" pressed: DELETING all barcodes`
-            );
-            this.deleteAllUserBarcodes(e);
-            e.preventDefault();
-        }
-
 
     };
 
@@ -676,7 +678,7 @@ class UserScansRootCore extends Component {
      */
     latestBarcodeChanged = (previousBarcode, currentBarcode) => {
 
-        if (!currentBarcode?.id || currentBarcode?.id === previousBarcode?.id) {
+        if (!currentBarcode || currentBarcode?.id === previousBarcode?.id) {
             console.log(
                 `UserScansRootCore.latestBarcodeChanged(): ` +
                 `most recent barcode has *NOT* changed at all/is null: ` +

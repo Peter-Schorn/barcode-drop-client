@@ -368,6 +368,7 @@ export default class UserScansRow extends Component {
                             {/* <Dropdown.Item >Something else</Dropdown.Item> */}
                         </Dropdown.Menu>
                     </Dropdown>
+                    {/* Barcode Image Modal */}
                     {this.renderBarcodeImageModal()}
                 </td>
                 {/* Barcode Cell */}
