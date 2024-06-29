@@ -48,14 +48,14 @@ class UserScansTableCore extends Component {
          />
          */
 
-        if (this.user) {
+        if (this.props.user) {
             console.log(
-                `UserScansTableCore.constructor(): user: ${this.user}`
+                `UserScansTableCore.constructor(): user: ${this.props.user}`
             );
         }
         else {
             console.error(
-                `UserScansTableCore.constructor(): invalid user: ${this.user}`
+                `UserScansTableCore.constructor(): invalid user: ${this.props.user}`
             );
         }
     }
