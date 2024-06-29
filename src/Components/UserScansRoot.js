@@ -181,7 +181,7 @@ class UserScansRootCore extends Component {
         // MARK: - WebSockets -
 
         const socketURL = new URL(process.env.REACT_APP_BACKEND_URL);
-        if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+        if (process.env?.NODE_ENV === "development") {
             socketURL.protocol = "ws";
         }
         else {
@@ -266,6 +266,11 @@ class UserScansRootCore extends Component {
                 );
             });
         };
+
+        // can be called from the developer console
+        document.getUserScans = () => {
+            this.getUserScans({ user: this.user });
+        }
 
     }
 
@@ -413,6 +418,10 @@ class UserScansRootCore extends Component {
     }
 
     configureSocket = () => {
+
+        if (process.env.REACT_APP_DISABLE_WEBSOCKET === "true") {
+            return;
+        }
 
         /*
          https://www.npmjs.com/package/partysocket#available-options
@@ -791,7 +800,7 @@ class UserScansRootCore extends Component {
         let barcodeTextMessage = barcode.truncated(30);
 
         toast.success(
-            `Copied "${barcodeTextMessage}" to Clipboard`,
+            `Copied "${barcodeTextMessage}" to the Clipboard`,
             {
                 duration: 5_000
             }
