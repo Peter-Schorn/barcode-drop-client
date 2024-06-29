@@ -24,6 +24,11 @@ class HomeViewCore extends Component {
         super(props);
 
         this.navigate = props.navigate;
+
+        document.title = `BarcodeDrop`;
+
+        this.usernameField = React.createRef();
+
         this.state = {
             user: null
         }
@@ -31,7 +36,7 @@ class HomeViewCore extends Component {
     }
 
     componentDidMount() {
-        document.title = `BarcodeDrop`;
+        this.usernameField?.current?.focus();
     }
 
     onSubmitForm = (event) => {
@@ -60,7 +65,14 @@ class HomeViewCore extends Component {
                             <Form.Label>
                                 <h2 className="text-primary mb-3"> Enter Your Username</h2>
                             </Form.Label>
-                            <Form.Control className="" size="lg" type="text" placeholder="" onChange={this.handleUserInputChange}/>
+                            <Form.Control
+                                ref={this.usernameField}
+                                className="" 
+                                size="lg" 
+                                type="text" 
+                                placeholder="" 
+                                onChange={this.handleUserInputChange}
+                            />
                         </Form.Group>
                         <Button className="mt-4" variant="primary" type="submit">
                             Submit
