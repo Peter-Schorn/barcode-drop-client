@@ -38,9 +38,9 @@ export default class SetupView extends Component {
                     <h1 className="p-5">Setup</h1>
 
                     <p>
-                        To scan barcodes with your <strong>iPhone</strong>, 
+                        To scan barcodes with your <strong>iOS device</strong>, 
                         you can use the following  {this.newTabLink(this.icloudShortcutURL, 
-                            <span>iCloud Shortcut</span>
+                            <strong>Apple Shortcut</strong>
                         )}:
                     </p>
                     <img 
