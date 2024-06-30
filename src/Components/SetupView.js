@@ -6,6 +6,13 @@ import MainNavbar from "./MainNavbar";
 
 export default class SetupView extends Component {
 
+    constructor(props) {
+        super(props);
+        
+        this.icloudShortcutURL = "https://www.icloud.com/shortcuts/0f7f0a8a0bc3476f807324d922b44fe2";
+
+    }
+
     componentDidMount() {
         document.title = `Setup | BarcodeDrop`;
     }
@@ -32,7 +39,9 @@ export default class SetupView extends Component {
 
                     <p>
                         To scan barcodes with your <strong>iPhone</strong>, 
-                        you can use the following iCloud Shortcut:
+                        you can use the following  {this.newTabLink(this.icloudShortcutURL, 
+                            <span>iCloud Shortcut</span>
+                        )}:
                     </p>
                     <img 
                         src="postBarcodeIcloudShortcut.svg" 

@@ -358,8 +358,8 @@ export default class UserScansRow extends Component {
                     title="Show context menu"
                 >
                     <Dropdown>
-                        <Dropdown.Toggle variant="success">
-                            <i className="fa fa-ellipsis-v px-2"></i>
+                        <Dropdown.Toggle variant="success" className="text-center">
+                            <i className="fa fa-ellipsis-v px-2" />
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
