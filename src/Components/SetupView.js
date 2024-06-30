@@ -78,7 +78,7 @@ export default class SetupView extends Component {
                         {"barcode={code}"}
                     </span>
 
-                    {/* <hr /> */}
+                    {/* <hr className="padded-hr" /> */}
 
                     {/* QR & Barcode Scanner */}
                     <p className="pt-4">
@@ -143,7 +143,7 @@ export default class SetupView extends Component {
                         </span>
                     </p>
 
-                    <hr />
+                    <hr className="padded-hr" />
 
                     <p className="pt-1">
                         <strong>

@@ -155,7 +155,7 @@ class UserScansRootCore extends Component {
             barcodes: [],
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
-            autoCopiedBarcode: null,
+            autoCopiedBarcode: null
         };
 
         this.deleteIDs = new Set();
@@ -166,6 +166,7 @@ class UserScansRootCore extends Component {
         this.copyBarcodeAfterDelayTimeout = null;
         this.user = props.router.params.user;
         this.lastAutoCopiedBarcode = null;
+        this.copyLastBarcodeIsDisabled = true
 
         // MARK: Document Title
         document.title = `Scans for ${this.user} | BarcodeDrop`;
@@ -279,6 +280,8 @@ class UserScansRootCore extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         console.log("UserScansRootCore.componentDidUpdate():");
+
+        this.copyLastBarcodeIsDisabled = this._copyLastBarcodeIsDisabled();
 
         const previousBarcode = prevState.barcodes[0];
         const currentBarcode = this.state.barcodes[0];
@@ -984,6 +987,29 @@ class UserScansRootCore extends Component {
 
     };
 
+    copyLastBarcodeToClipboard = () => {
+        
+        const latestBarcode = this.state?.barcodes[0]?.barcode;
+        
+        if (latestBarcode != null) {
+            
+            console.log(
+                `UserScansRootCore.copyLastBarcodeToClipboard(): ` +
+                `Copying latest barcode to clipboard: "${latestBarcode}"`
+            );
+
+            this.copyBarcodeToClipboard(latestBarcode, {
+                showNotification: true
+            });
+        }
+        else {
+            console.log(
+                `UserScansRootCore.copyLastBarcodeToClipboard(): ` +
+                `latest barcode is null or undefined`
+            );
+        }
+    };
+
     deleteAllUserBarcodesKeyboardShortcutString = () => {
         return isApplePlatform() ? "⌘D" : "Ctrl + D";
     };
@@ -994,6 +1020,10 @@ class UserScansRootCore extends Component {
 
     exportAsCSVKeyboardShortcutString = () => {
         return isApplePlatform() ? "⌘⇧E" : "Ctrl+Shift+E";
+    };
+
+    copyLastBarcodeKeyboardShortcutString = () => {
+        return isApplePlatform() ? "⌘K" : "Ctrl+K";
     };
 
     makeCSVString = () => {
@@ -1046,6 +1076,10 @@ class UserScansRootCore extends Component {
         link.href = url;
 
         link.click();
+    };
+
+    _copyLastBarcodeIsDisabled = () => {
+        return this.state?.barcodes?.length === 0 || null || undefined;
     };
 
     dismissToast = (e) => {
@@ -1154,6 +1188,24 @@ class UserScansRootCore extends Component {
                                             </span>
                                         </div>
                                     </Dropdown.Item>
+                                    <Dropdown.Divider className="" />
+                                    <Dropdown.Item 
+                                        className={`${this._copyLastBarcodeIsDisabled() ? "disabled" : ""}`}
+                                        onClick={this.copyLastBarcodeToClipboard}
+                                    >
+                                        <div className="hstack gap-3">
+                                            <i className="fa-solid fa-copy"></i>
+                                            <span>Copy Latest Barcode</span>
+                                            <span className="ms-auto">
+                                                {/* Spacer */}
+                                            </span>
+                                            <span style={{
+                                                color: "gray",
+                                            }}>
+                                                {this.copyLastBarcodeKeyboardShortcutString()}
+                                            </span>
+                                        </div>
+                                    </Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </div>
@@ -1202,35 +1254,3 @@ class UserScansRootCore extends Component {
     };
 
 }
-
-
-// <Table
-//     className="barcode-table border-dark"
-//     striped bordered hover
-//     style={{ maxWidth: "100%" }}
-// >
-//     <thead>
-//         <tr>
-//             <th style={{ width: "90px" }}>{/* copy button */}</th>
-//             <th style={{ width: "100px" }}>{/* context menu */}</th>
-//             <th>Barcode</th>
-//             <th>Time</th>
-//             <th style={{ width: "80px" }}>Delete</th>
-//         </tr>
-//     </thead>
-//     <tbody>
-//         {this.state.barcodes.map((barcode, index) =>
-//             <UserScansRow
-//                 key={barcode.id}
-//                 index={index}
-//                 barcode={barcode}
-//                 user={this.user}
-//                 isAutoCopied={this.state.autoCopiedBarcode?.id === barcode.id}
-//                 router={this.props.router}
-//                 removeBarcodeFromState={
-//                     this.removeBarcodeFromState
-//                 }
-//             />
-//         )}
-//     </tbody>
-// </Table>

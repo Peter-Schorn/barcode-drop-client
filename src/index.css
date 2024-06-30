@@ -71,7 +71,7 @@ code {
     /* background-color: blue !important; */
 }
 
-hr {
+hr.padded-hr {
     width: 10% !important;
     margin: 40px auto !important;
 }
