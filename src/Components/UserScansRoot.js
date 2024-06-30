@@ -449,6 +449,7 @@ class UserScansRootCore extends Component {
         const wsOptions = {
             minReconnectionDelay: 500,  // half a second
             maxReconnectionDelay: 10_000,  // 10 seconds
+            connectionTimeout: 15_000,  //
             debug: true
         };
 
