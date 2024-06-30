@@ -37,15 +37,16 @@ class UserScansTableCore extends Component {
         super(props);
         
         /*
-         <UserScansTableCore
-             barcodes={this.state.barcodes}
-             user={this.user}
-             autoCopiedBarcode={this.state.autoCopiedBarcode}
-             router={this.props.router}
-             removeBarcodeFromState={
+         <UserScansTable
+            barcodes={this.state.barcodes}
+            user={this.user}
+            autoCopiedBarcode={this.state.autoCopiedBarcode}
+            router={this.props.router}
+            removeBarcodeFromState={
                  this.removeBarcodeFromState
              }
          />
+
          */
 
         if (this.props.user) {

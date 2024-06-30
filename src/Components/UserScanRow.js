@@ -111,8 +111,6 @@ export default class UserScansRow extends Component {
             paddingheight: 10,
         };
 
-
-
         if (is2DSymbology) {
             const size = 30;
             options.width = size;
@@ -347,6 +345,7 @@ export default class UserScansRow extends Component {
                         )}
                     >
                         Copy
+                        {/* <i class="fa-solid fa-copy"></i> */}
                     </Button>
                 </td>
                 {/* Context Menu */}
@@ -359,12 +358,14 @@ export default class UserScansRow extends Component {
                     title="Show context menu"
                 >
                     <Dropdown>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                        <Dropdown.Toggle variant="success">
                             <i className="fa fa-ellipsis-v px-2"></i>
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={this.didClickGenerateBarcode} >Generate Barcode</Dropdown.Item>
+                            <Dropdown.Item onClick={this.didClickGenerateBarcode} >
+                                Generate Barcode
+                            </Dropdown.Item>
                             {/* <Dropdown.Item >Something else</Dropdown.Item> */}
                         </Dropdown.Menu>
                     </Dropdown>

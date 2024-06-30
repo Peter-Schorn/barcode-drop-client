@@ -4,10 +4,12 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import { AppContext } from "../Model/AppContext";
 
-import { Button, Table, Container } from 'react-bootstrap';
-import Toast from 'react-bootstrap/Toast';
+import { Container, Button, Dropdown, Stack } from 'react-bootstrap';
+// import Toast from 'react-bootstrap/Toast';
 
-import UserScansRow from "./UserScanRow";
+// import csv from 'csv'
+import { stringify as csvStringify } from 'csv-stringify/browser/esm/sync';
+
 import MainNavbar from "./MainNavbar";
 // import UserScansTable from "./UserScansTable";
 import { isApplePlatform, setIntervalImmediately } from "../MiscellaneousUtilities";
@@ -15,9 +17,11 @@ import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import { WebSocket } from "partysocket";
 
-import toast, { Toaster, ToastBar } from 'react-hot-toast';
+import toast, { Toaster, /* ToastBar */ } from 'react-hot-toast';
 
 import UserScansTable from "./UserScansTable";
+
+import { DebugBreakpointView } from "./DebugBreakpointView";
 
 export default function UserScansRoot(props) {
 
@@ -152,7 +156,6 @@ class UserScansRootCore extends Component {
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
             autoCopiedBarcode: null,
-            // showToast: false
         };
 
         this.deleteIDs = new Set();
@@ -857,7 +860,7 @@ class UserScansRootCore extends Component {
 
         console.log(
             `UserScansRootCore.getUserScans(): Getting scans for ` +
-            `user: ${user} at date: ${date}`
+            `user "${user}" at date ${date}`
         );
 
         this.context.api.getUserScans(this.user).then((result) => {
@@ -875,7 +878,7 @@ class UserScansRootCore extends Component {
         })
         .catch((error) => {
             console.error(
-                `UserScansRootCore.componentDidMount(): error: ${error}`
+                `UserScansRootCore.getUserScans(): error: ${error}`
             );
         });
 
@@ -959,13 +962,53 @@ class UserScansRootCore extends Component {
     };
 
     deleteAllUserBarcodesKeyboardShortcutString = () => {
-        return isApplePlatform() ? "Cmd + D" : "Ctrl + D";
+        return isApplePlatform() ? "⌘D" : "Ctrl + D";
     };
+
+    exportAsCSVKeyboardShortcutString = () => {
+        // return isApplePlatform() ? "Cmd + E" : "Ctrl + E";
+        return isApplePlatform() ? "⌘E" : "Ctrl+E";
+    };
+
+    exportAsCSV = (e) => {
+        console.log(`exportAsCSV():`, e);
+
+        // csv.parse(this.state.barcodes)
+
+        const csvString = csvStringify(this.state.barcodes, {
+            header: true,
+            columns: [
+                { key: "barcode", header: "Barcode" },
+                { key: "date", header: "Date" },
+                { key: "id", header: "ID" }
+            ]
+        
+        })
+        
+        console.log(`exportAsCSV(): csvString:`, csvString);
+        
+        navigator.clipboard.writeText(csvString)
+            .then(() => {
+                console.log(`exportAsCSV(): copied CSV to clipboard`);
+                toast.success("Copied CSV to clipboard");
+            })
+            .catch((error) => {
+                console.error(
+                    `exportAsCSV(): could not copy CSV to clipboard: ${error}`
+                );
+                toast.error("Could not copy CSV to clipboard");
+            });
+
+    }
+
+    dismissToast = (e) => {
+        console.log(`dismissToast():`, e);
+    }
 
     renderToast() {
         return (
-            <div style={{ /* height: "50px" */}}>
-                <Toaster 
+            <div style={{ /* height: "50px" */}} onClick={this.dismissToast}>
+                <Toaster
                     gutter={10}
                     toastOptions={{
                         style: {
@@ -983,6 +1026,16 @@ class UserScansRootCore extends Component {
 
                 <div dangerouslySetInnerHTML={{ __html: `<!-- fetch("https://api.barcodedrop.com/scan/${this.user}?barcode=barcode", { method: "POST" }) -->` }}/>
                 
+                {/* if (process.env?.NODE_ENV === "development") {
+                    <DebugBreakpointView />
+                } */}
+
+                {process.env?.NODE_ENV === "development" ?
+                    <DebugBreakpointView /> :
+                    null
+                }
+
+
                 <MainNavbar />
 
                 <Container fluid="md" style={{
@@ -990,47 +1043,82 @@ class UserScansRootCore extends Component {
                     // maxWidth: "300px"
                     // maxWidth: "vw-100"
                 }}>
+                {/* <div className="container-md"> */}
 
-                    <h2 style={{ margin: "30px 10px 10px 0px" }}>
-                        <strong className="scans-for-user-text">
-                            Scanned Barcodes for <em style={{ color: "gray" }}>{this.user}</em>
-                        </strong>
-                    </h2>
+                    <div className="row">
+                        <h2 style={{ margin: "30px 0px 0px 0px" }}>
+                            <strong className="scans-for-user-text">
+                                Scanned Barcodes for <em style={{ color: "gray" }}>{this.user}</em>
+                            </strong>
+                        </h2>
+                    </div>
 
                     {this.renderToast()}
 
-                    {/* Delete All */}
-                    <Button
-                        variant="danger"
-                        style={{ margin: "15px 0px" }}
-                        onClick={this.deleteAllUserBarcodes}
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title={this.deleteAllUserBarcodesKeyboardShortcutString()}
-                    >
-                        Delete All Barcodes
-                    </Button>
+                    <Stack direction="horizontal" className="pt-4 pb-3" gap={2}>
+                        <div className="pe-1">
+                             {/* Delete All */}
+                            
+                            <Button
+                                variant="danger"
+                                style={{ margin: "0px 0px"}}
+                                onClick={this.deleteAllUserBarcodes}
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                title={this.deleteAllUserBarcodesKeyboardShortcutString()}
+                            >
+                                Delete All Barcodes
+                            </Button>
+                        </div>
+                        <div className="p-1">
+                            {/* Dropdown */}
 
-                    {/* Auto-Copy */}
+                            <Dropdown>
+                                <Dropdown.Toggle variant="success">
+                                    <i className="fa fa-ellipsis-v px-2"></i>
+                                </Dropdown.Toggle>
 
-                    <label
-                        style={{ padding: "5px 20px" }}
-                        className=""
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        title="Automatically copy the most recent barcode to the clipboard"
-                    >
-                        <input
-                            type="checkbox"
-                            name="enable-auto-copy"
-                            id="enable-auto-copy"
-                            checked={this.state.enableAutoCopy}
-                            onChange={this.handleAutoCopyChange}
-                        />
-                        <span style={{ marginLeft: "5px" }}>
-                            Auto-Copy
-                        </span>
-                    </label>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item onClick={this.exportAsCSV} >
+                                        <div className="hstack gap-3">
+                                            <i className="fa fa-file-csv"></i>
+                                            <span>Export as CSV</span>
+                                            <span className="ms-auto">
+                                                {/* Spacer */}
+                                            </span>
+                                            <span style={{
+                                                color: "gray",
+                                            }}>
+                                                {this.exportAsCSVKeyboardShortcutString()}
+                                            </span>
+                                        </div>
+                                    </Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown> 
+                        </div>
+                        <div className="p-1">
+                            {/* Auto-Copy */}
+
+                            <label
+                                style={{ padding: "5px 10px" }}
+                                className=""
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                title="Automatically copy the most recent barcode to the clipboard"
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="enable-auto-copy"
+                                    id="enable-auto-copy"
+                                    checked={this.state.enableAutoCopy}
+                                    onChange={this.handleAutoCopyChange}
+                                />
+                                <span style={{ marginLeft: "5px" }}>
+                                    Auto-Copy
+                                </span>
+                            </label>
+                        </div>
+                    </Stack>
 
                     {/* spacer */}
 
@@ -1047,6 +1135,7 @@ class UserScansRootCore extends Component {
                     />
 
                 </Container>
+                {/* </div> */}
             </div>
         );
     };
