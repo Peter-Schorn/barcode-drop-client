@@ -210,7 +210,7 @@ class UserScansRootCore extends Component {
         clearInterval(this.pingPongInterval);
         clearTimeout(this.removeAutoCopiedBarcodeTimer);
         clearTimeout(this.copyBarcodeAfterDelayTimeout);
-        
+
         document.removeEventListener("hashchange", this.handleHashChange);
         document.removeEventListener("focusin", this.handleFocusIn);
         document.removeEventListener("focusout", this.handleFocusOut);
@@ -231,7 +231,7 @@ class UserScansRootCore extends Component {
         document.addEventListener("focusout", this.handleFocusOut);
         document.addEventListener("visibilitychange", this.handleVisibilityChange);
         document.addEventListener("keydown", this.handleKeyDown);
-        
+
         // MARK: Configure WebSocket
         this.configureSocket();
 
@@ -256,24 +256,24 @@ class UserScansRootCore extends Component {
                 user: this.user,
                 barcode: barcode
             })
-            .then((result) => {
-                console.log(
-                    `document.scan(): scanBarcode result ` +
-                    `(user: ${this.user}): ${result}`
-                );
-            })
-            .catch((error) => {
-                console.error(
-                    `document.scan(): could not scan barcode "${barcode}" ` +
-                    `for user ${this.user}: ${error}`
-                );
-            });
+                .then((result) => {
+                    console.log(
+                        `document.scan(): scanBarcode result ` +
+                        `(user: ${this.user}): ${result}`
+                    );
+                })
+                .catch((error) => {
+                    console.error(
+                        `document.scan(): could not scan barcode "${barcode}" ` +
+                        `for user ${this.user}: ${error}`
+                    );
+                });
         };
 
         // can be called from the developer console
         document.getUserScans = () => {
             this.getUserScans({ user: this.user });
-        }
+        };
 
     }
 
@@ -282,7 +282,7 @@ class UserScansRootCore extends Component {
 
         const previousBarcode = prevState.barcodes[0];
         const currentBarcode = this.state.barcodes[0];
-        
+
         if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
             this.autoCopyIfEnabled();
         }
@@ -368,6 +368,28 @@ class UserScansRootCore extends Component {
                 this.deleteAllUserBarcodes(e);
                 e.preventDefault();
             }
+            else if (e.key === "e" && e.shiftKey && !e.altKey) {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + shift + "e" pressed: EXPORTING all barcodes as CSV`
+                );
+                this.exportAsCSV(e);
+                e.preventDefault();
+            }
+            else if (e.key === "e" && !e.shiftKey && !e.altKey) {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + "e" pressed: COPYING all barcodes as CSV`
+                );
+                this.copyAsCSV(e);
+                e.preventDefault();
+            }
+            else {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + "${e.key}" pressed`
+                );
+            }
         }
 
     };
@@ -387,12 +409,12 @@ class UserScansRootCore extends Component {
     };
 
     handleVisibilityChange = (e) => {
-        
+
         console.log(
             `visibilitychange: document.hidden: ${document.hidden}; ` +
             `focused: ${document.hasFocus()}`
         );
-        
+
         console.log(
             `visibilitychange: document.hidden: ${document.hidden}; ` +
             `focused: ${document.hasFocus()}`
@@ -416,9 +438,9 @@ class UserScansRootCore extends Component {
                     `(readyState: ${this.socket?.current?.readyState})`
                 );
             }
-        }        
+        }
 
-    }
+    };
 
     configureSocket = () => {
 
@@ -780,7 +802,7 @@ class UserScansRootCore extends Component {
                 });
 
                 this.showBarcodeCopiedToast(barcodeText);
-                
+
                 clearTimeout(this.removeAutoCopiedBarcodeTimer);
                 this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
                     this.setState({
@@ -810,10 +832,10 @@ class UserScansRootCore extends Component {
             }
         );
 
-    }
+    };
 
     copyBarcodeToClipboard = (barcode, { showNotification }) => {
-        
+
         if (barcode == null) {
             console.log(
                 `copyBarcodeToClipboard: barcode is null or undefined`
@@ -824,7 +846,7 @@ class UserScansRootCore extends Component {
         console.log(
             `copyBarcodeToClipboard: Copying barcode to clipboard: "${barcode}"`
         );
-        
+
         navigator.clipboard.writeText(barcode)
             .then(() => {
 
@@ -832,7 +854,7 @@ class UserScansRootCore extends Component {
                     `copyBarcodeToClipboard: Copied barcode to clipboard: ` +
                     `"${barcode}"`
                 );
-                
+
                 // set the last auto copied barcode to null whenever another
                 // barcode is copied to the clipboard manually
                 this.setState({
@@ -877,16 +899,16 @@ class UserScansRootCore extends Component {
             });
 
         })
-        .catch((error) => {
-            console.error(
-                `UserScansRootCore.getUserScans(): error: ${error}`
-            );
-        });
+            .catch((error) => {
+                console.error(
+                    `UserScansRootCore.getUserScans(): error: ${error}`
+                );
+            });
 
     };
 
     deleteAllUserBarcodes = (e) => {
-        
+
         console.log(
             `UserScansRootCore.deleteAllUserBarcodes(): ` +
             `Deleting all user barcodes`
@@ -900,18 +922,18 @@ class UserScansRootCore extends Component {
         this.context.api.deleteUserScans({
             user: this.user
         })
-        .then((result) => {
-            console.log(
-                `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                `result: ${result}`
-            );
-        })
-        .catch((error) => {
-            console.error(
-                `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                `could not delete all user barcodes: ${error}`
-            );
-        });
+            .then((result) => {
+                console.log(
+                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                    `result: ${result}`
+                );
+            })
+            .catch((error) => {
+                console.error(
+                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                    `could not delete all user barcodes: ${error}`
+                );
+            });
 
     };
 
@@ -966,16 +988,15 @@ class UserScansRootCore extends Component {
         return isApplePlatform() ? "⌘D" : "Ctrl + D";
     };
 
-    exportAsCSVKeyboardShortcutString = () => {
-        // return isApplePlatform() ? "Cmd + E" : "Ctrl + E";
+    copyAsCSVKeyboardShortcutString = () => {
         return isApplePlatform() ? "⌘E" : "Ctrl+E";
     };
 
-    exportAsCSV = (e) => {
-        console.log(`exportAsCSV():`, e);
+    exportAsCSVKeyboardShortcutString = () => {
+        return isApplePlatform() ? "⌘⇧E" : "Ctrl+Shift+E";
+    };
 
-        // csv.parse(this.state.barcodes)
-
+    makeCSVString = () => {
         const csvString = csvStringify(this.state.barcodes, {
             header: true,
             columns: [
@@ -983,11 +1004,20 @@ class UserScansRootCore extends Component {
                 { key: "date", header: "Date" },
                 { key: "id", header: "ID" }
             ]
-        
-        })
-        
+
+        });
+        return csvString;
+    };
+
+    copyAsCSV = (e) => {
+        console.log(`exportAsCSV():`, e);
+
+        // csv.parse(this.state.barcodes)
+
+        const csvString = this.makeCSVString();
+
         console.log(`exportAsCSV(): csvString:`, csvString);
-        
+
         navigator.clipboard.writeText(csvString)
             .then(() => {
                 console.log(`exportAsCSV(): copied CSV to clipboard`);
@@ -1000,15 +1030,31 @@ class UserScansRootCore extends Component {
                 toast.error("Could not copy CSV to clipboard");
             });
 
-    }
+    };
+
+    exportAsCSV = (e) => {
+        const date = new Date();
+        const dateString = date.toISOString();
+
+        const fileData = this.makeCSVString();
+
+        const blob = new Blob([fileData], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.download = `barcodes-${dateString}.csv`;
+        link.href = url;
+
+        link.click();
+    };
 
     dismissToast = (e) => {
         console.log(`dismissToast():`, e);
-    }
+    };
 
     renderToast() {
         return (
-            <div style={{ /* height: "50px" */}} onClick={this.dismissToast}>
+            <div style={{ /* height: "50px" */ }} onClick={this.dismissToast}>
                 <Toaster
                     gutter={10}
                     toastOptions={{
@@ -1025,8 +1071,8 @@ class UserScansRootCore extends Component {
         return (
             <div className="vw-100 vh-100">
 
-                <div dangerouslySetInnerHTML={{ __html: `<!-- fetch("https://api.barcodedrop.com/scan/${this.user}?barcode=barcode", { method: "POST" }) -->` }}/>
-                
+                <div dangerouslySetInnerHTML={{ __html: `<!-- fetch("https://api.barcodedrop.com/scan/${this.user}?barcode=barcode", { method: "POST" }) -->` }} />
+
                 {/* if (process.env?.NODE_ENV === "development") {
                     <DebugBreakpointView />
                 } */}
@@ -1044,7 +1090,7 @@ class UserScansRootCore extends Component {
                     // maxWidth: "300px"
                     // maxWidth: "vw-100"
                 }}>
-                {/* <div className="container-md"> */}
+                    {/* <div className="container-md"> */}
 
                     <div className="row">
                         <h2 style={{ margin: "30px 0px 0px 0px" }}>
@@ -1058,11 +1104,11 @@ class UserScansRootCore extends Component {
 
                     <Stack direction="horizontal" className="pt-4 pb-3" gap={2}>
                         <div className="pe-1">
-                             {/* Delete All */}
-                            
+                            {/* Delete All */}
+
                             <Button
                                 variant="danger"
-                                style={{ margin: "0px 0px"}}
+                                style={{ margin: "0px 0px" }}
                                 onClick={this.deleteAllUserBarcodes}
                                 data-toggle="tooltip"
                                 data-placement="top"
@@ -1080,9 +1126,23 @@ class UserScansRootCore extends Component {
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu>
-                                    <Dropdown.Item onClick={this.exportAsCSV} >
+                                    <Dropdown.Item onClick={this.copyAsCSV} >
                                         <div className="hstack gap-3">
                                             <i className="fa fa-file-csv"></i>
+                                            <span>Copy as CSV</span>
+                                            <span className="ms-auto">
+                                                {/* Spacer */}
+                                            </span>
+                                            <span style={{
+                                                color: "gray",
+                                            }}>
+                                                {this.copyAsCSVKeyboardShortcutString()}
+                                            </span>
+                                        </div>
+                                    </Dropdown.Item>
+                                    <Dropdown.Item onClick={this.exportAsCSV} >
+                                        <div className="hstack gap-3">
+                                            <i className="fa-solid fa-file-export"></i>
                                             <span>Export as CSV</span>
                                             <span className="ms-auto">
                                                 {/* Spacer */}
@@ -1095,7 +1155,7 @@ class UserScansRootCore extends Component {
                                         </div>
                                     </Dropdown.Item>
                                 </Dropdown.Menu>
-                            </Dropdown> 
+                            </Dropdown>
                         </div>
                         <div className="p-1">
                             {/* Auto-Copy */}
