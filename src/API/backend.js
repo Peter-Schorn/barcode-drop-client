@@ -15,7 +15,10 @@ export default class Backend {
      * @returns an array of scan objects in JSON format
      */
     async getUserScans(user) {
-        return await this._get(`/scans/${user}`);
+        return await this._get(
+            `/scans/${user}`,
+            { queryParams: { "pretty-printed": false } }
+        );
     }
 
     /**
