@@ -8,11 +8,14 @@ import { Button, Dropdown } from "react-bootstrap";
 import Modal from "react-modal";
 
 import bwipjs from "bwip-js";
+import { setIntervalImmediately } from "../MiscellaneousUtilities";
 
 export default class UserScansRow extends Component {
 
     constructor(props) {
         super(props);
+
+        this.removeHighlightedBarcodeTimer = null;
 
         const dateDifference = this.dateDifferenceFromNow(
             this.props.barcode.date
@@ -33,7 +36,8 @@ export default class UserScansRow extends Component {
 
         this.state = {
             dateDifference: dateDifference,
-            generateBarcodeModalIsOpen: false
+            generateBarcodeModalIsOpen: false,
+            isHighlighted: this.props.isHighlighted
         };
 
     }
@@ -41,7 +45,7 @@ export default class UserScansRow extends Component {
     static contextType = AppContext;
 
     componentDidMount() {
-        this.intervalID = setInterval(
+        this.intervalID = setIntervalImmediately(
             () => this.tick(),
             5_000
         );
@@ -198,6 +202,10 @@ export default class UserScansRow extends Component {
 
     }
 
+    isHighlighted() {
+        return this.props.isHighlighted || this.state.isHighlighted;
+    }
+
     onClickCopyButton = (barcode) => {
         return (e) => {
 
@@ -209,6 +217,8 @@ export default class UserScansRow extends Component {
                         `UserScansRow: Copied barcode to clipboard: ` +
                         `"${barcodeText}"`
                     );
+                    // this._highlightBarcode();
+                    this.props.setHighlightedBarcode(barcode);
                 })
                 .catch((error) => {
                     console.error(
@@ -241,6 +251,21 @@ export default class UserScansRow extends Component {
         };
     };
 
+    _highlightBarcode = () => {
+        
+        this.setState({
+            isHighlighted: true
+        });
+
+        clearTimeout(this.removeHighlightedBarcodeTimer);
+        this.removeHighlightedBarcodeTimer = setTimeout(() => {
+            this.setState({
+                isHighlighted: false
+            });
+        }, 5_000);
+
+    };
+
     formattedDateString(date) {
         const dateObj = new Date(date);
         return dateObj.toLocaleTimeString();
@@ -266,7 +291,7 @@ export default class UserScansRow extends Component {
     }
 
     copyButtonStyle() {
-        const isHighlighted = this.props.isHighlighted;
+        const isHighlighted = this.isHighlighted();
         return {
             margin: "5px 5px",
             // backgroundColor: "green"

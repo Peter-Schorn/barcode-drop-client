@@ -98,10 +98,13 @@ class UserScansTableCore extends Component {
                             index={index}
                             barcode={barcode}
                             user={this.props.user}
-                            isAutoCopied={this.props.autoCopiedBarcode?.id === barcode.id}
+                            isHighlighted={this.props.highlightedBarcode?.id === barcode.id}
                             router={this.props.router}
                             removeBarcodeFromState={
                                 this.props.removeBarcodeFromState
+                            }
+                            setHighlightedBarcode={
+                                this.props.setHighlightedBarcode
                             }
                         />
                     )}

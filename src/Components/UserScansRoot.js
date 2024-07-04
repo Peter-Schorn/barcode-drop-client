@@ -349,10 +349,11 @@ class UserScansRootCore extends Component {
                     `UserScansRootCore.handleKeyDown(): ` +
                     `Platform modifier key + "k" pressed: copying barcode`
                 );
-                const latestBarcode = this.state.barcodes[0]?.barcode;
+                const latestBarcode = this.state.barcodes[0];
                 if (latestBarcode != null) {
                     this.copyBarcodeToClipboard(latestBarcode, {
-                        showNotification: true
+                        showNotification: true,
+                        highlight: true
                     });
                     e.preventDefault();
                 }
@@ -854,16 +855,17 @@ class UserScansRootCore extends Component {
 
                 if (highlight) {
 
-                    this.setState({
-                        highlightedBarcode: barcode
-                    });
+                    this._setHighlightedBarcode(barcode);
+                    // this.setState({
+                    //     highlightedBarcode: barcode
+                    // });
 
-                    clearTimeout(this.removeHighlightedBarcodeTimer);
-                    this.removeHighlightedBarcodeTimer = setTimeout(() => {
-                        this.setState({
-                            highlightedBarcode: null
-                        });
-                    }, 5_000);
+                    // clearTimeout(this.removeHighlightedBarcodeTimer);
+                    // this.removeHighlightedBarcodeTimer = setTimeout(() => {
+                    //     this.setState({
+                    //         highlightedBarcode: null
+                    //     });
+                    // }, 5_000);
 
                 }
 
@@ -874,6 +876,21 @@ class UserScansRootCore extends Component {
                     `"${barcodeText}": ${error}`
                 );
             });
+
+    };
+
+    _setHighlightedBarcode = (barcode) => {
+
+        this.setState({
+            highlightedBarcode: barcode
+        });
+
+        clearTimeout(this.removeHighlightedBarcodeTimer);
+        this.removeHighlightedBarcodeTimer = setTimeout(() => {
+            this.setState({
+                highlightedBarcode: null
+            });
+        }, 5_000);
 
     };
 
@@ -1048,7 +1065,7 @@ class UserScansRootCore extends Component {
 
     copyLastBarcodeToClipboard = () => {
         
-        const latestBarcode = this.state?.barcodes[0]?.barcode;
+        const latestBarcode = this.state?.barcodes[0];
         
         if (latestBarcode != null) {
             
@@ -1058,7 +1075,8 @@ class UserScansRootCore extends Component {
             );
 
             this.copyBarcodeToClipboard(latestBarcode, {
-                showNotification: true
+                showNotification: true,
+                highlight: true
             });
         }
         else {
@@ -1315,6 +1333,9 @@ class UserScansRootCore extends Component {
                         router={this.props.router}
                         removeBarcodeFromState={
                             this.removeBarcodeFromState
+                        }
+                        setHighlightedBarcode={
+                            this._setHighlightedBarcode
                         }
                     />
 
