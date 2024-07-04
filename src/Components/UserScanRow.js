@@ -266,12 +266,12 @@ export default class UserScansRow extends Component {
     }
 
     copyButtonStyle() {
-        const isAutoCopied = this.props.isAutoCopied;
+        const isHighlighted = this.props.isHighlighted;
         return {
             margin: "5px 5px",
             // backgroundColor: "green"
-            backgroundColor: isAutoCopied ? "green" : null,
-            border: isAutoCopied ? "1px solid green" : null,
+            backgroundColor: isHighlighted ? "green" : null,
+            border: isHighlighted ? "1px solid green" : null,
             transition: "all 0.5s ease-out"
         };
     }

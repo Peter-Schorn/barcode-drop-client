@@ -40,7 +40,7 @@ class UserScansTableCore extends Component {
          <UserScansTable
             barcodes={this.state.barcodes}
             user={this.user}
-            autoCopiedBarcode={this.state.autoCopiedBarcode}
+            highlightedBarcode={this.state.highlightedBarcode}
             router={this.props.router}
             removeBarcodeFromState={
                  this.removeBarcodeFromState

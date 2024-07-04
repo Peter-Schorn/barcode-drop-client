@@ -155,13 +155,13 @@ class UserScansRootCore extends Component {
             barcodes: [],
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
-            autoCopiedBarcode: null
+            highlightedBarcode: null
         };
 
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
-        this.removeAutoCopiedBarcodeTimer = null;
+        this.removeHighlightedBarcodeTimer = null;
         this.pollingID = null;
         this.copyBarcodeAfterDelayTimeout = null;
         this.user = props.router.params.user;
@@ -209,7 +209,7 @@ class UserScansRootCore extends Component {
 
         clearInterval(this.pollingID);
         clearInterval(this.pingPongInterval);
-        clearTimeout(this.removeAutoCopiedBarcodeTimer);
+        clearTimeout(this.removeHighlightedBarcodeTimer);
         clearTimeout(this.copyBarcodeAfterDelayTimeout);
 
         document.removeEventListener("hashchange", this.handleHashChange);
@@ -775,15 +775,17 @@ class UserScansRootCore extends Component {
         const barcodeText = mostRecentBarcode?.barcode;
         if (barcodeText == null) {
             console.error(
-                "AUTO-Copy failed: most recent barcode is null or undefined"
+                `AUTO-Copy failed: most recent barcode is null or undefined:`,
+                mostRecentBarcode
             );
             return;
         }
 
         if (this.lastAutoCopiedBarcode?.id === mostRecentBarcode?.id) {
             console.log(
-                "AUTO-Copy failed: most recent barcode is the same as the " +
-                "previously auto-copied barcode"
+                `AUTO-Copy failed: most recent barcode id is the same as the ` +
+                `previously auto-copied barcode id (${mostRecentBarcode?.id}); ` +
+                `not copying latest barcode`
             );
             return;
         }
@@ -793,40 +795,92 @@ class UserScansRootCore extends Component {
             `Auto-copying most recent barcode: "${mostRecentBarcode}"`
         );
 
+        this._writeBarcodeToClipboard(mostRecentBarcode, {
+            showNotification: true,
+            highlight: true
+        });
+
+        // navigator.clipboard.writeText(barcodeText)
+        //     .then(() => {
+
+        //         console.log(
+        //             `AUTO-Copied barcode to clipboard: "${barcodeText}"`
+        //         );
+
+        //         this.setState({
+        //             highlightedBarcode: mostRecentBarcode
+        //         });
+
+        //         this.showBarcodeCopiedToast(barcodeText);
+
+        //         clearTimeout(this.removeHighlightedBarcodeTimer);
+        //         this.removeHighlightedBarcodeTimer = setTimeout(() => {
+        //             this.setState({
+        //                 highlightedBarcode: null
+        //             });
+        //         }, 5_000);
+
+        //     })
+        //     .catch((error) => {
+        //         console.error(
+        //             `AUTO-Copy failed: could not copy barcode: ` +
+        //             `"${barcodeText}": ${error}`
+        //         );
+        //     });
+
+    };
+
+    _writeBarcodeToClipboard = (barcode, { showNotification, highlight}) => {
+        
+        let barcodeText = barcode?.barcode;
+        if (barcodeText == null) {
+            console.error(
+                `_writeBarcodeToClipboard: barcode text is null or undefined`
+            );
+            return;
+        }
+
         navigator.clipboard.writeText(barcodeText)
             .then(() => {
 
                 console.log(
-                    `AUTO-Copied barcode to clipboard: "${barcodeText}"`
+                    `_writeTextToClipboard: Copied text to clipboard: ` +
+                    `"${barcodeText}"`
                 );
 
-                this.setState({
-                    autoCopiedBarcode: mostRecentBarcode
-                });
+                if (showNotification) {
+                    this.showBarcodeCopiedToast(barcodeText);
+                }
 
-                this.showBarcodeCopiedToast(barcodeText);
+                if (highlight) {
 
-                clearTimeout(this.removeAutoCopiedBarcodeTimer);
-                this.removeAutoCopiedBarcodeTimer = setTimeout(() => {
                     this.setState({
-                        autoCopiedBarcode: null
+                        highlightedBarcode: barcode
                     });
-                }, 5_000);
+
+                    clearTimeout(this.removeHighlightedBarcodeTimer);
+                    this.removeHighlightedBarcodeTimer = setTimeout(() => {
+                        this.setState({
+                            highlightedBarcode: null
+                        });
+                    }, 5_000);
+
+                }
 
             })
             .catch((error) => {
                 console.error(
-                    `AUTO-Copy failed: could not copy barcode: ` +
+                    `_writeTextToClipboard: Could not copy text to clipboard: ` +
                     `"${barcodeText}": ${error}`
                 );
             });
 
     };
 
-    showBarcodeCopiedToast = (barcode) => {
-        console.log(`showBarcodeCopiedToast(): barcode: ${barcode}`);
+    showBarcodeCopiedToast = (barcodeText) => {
+        console.log(`showBarcodeCopiedToast(): barcode: ${barcodeText}`);
 
-        let barcodeTextMessage = barcode.truncated(30);
+        let barcodeTextMessage = barcodeText.truncated(30);
 
         toast.success(
             `Copied "${barcodeTextMessage}" to the Clipboard`,
@@ -850,31 +904,36 @@ class UserScansRootCore extends Component {
             `copyBarcodeToClipboard: Copying barcode to clipboard: "${barcode}"`
         );
 
-        navigator.clipboard.writeText(barcode)
-            .then(() => {
+        this._writeBarcodeToClipboard(barcode, {
+            showNotification: showNotification,
+            highlight: true
+        });
 
-                console.log(
-                    `copyBarcodeToClipboard: Copied barcode to clipboard: ` +
-                    `"${barcode}"`
-                );
+        // navigator.clipboard.writeText(barcode)
+        //     .then(() => {
 
-                // set the last auto copied barcode to null whenever another
-                // barcode is copied to the clipboard manually
-                this.setState({
-                    autoCopiedBarcode: null
-                });
+        //         console.log(
+        //             `copyBarcodeToClipboard: Copied barcode to clipboard: ` +
+        //             `"${barcode}"`
+        //         );
 
-                if (showNotification) {
-                    this.showBarcodeCopiedToast(barcode);
-                }
+        //         // set the last auto copied barcode to null whenever another
+        //         // barcode is copied to the clipboard manually
+        //         this.setState({
+        //             highlightedBarcode: null
+        //         });
 
-            })
-            .catch((error) => {
-                console.error(
-                    `copyBarcodeToClipboard: Could not copy barcode to ` +
-                    `clipboard: "${barcode}": ${error}`
-                );
-            });
+        //         if (showNotification) {
+        //             this.showBarcodeCopiedToast(barcode);
+        //         }
+
+        //     })
+        //     .catch((error) => {
+        //         console.error(
+        //             `copyBarcodeToClipboard: Could not copy barcode to ` +
+        //             `clipboard: "${barcode}": ${error}`
+        //         );
+        //     });
 
     };
 
@@ -1011,7 +1070,7 @@ class UserScansRootCore extends Component {
     };
 
     deleteAllUserBarcodesKeyboardShortcutString = () => {
-        return isApplePlatform() ? "⌘D" : "Ctrl + D";
+        return isApplePlatform() ? "⌘D" : "Ctrl+D";
     };
 
     copyAsCSVKeyboardShortcutString = () => {
@@ -1078,12 +1137,18 @@ class UserScansRootCore extends Component {
         link.click();
     };
 
-    _copyLastBarcodeIsDisabled = () => {
-        return this.state?.barcodes?.length === 0 || null || undefined;
-    };
-
     dismissToast = (e) => {
         console.log(`dismissToast():`, e);
+    };
+
+    disabledClassIfZeroBarcodes = () => {
+        return this.state?.barcodes?.length === 0 ? "disabled" : "";
+    }
+
+    // MARK: Private Interface
+
+    _copyLastBarcodeIsDisabled = () => {
+        return this.state?.barcodes?.length === 0 || null || undefined;
     };
 
     renderToast() {
@@ -1160,7 +1225,10 @@ class UserScansRootCore extends Component {
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu>
-                                    <Dropdown.Item onClick={this.copyAsCSV} >
+                                    <Dropdown.Item
+                                        className={this.disabledClassIfZeroBarcodes()}
+                                        onClick={this.copyAsCSV}
+                                    >
                                         <div className="hstack gap-3">
                                             <i className="fa fa-file-csv"></i>
                                             <span>Copy as CSV</span>
@@ -1174,7 +1242,10 @@ class UserScansRootCore extends Component {
                                             </span>
                                         </div>
                                     </Dropdown.Item>
-                                    <Dropdown.Item onClick={this.exportAsCSV} >
+                                    <Dropdown.Item
+                                        className={this.disabledClassIfZeroBarcodes()}
+                                        onClick={this.exportAsCSV}
+                                    >
                                         <div className="hstack gap-3">
                                             <i className="fa-solid fa-file-export"></i>
                                             <span>Export as CSV</span>
@@ -1190,7 +1261,7 @@ class UserScansRootCore extends Component {
                                     </Dropdown.Item>
                                     <Dropdown.Divider className="" />
                                     <Dropdown.Item 
-                                        className={`${this._copyLastBarcodeIsDisabled() ? "disabled" : ""}`}
+                                        className={this.disabledClassIfZeroBarcodes()}
                                         onClick={this.copyLastBarcodeToClipboard}
                                     >
                                         <div className="hstack gap-3">
@@ -1240,7 +1311,7 @@ class UserScansRootCore extends Component {
                     <UserScansTable
                         barcodes={this.state.barcodes}
                         user={this.user}
-                        autoCopiedBarcode={this.state.autoCopiedBarcode}
+                        highlightedBarcode={this.state.highlightedBarcode}
                         router={this.props.router}
                         removeBarcodeFromState={
                             this.removeBarcodeFromState
