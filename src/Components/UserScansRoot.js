@@ -166,7 +166,6 @@ class UserScansRootCore extends Component {
         this.copyBarcodeAfterDelayTimeout = null;
         this.user = props.router.params.user;
         this.lastAutoCopiedBarcode = null;
-        this.copyLastBarcodeIsDisabled = true
 
         // MARK: Document Title
         document.title = `Scans for ${this.user} | BarcodeDrop`;
@@ -280,8 +279,6 @@ class UserScansRootCore extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         console.log("UserScansRootCore.componentDidUpdate():");
-
-        this.copyLastBarcodeIsDisabled = this._copyLastBarcodeIsDisabled();
 
         const previousBarcode = prevState.barcodes[0];
         const currentBarcode = this.state.barcodes[0];
@@ -801,97 +798,6 @@ class UserScansRootCore extends Component {
             highlight: true
         });
 
-        // navigator.clipboard.writeText(barcodeText)
-        //     .then(() => {
-
-        //         console.log(
-        //             `AUTO-Copied barcode to clipboard: "${barcodeText}"`
-        //         );
-
-        //         this.setState({
-        //             highlightedBarcode: mostRecentBarcode
-        //         });
-
-        //         this.showBarcodeCopiedToast(barcodeText);
-
-        //         clearTimeout(this.removeHighlightedBarcodeTimer);
-        //         this.removeHighlightedBarcodeTimer = setTimeout(() => {
-        //             this.setState({
-        //                 highlightedBarcode: null
-        //             });
-        //         }, 5_000);
-
-        //     })
-        //     .catch((error) => {
-        //         console.error(
-        //             `AUTO-Copy failed: could not copy barcode: ` +
-        //             `"${barcodeText}": ${error}`
-        //         );
-        //     });
-
-    };
-
-    _writeBarcodeToClipboard = (barcode, { showNotification, highlight}) => {
-        
-        let barcodeText = barcode?.barcode;
-        if (barcodeText == null) {
-            console.error(
-                `_writeBarcodeToClipboard: barcode text is null or undefined`
-            );
-            return;
-        }
-
-        navigator.clipboard.writeText(barcodeText)
-            .then(() => {
-
-                console.log(
-                    `_writeTextToClipboard: Copied text to clipboard: ` +
-                    `"${barcodeText}"`
-                );
-
-                if (showNotification) {
-                    this.showBarcodeCopiedToast(barcodeText);
-                }
-
-                if (highlight) {
-
-                    this._setHighlightedBarcode(barcode);
-                    // this.setState({
-                    //     highlightedBarcode: barcode
-                    // });
-
-                    // clearTimeout(this.removeHighlightedBarcodeTimer);
-                    // this.removeHighlightedBarcodeTimer = setTimeout(() => {
-                    //     this.setState({
-                    //         highlightedBarcode: null
-                    //     });
-                    // }, 5_000);
-
-                }
-
-            })
-            .catch((error) => {
-                console.error(
-                    `_writeTextToClipboard: Could not copy text to clipboard: ` +
-                    `"${barcodeText}": ${error}`
-                );
-            });
-
-    };
-
-    _setHighlightedBarcode = (barcode) => {
-
-        this.setState({
-            highlightedBarcode: barcode
-        });
-
-        clearTimeout(this.removeHighlightedBarcodeTimer);
-        this.removeHighlightedBarcodeTimer = setTimeout(() => {
-            this.setState({
-                highlightedBarcode: null
-            });
-        }, 5_000);
-
     };
 
     showBarcodeCopiedToast = (barcodeText) => {
@@ -1160,13 +1066,76 @@ class UserScansRootCore extends Component {
     };
 
     disabledClassIfZeroBarcodes = () => {
-        return this.state?.barcodes?.length === 0 ? "disabled" : "";
+        return this._copyLastBarcodeIsDisabled() ? "disabled" : "";
     }
 
     // MARK: Private Interface
 
     _copyLastBarcodeIsDisabled = () => {
-        return this.state?.barcodes?.length === 0 || null || undefined;
+        return !this.state?.barcodes?.length;
+    };
+
+    _writeBarcodeToClipboard = (barcode, { showNotification, highlight}) => {
+        
+        let barcodeText = barcode?.barcode;
+        if (barcodeText == null) {
+            console.error(
+                `_writeBarcodeToClipboard: barcode text is null or undefined`
+            );
+            return;
+        }
+
+        navigator.clipboard.writeText(barcodeText)
+            .then(() => {
+
+                console.log(
+                    `_writeTextToClipboard: Copied text to clipboard: ` +
+                    `"${barcodeText}"`
+                );
+
+                if (showNotification) {
+                    this.showBarcodeCopiedToast(barcodeText);
+                }
+
+                if (highlight) {
+
+                    this._setHighlightedBarcode(barcode);
+                    // this.setState({
+                    //     highlightedBarcode: barcode
+                    // });
+
+                    // clearTimeout(this.removeHighlightedBarcodeTimer);
+                    // this.removeHighlightedBarcodeTimer = setTimeout(() => {
+                    //     this.setState({
+                    //         highlightedBarcode: null
+                    //     });
+                    // }, 5_000);
+
+                }
+
+            })
+            .catch((error) => {
+                console.error(
+                    `_writeTextToClipboard: Could not copy text to clipboard: ` +
+                    `"${barcodeText}": ${error}`
+                );
+            });
+
+    };
+
+    _setHighlightedBarcode = (barcode) => {
+
+        this.setState({
+            highlightedBarcode: barcode
+        });
+
+        clearTimeout(this.removeHighlightedBarcodeTimer);
+        this.removeHighlightedBarcodeTimer = setTimeout(() => {
+            this.setState({
+                highlightedBarcode: null
+            });
+        }, 5_000);
+
     };
 
     renderToast() {
