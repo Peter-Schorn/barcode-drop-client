@@ -1096,7 +1096,7 @@ class UserScansRootCore extends Component {
         }
 
         const formattedLink = this.state?.formattedLink;
-        if (formattedLink == null) {
+        if (!formattedLink) {
             console.error(
                 `onClickOpenLink(): formatted link is null or undefined`
             );
@@ -1158,7 +1158,15 @@ class UserScansRootCore extends Component {
             window.location.hash.slice(1)
         );
 
-        urlFragmentParams.set("formatted-link", formattedLink);
+        if (!formattedLink) {
+            console.log(
+                `onSubmitConfigureLinkForm(): formatted link is null or undefined`
+            );
+            urlFragmentParams.delete("formatted-link");
+        }
+        else {
+            urlFragmentParams.set("formatted-link", formattedLink);
+        }
         window.location.hash = urlFragmentParams.toString();
 
         e.preventDefault();
