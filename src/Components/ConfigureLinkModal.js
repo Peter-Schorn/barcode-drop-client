@@ -14,14 +14,21 @@ import UserScansRow from "./UserScanRow";
 
 export default class ConfigureLinkModal extends Component {
 
-    // constructor(props) {
-    //     super(props);
+    constructor(props) {
+        super(props);
 
-    // }
+        this.configureLinkInputRef = React.createRef();
+
+    }
 
     exampleFormattedURL = () => {
         // return `https://example.com/scan?barcode=%s`;
         return `https://www.google.com/search?q=%s`;
+    };
+
+    onOpen = () => {
+        this.configureLinkInputRef.current.focus();
+        this.props.onOpenConfigureLinkModal();
     };
 
     render() {
@@ -32,7 +39,7 @@ export default class ConfigureLinkModal extends Component {
                 className={"configure-link-modal rounded-3 m-5 mx-auto p-5 w-50 shadow-lg text-black"}
 
                 isOpen={this.props.showFormattedLinkModal}
-                onAfterOpen={this.props.onOpenConfigureLinkModal}
+                onAfterOpen={this.onOpen}
                 onRequestClose={this.props.closeConfigureLinkModal}
 
             // style={this.customStyles}

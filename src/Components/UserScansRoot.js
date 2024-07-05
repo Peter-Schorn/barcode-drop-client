@@ -163,7 +163,6 @@ class UserScansRootCore extends Component {
             showFormattedLinkModal: false
         };
 
-        this.configureLinkInputRef = React.createRef();
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
@@ -407,10 +406,10 @@ class UserScansRootCore extends Component {
                 this.copyAsCSV(e);
                 e.preventDefault();
             }
-            else if (e.key === "l" && e.shiftKey && !e.altKey) {
+            else if (e.key === "l" && !e.shiftKey && !e.altKey) {
                 console.log(
                     `UserScansRootCore.handleKeyDown(): ` +
-                    `Platform modifier key + shift + "l" pressed: ` +
+                    `Platform modifier key + "l" pressed: ` +
                     `SHOWING formatted link`
                 );
                 this.setState({
@@ -1000,7 +999,7 @@ class UserScansRootCore extends Component {
     };
 
     configureLinkKeyboardShortcutString = () => {
-        return isApplePlatform() ? "⌘⇧L" : "Ctrl+Shift+L";
+        return isApplePlatform() ? "⌘L" : "Ctrl+L";
     };
 
     makeCSVString = () => {
@@ -1171,6 +1170,7 @@ class UserScansRootCore extends Component {
         // this.setState({
         //     showFormattedLinkModal: true
         // });
+
     };
 
     afterOpenGenerateBarcodeModal = (e) => {
