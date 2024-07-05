@@ -20,7 +20,8 @@
     "react-scripts": "5.0.1",
     "react-tooltip": "^5.26.4",
     "react-use-websocket": "^4.8.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@babel/plugin-transform-private-property-in-object": "^7.16.7"
   },
   "scripts": {
     "start": "react-scripts start",
