@@ -250,22 +250,22 @@ class UserScansRootCore extends Component {
             });
 
         // can be called from the developer console
-        document.scan = (barcode) => {
+        document.scan = (barcode, user = this.user) => {
             console.log(`document.scan(): barcode: "${barcode}"`);
             this.context.api.scanBarcode({
-                user: this.user,
+                user: user,
                 barcode: barcode
             })
                 .then((result) => {
                     console.log(
                         `document.scan(): scanBarcode result ` +
-                        `(user: ${this.user}): ${result}`
+                        `(user: ${user}): ${result}`
                     );
                 })
                 .catch((error) => {
                     console.error(
                         `document.scan(): could not scan barcode "${barcode}" ` +
-                        `for user ${this.user}: ${error}`
+                        `for user ${user}: ${error}`
                     );
                 });
         };
@@ -608,7 +608,8 @@ class UserScansRootCore extends Component {
     receiveSocketMessage = (event) => {
 
         console.log(
-            `[${new Date().toISOString()}] UserScansRootCore.receiveSocketMessage(): ` +
+            `[${new Date().toISOString()}] ` +
+            `UserScansRootCore.receiveSocketMessage(): ` +
             `event:`, event
         );
 
@@ -619,23 +620,30 @@ class UserScansRootCore extends Component {
 
         const message = JSON.parse(event.data);
 
-        // MARK: Insert new scan
+        // MARK: Insert new scans
         if (
-            message?.type === SocketMessageTypes.upsertScan &&
-            message?.newScan
+            message?.type === SocketMessageTypes.upsertScans &&
+            message?.newScans
         ) {
-            const newScan = message.newScan;
+            const newScans = message.newScans;
             console.log(
-                `socket will insert newScan for user ${this.user}:`,
-                newScan
+                `socket will insert newScans for user ${this.user}:`,
+                newScans
             );
             this.setState(state => {
-                // MARK: insert the new scan in sorted order by date
+                // MARK: insert the new scans in sorted order by date
                 // and remove any existing scan with the same ID
 
                 let newBarcodes = state.barcodes
-                    .filter((barcode) => barcode.id !== newScan.id)
-                    .concat(newScan);
+                    .filter((barcode) => { 
+                        for (const newScan of newScans) {
+                            if (barcode.id === newScan.id) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .concat(newScans);
 
                 newBarcodes.sort((lhs, rhs) => {
                     return new Date(rhs.date) - new Date(lhs.date);
@@ -649,17 +657,20 @@ class UserScansRootCore extends Component {
         }
         // MARK: Delete scan
         else if (
-            message?.type === SocketMessageTypes.deleteScan &&
-            message?.id
+            message?.type === SocketMessageTypes.deleteScans &&
+            message?.ids
         ) {
-            const id = message.id;
+            const ids = message.ids;
 
+            const hash = message.transactionHash;
             console.log(
-                `socket will delete barcode with ID: ${id}`
+                `socket will delete barcode with IDs (transactionHash: ${hash}): ` +
+                `${ids}`
             );
-            this.removeBarcodeFromState(id);
+            this.removeBarcodesFromState(ids);
 
         }
+        
         // MARK: Replace all scans
         else if (
             message?.type === SocketMessageTypes.replaceAllScans &&
@@ -679,7 +690,7 @@ class UserScansRootCore extends Component {
 
         }
         else {
-            console.warning(
+            console.error(
                 `UserScansRootCore.receiveSocketMessage(): ` +
                 `socket could not handle message:`, message
             );
@@ -907,29 +918,29 @@ class UserScansRootCore extends Component {
         this.context.api.deleteUserScans({
             user: this.user
         })
-            .then((result) => {
-                console.log(
-                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                    `result: ${result}`
-                );
-            })
-            .catch((error) => {
-                console.error(
-                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                    `could not delete all user barcodes: ${error}`
-                );
-            });
+        .then((result) => {
+            console.log(
+                `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                `result: ${result}`
+            );
+        })
+        .catch((error) => {
+            console.error(
+                `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                `could not delete all user barcodes: ${error}`
+            );
+        });
 
     };
 
-    removeBarcodeFromState = (barcodeID) => {
-        console.log(`Removing barcode with ID from state: ${barcodeID}`);
+    removeBarcodesFromState = (barcodeIDs) => {
+        console.log(`Removing barcode with ID from state: ${barcodeIDs}`);
 
         this.setState((state) => {
 
-            this.deleteIDs.add(barcodeID);
+            barcodeIDs.forEach(element => this.deleteIDs.add(element))
             console.log(
-                `removeBarcodeFromState(): ${this.deleteIDs.size} deleteIDs:`,
+                `removeBarcodesFromState(): ${this.deleteIDs.size} deleteIDs:`,
                 this.deleteIDs
             );
 
@@ -1098,19 +1109,7 @@ class UserScansRootCore extends Component {
                 }
 
                 if (highlight) {
-
                     this._setHighlightedBarcode(barcode);
-                    // this.setState({
-                    //     highlightedBarcode: barcode
-                    // });
-
-                    // clearTimeout(this.removeHighlightedBarcodeTimer);
-                    // this.removeHighlightedBarcodeTimer = setTimeout(() => {
-                    //     this.setState({
-                    //         highlightedBarcode: null
-                    //     });
-                    // }, 5_000);
-
                 }
 
             })
@@ -1300,8 +1299,8 @@ class UserScansRootCore extends Component {
                         user={this.user}
                         highlightedBarcode={this.state.highlightedBarcode}
                         router={this.props.router}
-                        removeBarcodeFromState={
-                            this.removeBarcodeFromState
+                        removeBarcodesFromState={
+                            this.removeBarcodesFromState
                         }
                         setHighlightedBarcode={
                             this._setHighlightedBarcode

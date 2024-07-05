@@ -42,8 +42,8 @@ class UserScansTableCore extends Component {
             user={this.user}
             highlightedBarcode={this.state.highlightedBarcode}
             router={this.props.router}
-            removeBarcodeFromState={
-                 this.removeBarcodeFromState
+            removeBarcodesFromState={
+                 this.removeBarcodesFromState
              }
          />
 
@@ -100,8 +100,8 @@ class UserScansTableCore extends Component {
                             user={this.props.user}
                             isHighlighted={this.props.highlightedBarcode?.id === barcode.id}
                             router={this.props.router}
-                            removeBarcodeFromState={
-                                this.props.removeBarcodeFromState
+                            removeBarcodesFromState={
+                                this.props.removeBarcodesFromState
                             }
                             setHighlightedBarcode={
                                 this.props.setHighlightedBarcode

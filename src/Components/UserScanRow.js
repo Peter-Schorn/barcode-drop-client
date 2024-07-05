@@ -235,7 +235,7 @@ export default class UserScansRow extends Component {
             console.log(`Deleting barcode: "${barcode}"`);
             const barcodeID = barcode.id;
 
-            this.props.removeBarcodeFromState(barcodeID);
+            this.props.removeBarcodesFromState([barcodeID]);
 
             this.context.api.deleteScans([barcodeID])
                 .then((result) => {
@@ -342,7 +342,7 @@ export default class UserScansRow extends Component {
                 >
                     {/* <h3>{barcodeText}</h3> */}
                     <canvas
-                        class="barcode-image-canvas"
+                        className="barcode-image-canvas"
                         ref={this.canvasRef}
                     >
                     </canvas>
@@ -370,7 +370,7 @@ export default class UserScansRow extends Component {
                         )}
                     >
                         Copy
-                        {/* <i class="fa-solid fa-copy"></i> */}
+                        {/* <i className="fa-solid fa-copy"></i> */}
                     </Button>
                 </td>
                 {/* Context Menu */}
