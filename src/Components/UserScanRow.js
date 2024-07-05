@@ -3,14 +3,19 @@ import { Component } from "react";
 
 import { AppContext } from "../Model/AppContext";
 
-import { Button, Dropdown } from "react-bootstrap";
+import { Button, Dropdown, Stack } from "react-bootstrap";
 
 import Modal from "react-modal";
 
 import bwipjs from "bwip-js";
+
 import { setIntervalImmediately } from "../MiscellaneousUtilities";
 
+import BarcodeModalView from "./BarcodeModalView";
+
 export default class UserScansRow extends Component {
+    
+    static contextType = AppContext;
 
     constructor(props) {
         super(props);
@@ -32,8 +37,6 @@ export default class UserScansRow extends Component {
             },
         };
 
-        this.canvasRef = React.createRef();
-
         this.state = {
             dateDifference: dateDifference,
             generateBarcodeModalIsOpen: false,
@@ -42,14 +45,11 @@ export default class UserScansRow extends Component {
 
     }
 
-    static contextType = AppContext;
-
     componentDidMount() {
         this.intervalID = setIntervalImmediately(
             () => this.tick(),
             5_000
         );
-        // this.drawBarcodeToCanvas();
     }
 
     componentWillUnmount() {
@@ -68,79 +68,7 @@ export default class UserScansRow extends Component {
             dateDifference: dateDifference
         });
     };
-
-    drawBarcodeToCanvas = () => {
-
-        // const canvas = document.getElementById("barcode-image-canvas");
-        const canvas = this.canvasRef.current;
-
-        if (!canvas) {
-            console.error(
-                "Barcode canvas element not found"
-            );
-            return;
-        }
-
-        const barcodeText = this.props.barcode.barcode;
-
-        // Cannot differentiate between UPC-E and EAN-8, so don't 
-        // automatically use either
-
-        let symbology;
-        let is2DSymbology = false;
-
-        if (/^[0-9]{12}$/.test(barcodeText)) {
-            symbology = "upca";
-        }
-        else if (/^[0-9]{13}$/.test(barcodeText)) {
-            symbology = "ean13";
-        }
-        else if (barcodeText.length <= 20) {
-            symbology = "code128";
-        }
-        else {
-            symbology = "datamatrix";
-            is2DSymbology = true;
-        }
-
-        let options = {
-            bcid: symbology,
-            text: barcodeText,
-            scale: 3,
-            includetext: true,
-            textxalign: "center",
-            textsize: 13,
-            textyoffset: 10,
-            paddingwidth: 10,
-            paddingheight: 10,
-        };
-
-        if (is2DSymbology) {
-            const size = 30;
-            options.width = size;
-            options.height = size;
-        }
-        else {
-            options.width = 60;
-            options.height = 20;
-        }
-
-        bwipjs.toCanvas(canvas, options, (error, canvas) => {
-
-            if (error) {
-                console.error(
-                    `Error drawing barcode "${barcodeText}" to canvas: ${error}`
-                );
-            }
-            else {
-                console.log(
-                    `Barcode drawn to canvas: "${barcodeText}"`
-                );
-            }
-
-        });
-    };
-
+    
     rowStyleClassName = () => {
         // TODO: figure out why table variants cover borders
         // return this.props.index === 0 ? "table-success" : "";
@@ -210,7 +138,10 @@ export default class UserScansRow extends Component {
         return (e) => {
 
             const barcodeText = barcode.barcode;
-
+            
+            this.setState({
+                isCopying: true
+            });
             navigator.clipboard.writeText(barcodeText)
                 .then(() => {
                     console.log(
@@ -219,12 +150,23 @@ export default class UserScansRow extends Component {
                     );
                     // this._highlightBarcode();
                     this.props.setHighlightedBarcode(barcode);
+                    setTimeout(() => {
+                        this.setState({
+                            isCopying: false
+                        });
+                    }, 250);
+
                 })
                 .catch((error) => {
                     console.error(
                         `UserScansRow: Error copying barcode to clipboard: ` +
                         `"${barcodeText}": ${error}`
                     );
+                    setTimeout(() => {
+                        this.setState({
+                            isCopying: false
+                        });
+                    }, 1_000);
                 });
         };
     };
@@ -251,61 +193,18 @@ export default class UserScansRow extends Component {
         };
     };
 
-    _highlightBarcode = () => {
-        
-        this.setState({
-            isHighlighted: true
-        });
-
-        clearTimeout(this.removeHighlightedBarcodeTimer);
-        this.removeHighlightedBarcodeTimer = setTimeout(() => {
-            this.setState({
-                isHighlighted: false
-            });
-        }, 5_000);
-
-    };
-
     formattedDateString(date) {
         const dateObj = new Date(date);
         return dateObj.toLocaleTimeString();
     }
 
-    barcodeIDdebugText() {
-        const queryParams = this.props.router.searchParams;
-
-        if (queryParams.get("debug") === "true") {
-            return (
-                <span
-                    className="text-secondary"
-                    style={{ fontSize: "12px" }}
-                >
-                    {` (${this.props.barcode.id})`}
-                </span>
-            );
-        }
-        else {
-            return null;
-        }
-
-    }
-
-    copyButtonStyle() {
-        const isHighlighted = this.isHighlighted();
-        return {
-            margin: "5px 5px",
-            // backgroundColor: "green"
-            backgroundColor: isHighlighted ? "green" : null,
-            border: isHighlighted ? "1px solid green" : null,
-            transition: "all 0.5s ease-out"
-        };
-    }
-
-    afterOpenGenerateBarcodeModal = () => {
+    didClickGenerateBarcode = (e) => {
         console.log(
-            "Generate Barcode Modal is now open"
+            "Generate Barcode button was clicked:", e
         );
-        this.drawBarcodeToCanvas();
+        this.setState({
+            generateBarcodeModalIsOpen: true
+        });
     };
 
     closeGenerateBarcodeModal = () => {
@@ -317,121 +216,273 @@ export default class UserScansRow extends Component {
         );
     };
 
-    didClickGenerateBarcode = (e) => {
-        console.log(
-            "Generate Barcode button was clicked:", e
-        );
-        this.setState({
-            generateBarcodeModalIsOpen: true
-        });
-    };
+    copyButtonStyle() {
+        const isHighlighted = this.isHighlighted();
+        return {
+            backgroundColor: isHighlighted ? "#0fd626" : "lightblue",
+
+            padding: "6px 15px",
+            margin: "0px 0px 0px 0px",
+            borderTop: "1px solid black",
+            borderBottom: "1px solid black",
+            borderLeft: "1px solid black",
+            borderRight: "0.5px solid black",
+            borderRadius: "5px 0px 0px 5px",
+            rounded: "10px",
+            color: "black",
+
+            // borderLeft: isHighlighted ? "1px solid green" : "1px solid",
+            // borderTop: isHighlighted ? "1px solid green" : "1px solid",
+            // borderBottom: isHighlighted ? "1px solid green" : "1px solid",
+            transform: this.state.isCopying ? "translateY(3px)" : null,
+            transition: "all 0.5s ease-out"
+        };
+    }
+
+    linkButtonStyle() {
+        return {
+            padding: "6px 10px",
+            margin: "0px 0px 0px 0px",
+            color: "black",
+            backgroundColor: "grey",
+            borderTop: "1px solid black",
+            borderBottom: "1px solid black",
+            borderLeft: "0.5px solid black",
+            borderRight: "1px solid black",
+            borderRadius: "0px 5px 5px 0px",
+            rounded: "10px"
+
+        };
+
+    }
+
+    barcodeIsFalsy() {
+        return !this.props?.barcode?.barcode;
+    }
+
+    barcodeIDdebugText(smallSize) {
+        const queryParams = this.props.router.searchParams;
+
+        if (queryParams.get("debug") === "true") {
+            return (
+                <span
+                    className="text-secondary"
+                    style={{ fontSize: "12px" }}
+                >
+                    { smallSize ? "•" : null }
+                    {` (${this.props.barcode.id})`}
+                </span>
+            );
+        }
+        else {
+            return null;
+        }
+
+    }
 
     // MARK: - Components -
 
-    renderBarcodeImageModal() {
+    renderDeleteButton() {
         return (
-            <Modal
-                isOpen={this.state.generateBarcodeModalIsOpen}
-                onAfterOpen={this.afterOpenGenerateBarcodeModal}
-                onRequestClose={this.closeGenerateBarcodeModal}
-                style={this.customStyles}
-                contentLabel="Barcode"
+            <Button
+                style={{
+                    margin: "5px 5px",
+                    backgroundColor: "#e84846"
+                }}
+                onClick={this.onClickDeleteButton(
+                    this.props.barcode
+                )}
             >
-                <div
-                    className="barcode-image-modal text-center"
-                >
-                    {/* <h3>{barcodeText}</h3> */}
-                    <canvas
-                        className="barcode-image-canvas"
-                        ref={this.canvasRef}
-                    >
-                    </canvas>
-                </div>
-            </Modal>
+                <i className="fa fa-trash"></i>
+            </Button>
+        );
+    }
+
+    renderBarcodeCell() {
+
+        let smallSize = false
+        if (this.props.viewportSize.width <= 600) {
+            smallSize = true;
+        }
+
+        return (
+            <td>
+                <span className="barcode-text text-break">
+                    {this.props.barcode.barcode}
+                </span>
+                { smallSize ? (
+                    // <div>
+                        <span 
+                            className="text-secondary px-2"
+                            style={{
+                                fontSize: "12px"
+                            }}
+                            >
+                            {"• "}
+                            {this.state.dateDifference}
+                        </span>
+                    // </div>
+                ) : null }
+                {/* --- BARCODE ID --- */}
+                {this.barcodeIDdebugText(smallSize)}
+            </td>
         );
     }
 
     render() {
         return (
             <tr
-                data-barcode-id={this.props.barcode.id}
-                key={this.props.barcode.id}
-                className={this.rowStyleClassName()}
+            data-barcode-id={this.props.barcode.id}
+            key={this.props.barcode.id}
+            className={this.rowStyleClassName()}
             >
-                {/* Copy Button */}
+                {/* {this.renderBarcodeImageModal()} */}
+
+                <BarcodeModalView 
+                    barcode={this.props.barcode}
+                    generateBarcodeModalIsOpen={this.state.generateBarcodeModalIsOpen}
+                    closeGenerateBarcodeModal={this.closeGenerateBarcodeModal}
+                />
+
                 <td style={{
                     textAlign: "center",
+                    // minWidth: "120px",
+                    // maxHeight: "10px"
+                    // height: "20px"
+                    // margin: "2px !important",
+                    padding: "2px !important"
                 }}>
-                    <Button
-                        className="copy-button"
-                        style={this.copyButtonStyle()}
-                        onClick={this.onClickCopyButton(
-                            this.props.barcode
-                        )}
-                    >
-                        Copy
-                        {/* <i className="fa-solid fa-copy"></i> */}
-                    </Button>
-                </td>
-                {/* Context Menu */}
-                <td
-                    style={{
+
+                <Stack direction="horizontal" className="pt-4 pb-3" gap={0}>
+                   
+                    {/* <div> */}
+                        {/* --- Copy Button --- */}
+                        <button
+                            // variant=""
+                            className="copy-button"
+                            style={this.copyButtonStyle()}
+                            onClick={this.onClickCopyButton(
+                                this.props.barcode
+                            )}
+                        >
+                            {/* span>Copy</span> */}
+                            <i className="fa-solid fa-copy"></i>
+                        </button>
+                        {/* --- Link Button --- */}
+                        <button
+                            className="link-button"
+                            onClick={(e) => {
+                                return this.props.onClickOpenLink(
+                                    e, this.props.barcode
+                                );
+                            }}
+                            style={this.linkButtonStyle()}
+                        >
+                            <i className="fa fa-link"></i>
+                        </button>
+                    {/* </div> */}
+                {/* </td> */}
+                {/* --- Context Menu --- */}
+                {/* <td */}
+                    {/* style={{
                         textAlign: "center",
                     }}
                     data-toggle="tooltip"
                     data-placement="top"
                     title="Show context menu"
-                >
-                    <Dropdown>
+                > */}
+                    <Dropdown className="ms-1">
                         <Dropdown.Toggle variant="success" className="text-center">
                             <i className="fa fa-ellipsis-v px-2" />
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={this.didClickGenerateBarcode} >
-                                Generate Barcode
+                            <Dropdown.Item 
+                                onClick={this.didClickGenerateBarcode}
+                                disabled={this.barcodeIsFalsy()}
+                                style={{
+                                    color: "#076b05"
+                                }}
+                            >
+                                <div className="hstack gap-3">
+                                    <i className="fa-solid fa-barcode"></i>
+                                    <span>Generate Barcode</span>
+                                    <span className="ms-auto">
+                                        {/* --- Spacer --- */}
+                                    </span>
+                                    <span style={{
+                                        color: "gray",
+                                    }}>
+                                        {/* {this.copyAsCSVKeyboardShortcutString()} */}
+                                    </span>
+                                </div>
                             </Dropdown.Item>
-                            {/* <Dropdown.Item >Something else</Dropdown.Item> */}
+                            <Dropdown.Divider className="" />
+                            <Dropdown.Item
+                                style={{
+                                    color: "#ed432d",
+                                    // color: "white",
+                                    // backgroundColor: "#ed432d"
+                                }}
+                                onClick={this.onClickDeleteButton(
+                                    this.props.barcode
+                                )}
+                                disabled={this.barcodeIsFalsy()}
+                            >
+                                <div 
+                                    className="hstack gap-3"
+                                    style={{
+                                        // padding: "5px 10px",
+                                    }}
+                                >
+                                    <i className="fa fa-trash"></i>
+                                    <span>Delete</span>
+                                    <span className="ms-auto">
+                                        {/* --- Spacer --- */}
+                                    </span>
+                                    <span style={{
+                                        color: "gray",
+                                    }}>
+                                        {/* {this.copyAsCSVKeyboardShortcutString()} */}
+                                    </span>
+                                </div>
+                            </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
-                    {/* Barcode Image Modal */}
-                    {this.renderBarcodeImageModal()}
+                </Stack>
+                    {/* </div> */}
+                    {/* --- Barcode Image Modal --- */}
                 </td>
-                {/* Barcode Cell */}
-                <td>
-                    <span className="barcode-text">
-                        {this.props.barcode.barcode}
-                    </span>
-                    {/* BARCODE ID */}
-                    {this.barcodeIDdebugText()}
-                </td>
-
-                <td
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    title={this.formattedDateString(this.props.barcode.date)}
-                >
-                    {this.state.dateDifference}
-                </td>
-                <td
-                    style={{
-                        textAlign: "center",
-                    }}
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    title="Delete this barcode"
-                >
-                    <Button
-                        style={{
-                            margin: "5px 5px",
-                        }}
-                        onClick={this.onClickDeleteButton(
-                            this.props.barcode
-                        )}
-                    >
-                        <i className="fa fa-trash"></i>
-                    </Button>
-                </td>
+                {/* --- Barcode Cell --- */}
+                {this.renderBarcodeCell()}
+                {/* --- Time Cell (>600px) --- */}
+                {
+                    this.props.viewportSize?.width > 600 ? (
+                        <td
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title={this.formattedDateString(this.props.barcode.date)}
+                        >
+                            {this.state.dateDifference}
+                        </td>
+                    ) : null
+                }
+                
+                {/* --- Delete Button (>800px) --- */}
+                {
+                    this.props.viewportSize?.width > 800 ? (
+                        <td
+                            style={{
+                                textAlign: "center",
+                            }}
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="Delete this barcode"
+                        >
+                            {this.renderDeleteButton()}
+                        </td>
+                    ) : null
+                }
             </tr>
         );
     }

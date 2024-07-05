@@ -4,8 +4,11 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import { AppContext } from "../Model/AppContext";
 
-import { Container, Button, Dropdown, Stack } from 'react-bootstrap';
+import { Container, Button, Dropdown, Stack, Form } from 'react-bootstrap';
 // import Toast from 'react-bootstrap/Toast';
+import { toast } from 'react-hot-toast';
+
+import Modal from "react-modal";
 
 // import csv from 'csv'
 import { stringify as csvStringify } from 'csv-stringify/browser/esm/sync';
@@ -17,11 +20,10 @@ import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import { WebSocket } from "partysocket";
 
-import toast, { Toaster, /* ToastBar */ } from 'react-hot-toast';
-
 import UserScansTable from "./UserScansTable";
-
 import { DebugBreakpointView } from "./DebugBreakpointView";
+import ConfigureLinkModal from "./ConfigureLinkModal";
+import UserScansToast from "./UserScansToast";
 
 export default function UserScansRoot(props) {
 
@@ -147,6 +149,7 @@ class UserScansRootCore extends Component {
         );
 
         const enableAutoCopy = urlFragmentParams.get("auto-copy") === "true";
+        const formattedLink = urlFragmentParams.get("formatted-link");
         console.log(
             `UserScansRootCore.constructor(): enableAutoCopy: ${enableAutoCopy}`
         );
@@ -155,9 +158,12 @@ class UserScansRootCore extends Component {
             barcodes: [],
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
-            highlightedBarcode: null
+            highlightedBarcode: null,
+            formattedLink: formattedLink,
+            showFormattedLinkModal: false
         };
 
+        this.configureLinkInputRef = React.createRef();
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
         this.lastPongDate = null;
@@ -168,7 +174,14 @@ class UserScansRootCore extends Component {
         this.lastAutoCopiedBarcode = null;
 
         // MARK: Document Title
-        document.title = `Scans for ${this.user} | BarcodeDrop`;
+        let title = `Scans for ${this.user} | BarcodeDrop`;
+        if (document.location.port) {
+            document.title = `[${document.location.host}] ${title}`;
+        }
+        else {
+            document.title = title;
+        }
+
 
         if (this.user) {
             console.log(
@@ -298,12 +311,21 @@ class UserScansRootCore extends Component {
             window.location.hash.slice(1)
         );
         const enableAutoCopy = urlFragmentParams.get("auto-copy") === "true";
+        const formattedLink = urlFragmentParams.get("formatted-link");
+
         console.log(
             `UserScansRootCore.handleHashChange(): ` +
             `enableAutoCopy: ${enableAutoCopy}`
         );
-        this.setState({
-            enableAutoCopy: enableAutoCopy
+        this.setState((state) => {
+
+            let newState = {
+                enableAutoCopy: enableAutoCopy
+            }
+            if (formattedLink) {
+                newState.formattedLink = formattedLink;
+            }
+            return newState;
         });
 
     };
@@ -348,7 +370,7 @@ class UserScansRootCore extends Component {
                 );
                 const latestBarcode = this.state.barcodes[0];
                 if (latestBarcode != null) {
-                    this.copyBarcodeToClipboard(latestBarcode, {
+                    this._writeBarcodeToClipboard(latestBarcode, {
                         showNotification: true,
                         highlight: true
                     });
@@ -383,6 +405,17 @@ class UserScansRootCore extends Component {
                     `Platform modifier key + "e" pressed: COPYING all barcodes as CSV`
                 );
                 this.copyAsCSV(e);
+                e.preventDefault();
+            }
+            else if (e.key === "l" && e.shiftKey && !e.altKey) {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + shift + "l" pressed: ` +
+                    `SHOWING formatted link`
+                );
+                this.setState({
+                    showFormattedLinkModal: true
+                });
                 e.preventDefault();
             }
             else {
@@ -431,6 +464,7 @@ class UserScansRootCore extends Component {
                     `(readyState: ${this.socket.current.readyState})`
                 );
                 this.socket.current.reconnect();
+                this.copyLastBarcodeToClipboard();
             }
             else {
                 console.log(
@@ -635,7 +669,7 @@ class UserScansRootCore extends Component {
                 // and remove any existing scan with the same ID
 
                 let newBarcodes = state.barcodes
-                    .filter((barcode) => { 
+                    .filter((barcode) => {
                         for (const newScan of newScans) {
                             if (barcode.id === newScan.id) {
                                 return false;
@@ -664,13 +698,13 @@ class UserScansRootCore extends Component {
 
             const hash = message.transactionHash;
             console.log(
-                `socket will delete barcode with IDs (transactionHash: ${hash}): ` +
+                `socket will delete barcodes with IDs (transactionHash: ${hash}): ` +
                 `${ids}`
             );
             this.removeBarcodesFromState(ids);
 
         }
-        
+
         // MARK: Replace all scans
         else if (
             message?.type === SocketMessageTypes.replaceAllScans &&
@@ -782,6 +816,7 @@ class UserScansRootCore extends Component {
 
         const mostRecentBarcode = this.state.barcodes[0];
         const barcodeText = mostRecentBarcode?.barcode;
+
         if (barcodeText == null) {
             console.error(
                 `AUTO-Copy failed: most recent barcode is null or undefined:`,
@@ -790,24 +825,15 @@ class UserScansRootCore extends Component {
             return;
         }
 
-        if (this.lastAutoCopiedBarcode?.id === mostRecentBarcode?.id) {
+        if (this.latestBarcodeChanged) {
             console.log(
-                `AUTO-Copy failed: most recent barcode id is the same as the ` +
-                `previously auto-copied barcode id (${mostRecentBarcode?.id}); ` +
-                `not copying latest barcode`
+                `Auto-copying most recent barcode: "${mostRecentBarcode}"`
             );
-            return;
+            this._writeBarcodeToClipboard(mostRecentBarcode, {
+                showNotification: true,
+                highlight: true
+            });
         }
-        this.lastAutoCopiedBarcode = mostRecentBarcode;
-
-        console.log(
-            `Auto-copying most recent barcode: "${mostRecentBarcode}"`
-        );
-
-        this._writeBarcodeToClipboard(mostRecentBarcode, {
-            showNotification: true,
-            highlight: true
-        });
 
     };
 
@@ -824,53 +850,6 @@ class UserScansRootCore extends Component {
         );
 
     };
-
-    copyBarcodeToClipboard = (barcode, { showNotification }) => {
-
-        if (barcode == null) {
-            console.log(
-                `copyBarcodeToClipboard: barcode is null or undefined`
-            );
-            return;
-        }
-
-        console.log(
-            `copyBarcodeToClipboard: Copying barcode to clipboard: "${barcode}"`
-        );
-
-        this._writeBarcodeToClipboard(barcode, {
-            showNotification: showNotification,
-            highlight: true
-        });
-
-        // navigator.clipboard.writeText(barcode)
-        //     .then(() => {
-
-        //         console.log(
-        //             `copyBarcodeToClipboard: Copied barcode to clipboard: ` +
-        //             `"${barcode}"`
-        //         );
-
-        //         // set the last auto copied barcode to null whenever another
-        //         // barcode is copied to the clipboard manually
-        //         this.setState({
-        //             highlightedBarcode: null
-        //         });
-
-        //         if (showNotification) {
-        //             this.showBarcodeCopiedToast(barcode);
-        //         }
-
-        //     })
-        //     .catch((error) => {
-        //         console.error(
-        //             `copyBarcodeToClipboard: Could not copy barcode to ` +
-        //             `clipboard: "${barcode}": ${error}`
-        //         );
-        //     });
-
-    };
-
 
     /** Get the user's scans */
     getUserScans = ({ user }) => {
@@ -918,18 +897,18 @@ class UserScansRootCore extends Component {
         this.context.api.deleteUserScans({
             user: this.user
         })
-        .then((result) => {
-            console.log(
-                `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                `result: ${result}`
-            );
-        })
-        .catch((error) => {
-            console.error(
-                `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                `could not delete all user barcodes: ${error}`
-            );
-        });
+            .then((result) => {
+                console.log(
+                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                    `result: ${result}`
+                );
+            })
+            .catch((error) => {
+                console.error(
+                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                    `could not delete all user barcodes: ${error}`
+                );
+            });
 
     };
 
@@ -938,7 +917,7 @@ class UserScansRootCore extends Component {
 
         this.setState((state) => {
 
-            barcodeIDs.forEach(element => this.deleteIDs.add(element))
+            barcodeIDs.forEach(element => this.deleteIDs.add(element));
             console.log(
                 `removeBarcodesFromState(): ${this.deleteIDs.size} deleteIDs:`,
                 this.deleteIDs
@@ -981,17 +960,17 @@ class UserScansRootCore extends Component {
     };
 
     copyLastBarcodeToClipboard = () => {
-        
+
         const latestBarcode = this.state?.barcodes[0];
-        
+
         if (latestBarcode != null) {
-            
+
             console.log(
                 `UserScansRootCore.copyLastBarcodeToClipboard(): ` +
                 `Copying latest barcode to clipboard: "${latestBarcode}"`
             );
 
-            this.copyBarcodeToClipboard(latestBarcode, {
+            this._writeBarcodeToClipboard(latestBarcode, {
                 showNotification: true,
                 highlight: true
             });
@@ -1020,6 +999,10 @@ class UserScansRootCore extends Component {
         return isApplePlatform() ? "⌘K" : "Ctrl+K";
     };
 
+    configureLinkKeyboardShortcutString = () => {
+        return isApplePlatform() ? "⌘⇧L" : "Ctrl+Shift+L";
+    };
+
     makeCSVString = () => {
         const csvString = csvStringify(this.state.barcodes, {
             header: true,
@@ -1036,7 +1019,12 @@ class UserScansRootCore extends Component {
     copyAsCSV = (e) => {
         console.log(`exportAsCSV():`, e);
 
-        // csv.parse(this.state.barcodes)
+        if (!this.state?.barcodes?.length) {
+            console.error(
+                `copyAsCSV(): cannot copy CSV to clipboard: no barcodes`
+            );
+            return;
+        }
 
         const csvString = this.makeCSVString();
 
@@ -1057,6 +1045,20 @@ class UserScansRootCore extends Component {
     };
 
     exportAsCSV = (e) => {
+
+        console.log(
+            `exportAsCSV():`, e,
+            "barcodes:", this.state.barcodes
+        );
+
+        if (this._copyLastBarcodeIsDisabled()) {
+            console.error(
+                `exportAsCSV(): cannot export CSV: no barcodes`
+            );
+            return;
+        }
+
+
         const date = new Date();
         const dateString = date.toISOString();
 
@@ -1078,7 +1080,119 @@ class UserScansRootCore extends Component {
 
     disabledClassIfZeroBarcodes = () => {
         return this._copyLastBarcodeIsDisabled() ? "disabled" : "";
-    }
+    };
+
+    // MARK: - Links -
+
+    onClickOpenLink = (e, barcode) => {
+
+        console.log(`onClickOpenLink(): event:`, e, `barcode:`, barcode);
+
+        const barcodeText = barcode?.barcode;
+        if (barcodeText == null) {
+            console.error(
+                `onClickOpenLink(): barcode text is null or undefined`
+            );
+            return;
+        }
+
+        const formattedLink = this.state?.formattedLink;
+        if (formattedLink == null) {
+            console.error(
+                `onClickOpenLink(): formatted link is null or undefined`
+            );
+            return;
+        }
+
+        const url = formattedLink.replace("%s", barcodeText);
+        console.log(
+            `onClickOpenLink(): Opening link: "${url}" ` +
+            `for barcode: "${barcodeText}"`
+        );
+
+        window.open(url, "_blank");
+
+    };
+
+    configureLink = (e) => {
+
+        console.log(`configureLink():`, e);
+
+        this.setState({
+            showFormattedLinkModal: true
+        });
+
+
+    };
+
+    onChangeConfigureLinkInput = (e) => {
+
+        const formattedLink = e.target.value;
+        console.log(
+            `onChangeConfigureLinkInput(): formattedLink: ${formattedLink}`
+        );
+
+        this.setState({
+            formattedLink: formattedLink
+        });
+
+    };
+
+    onSubmitConfigureLinkForm = (e) => {
+
+        console.log(`onSubmitConfigureLinkForm():`, e);
+
+        const formattedLink = this.state.formattedLink;
+        // const formattedLink = e.target.value;
+
+        console.log(
+            `onChangeConfigureLinkInput(): formattedLink:`,
+            formattedLink
+        );
+
+        this.setState({
+            showFormattedLinkModal: false,
+            formattedLink: formattedLink
+        });
+
+        const urlFragmentParams = new URLSearchParams(
+            window.location.hash.slice(1)
+        );
+
+        urlFragmentParams.set("formatted-link", formattedLink);
+        window.location.hash = urlFragmentParams.toString();
+
+        e.preventDefault();
+
+    };
+
+    onOpenConfigureLinkModal = (e) => {
+        console.log(`onOpenConfigureLinkModal():`, e);
+        // this.setState({
+        //     showFormattedLinkModal: true
+        // });
+    };
+
+    afterOpenGenerateBarcodeModal = (e) => {
+        console.log(`afterOpenGenerateBarcodeModal():`, e);
+    };
+
+    closeConfigureLinkModal = (e) => {
+        
+        console.log(`closeConfigureLinkModal():`, e);
+        
+        this.setState({
+            showFormattedLinkModal: false
+        });
+
+        const urlFragmentParams = new URLSearchParams(
+            window.location.hash.slice(1)
+        );
+
+        urlFragmentParams.set("formatted-link", this.state.formattedLink);
+        window.location.hash = urlFragmentParams.toString();
+
+    };
 
     // MARK: Private Interface
 
@@ -1086,8 +1200,8 @@ class UserScansRootCore extends Component {
         return !this.state?.barcodes?.length;
     };
 
-    _writeBarcodeToClipboard = (barcode, { showNotification, highlight}) => {
-        
+    _writeBarcodeToClipboard = (barcode, { showNotification, highlight }) => {
+
         let barcodeText = barcode?.barcode;
         if (barcodeText == null) {
             console.error(
@@ -1105,10 +1219,19 @@ class UserScansRootCore extends Component {
                 );
 
                 if (showNotification) {
+                    console.log(
+                        `_writeTextToClipboard: ` +
+                        `--- SHOWING BARCODE COPIED TOAST ---` +
+                        `(id: ${barcode?.id})`
+                    );
                     this.showBarcodeCopiedToast(barcodeText);
                 }
 
                 if (highlight) {
+                    console.log(
+                        `_writeTextToClipboard: --- HIGHLIGHT --- ` +
+                        `(id: ${barcode?.id})`
+                    );
                     this._setHighlightedBarcode(barcode);
                 }
 
@@ -1137,20 +1260,7 @@ class UserScansRootCore extends Component {
 
     };
 
-    renderToast() {
-        return (
-            <div style={{ /* height: "50px" */ }} onClick={this.dismissToast}>
-                <Toaster
-                    gutter={10}
-                    toastOptions={{
-                        style: {
-                            background: "lightblue",
-                        }
-                    }}
-                />
-            </div>
-        );
-    }
+    // MARK: --- Rendering ---
 
     render() {
         return (
@@ -1166,6 +1276,17 @@ class UserScansRootCore extends Component {
                     <DebugBreakpointView /> :
                     null
                 }
+
+                <ConfigureLinkModal
+                    formattedLink={this.state.formattedLink}
+                    showFormattedLinkModal={this.state.showFormattedLinkModal}
+                    setState={this.setState}
+                    onOpenConfigureLinkModal={this.onOpenConfigureLinkModal}
+                    onChangeConfigureLinkInput={this.onChangeConfigureLinkInput}
+                    closeConfigureLinkModal={this.closeConfigureLinkModal}
+                    onSubmitConfigureLinkForm={this.onSubmitConfigureLinkForm}
+                />
+                <UserScansToast />
 
 
                 <MainNavbar />
@@ -1185,11 +1306,11 @@ class UserScansRootCore extends Component {
                         </h2>
                     </div>
 
-                    {this.renderToast()}
+                    {/* --- Spacer --- */}
 
                     <Stack direction="horizontal" className="pt-4 pb-3" gap={2}>
                         <div className="pe-1">
-                            {/* Delete All */}
+                            {/* --- Delete All --- */}
 
                             <Button
                                 variant="danger"
@@ -1203,7 +1324,7 @@ class UserScansRootCore extends Component {
                             </Button>
                         </div>
                         <div className="p-1">
-                            {/* Dropdown */}
+                            {/* --- Dropdown --- */}
 
                             <Dropdown>
                                 <Dropdown.Toggle variant="success">
@@ -1219,7 +1340,7 @@ class UserScansRootCore extends Component {
                                             <i className="fa fa-file-csv"></i>
                                             <span>Copy as CSV</span>
                                             <span className="ms-auto">
-                                                {/* Spacer */}
+                                                {/* --- Spacer --- */}
                                             </span>
                                             <span style={{
                                                 color: "gray",
@@ -1236,7 +1357,7 @@ class UserScansRootCore extends Component {
                                             <i className="fa-solid fa-file-export"></i>
                                             <span>Export as CSV</span>
                                             <span className="ms-auto">
-                                                {/* Spacer */}
+                                                {/* --- Spacer --- */}
                                             </span>
                                             <span style={{
                                                 color: "gray",
@@ -1246,7 +1367,7 @@ class UserScansRootCore extends Component {
                                         </div>
                                     </Dropdown.Item>
                                     <Dropdown.Divider className="" />
-                                    <Dropdown.Item 
+                                    <Dropdown.Item
                                         className={this.disabledClassIfZeroBarcodes()}
                                         onClick={this.copyLastBarcodeToClipboard}
                                     >
@@ -1254,12 +1375,29 @@ class UserScansRootCore extends Component {
                                             <i className="fa-solid fa-copy"></i>
                                             <span>Copy Latest Barcode</span>
                                             <span className="ms-auto">
-                                                {/* Spacer */}
+                                                {/* --- Spacer --- */}
                                             </span>
                                             <span style={{
                                                 color: "gray",
                                             }}>
                                                 {this.copyLastBarcodeKeyboardShortcutString()}
+                                            </span>
+                                        </div>
+                                    </Dropdown.Item>
+                                    <Dropdown.Divider className="" />
+                                    <Dropdown.Item
+                                        onClick={this.configureLink}
+                                    >
+                                        <div className="hstack gap-3">
+                                            <i className="fa fa-link"></i>
+                                            <span>Configure Link...</span>
+                                            <span className="ms-auto">
+                                                {/* --- Spacer --- */}
+                                            </span>
+                                            <span style={{
+                                                color: "gray",
+                                            }}>
+                                                {this.configureLinkKeyboardShortcutString()}
                                             </span>
                                         </div>
                                     </Dropdown.Item>
@@ -1290,7 +1428,7 @@ class UserScansRootCore extends Component {
                         </div>
                     </Stack>
 
-                    {/* spacer */}
+                    {/* --- spacer --- */}
 
                     {/* Table of Barcodes */}
 
@@ -1305,10 +1443,11 @@ class UserScansRootCore extends Component {
                         setHighlightedBarcode={
                             this._setHighlightedBarcode
                         }
+                        onClickOpenLink={this.onClickOpenLink}
                     />
 
                 </Container>
-                {/* </div> */}
+                {/* /div> */}
             </div>
         );
     };

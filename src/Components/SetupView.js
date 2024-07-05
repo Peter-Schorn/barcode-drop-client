@@ -56,7 +56,7 @@ export default class SetupView extends Component {
                         You can use the following apps to scan barcodes:
                     </p>
 
-                    {/* QR Bot */}
+                    {/* --- QR Bot --- */}
                     <p>
                         {this.newTabLink("https://qrbot.net", 
                             <strong>QR Bot</strong>
@@ -80,7 +80,7 @@ export default class SetupView extends Component {
 
                     {/* <hr className="padded-hr" /> */}
 
-                    {/* QR & Barcode Scanner */}
+                    {/* --- QR & Barcode Scanner --- */}
                     <p className="pt-4">
                         {this.newTabLink(
                             "https://play.google.com/store/apps/details?id=com.scanner.kataykin.icamesscaner.free", 
@@ -108,7 +108,7 @@ export default class SetupView extends Component {
                         (replace {"<user>"} with your username):
                     </p>
 
-                    {/* <code style={{ all: "revert"}}> */}
+                    {/* --- <code style={{ all: "revert"}}> --- */}
                     <code>
                         {"https://api.barcodedrop.com/scan/<user>"}
                     </code>

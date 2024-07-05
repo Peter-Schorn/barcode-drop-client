@@ -23,6 +23,7 @@ export default function UserScansTable(props) {
     return (
         <UserScansTableCore
             {...props}
+            onClickOpenLink={props.onClickOpenLink}
         />
     );
 
@@ -49,6 +50,13 @@ class UserScansTableCore extends Component {
 
          */
 
+        this.state = {
+            viewportSize: {
+                width: window.innerWidth,
+                height: window.innerHeight
+            }
+        };
+
         if (this.props.user) {
             console.log(
                 `UserScansTableCore.constructor(): user: ${this.props.user}`
@@ -62,8 +70,18 @@ class UserScansTableCore extends Component {
     }
 
     componentDidMount() {
+        
         console.log("UserScansTableCore.componentDidMount():");
-        // console.log(`context.api: ${this.context.api}`);
+
+        window.addEventListener("resize", this.windowDidResize);
+    }
+
+    componentWillUnmount() {
+        
+        console.log("UserScansTableCore.componentWillUnmount()");
+
+        window.removeEventListener("resize", this.windowDidResize);
+
     }
 
     // componentDidUpdate(prevProps, prevState) {
@@ -73,6 +91,25 @@ class UserScansTableCore extends Component {
     //         `prevState: ${prevState}`
     //     );
     // }
+
+    windowDidResize = (e) => {
+        
+        this.setState((state) => {
+            const size = {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+            console.log(
+                `UserScansTableCore.windowDidResize(): size:`,
+                size
+            );
+            return {
+                viewportSize: size
+            };
+        });
+
+    }
+
 
     render() {
         console.log("UserScansTableCore.render()");
@@ -84,11 +121,19 @@ class UserScansTableCore extends Component {
             >
                 <thead>
                     <tr>
-                        <th style={{ width: "90px" }}>{/* copy button */}</th>
-                        <th style={{ width: "100px" }}>{/* context menu */}</th>
+                        <th>
+                            {/* --- Primary Buttons --- */}
+                        {/* </th> */}
+                        {/* <th style={{ width: "100px" }}> */}
+                            {/* --- Context Menu --- */}
+                        </th>
                         <th>Barcode</th>
-                        <th>Time</th>
-                        <th style={{ width: "80px" }}>Delete</th>
+                        { this.state.viewportSize.width > 600 ? (
+                            <th>Time</th>
+                        ) : null }
+                        { this.state.viewportSize.width > 800 ? (
+                            <th style={{ width: "80px" }}>Delete</th>
+                        ) : null }
                     </tr>
                 </thead>
                 <tbody>
@@ -98,6 +143,7 @@ class UserScansTableCore extends Component {
                             index={index}
                             barcode={barcode}
                             user={this.props.user}
+                            viewportSize={this.state.viewportSize}
                             isHighlighted={this.props.highlightedBarcode?.id === barcode.id}
                             router={this.props.router}
                             removeBarcodesFromState={
@@ -106,6 +152,7 @@ class UserScansTableCore extends Component {
                             setHighlightedBarcode={
                                 this.props.setHighlightedBarcode
                             }
+                            onClickOpenLink={this.props.onClickOpenLink}
                         />
                     )}
                 </tbody>

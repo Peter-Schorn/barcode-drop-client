@@ -1,6 +1,6 @@
 import React from 'react';
 import { Component } from "react";
-import { Form, Button} from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import MainNavbar from "./MainNavbar";
@@ -31,7 +31,7 @@ class HomeViewCore extends Component {
 
         this.state = {
             user: null
-        }
+        };
 
     }
 
@@ -43,7 +43,7 @@ class HomeViewCore extends Component {
         event.preventDefault();
         console.log(`HomeView.onSubmitForm(): user: "${this.state.user}"`);
         return this.navigate(`/scans/${this.state.user}`);
-    }
+    };
 
     handleUserInputChange = (event) => {
         console.log(
@@ -53,7 +53,7 @@ class HomeViewCore extends Component {
         this.setState({
             user: event.target.value
         });
-    }
+    };
 
     render() {
         return (
@@ -67,10 +67,10 @@ class HomeViewCore extends Component {
                             </Form.Label>
                             <Form.Control
                                 ref={this.usernameField}
-                                className="" 
-                                size="lg" 
-                                type="text" 
-                                placeholder="" 
+                                className=""
+                                size="lg"
+                                type="text"
+                                placeholder=""
                                 onChange={this.handleUserInputChange}
                             />
                         </Form.Group>

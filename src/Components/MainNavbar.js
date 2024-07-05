@@ -22,7 +22,7 @@ export default class MainNavbar extends Component {
                                 </i>
                             </strong>
                         </a>
-                    {/* </div> */}
+                    {/* --- </div> --- */}
                     <button 
                         className="navbar-toggler"
                         type="button"

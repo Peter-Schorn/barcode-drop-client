@@ -45,19 +45,19 @@ export default class App extends Component {
                 <BrowserRouter>
                     <Routes>
 
-                        {/* Home */}
+                        {/* --- Home --- */}
                         <Route 
                             path="/" 
                             element={<HomeView/>}
                         />
 
-                        {/* Setup Instructions */}
+                        {/* --- Setup Instructions --- */}
                         <Route
                             path="/setup"
                             element={<SetupView/>}
                         />
 
-                        {/* User Scans Table */}
+                        {/* --- User Scans Table --- */}
                         <Route 
                             path="/scans/:user" 
                             element={<UserScansRoot/>}
