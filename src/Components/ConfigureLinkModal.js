@@ -71,7 +71,6 @@ export default class ConfigureLinkModal extends Component {
                         top: "20px",
                         left: offset,
                         right: offset,
-                        bottom: "20px",
                         border: "1px solid #ccc",
                         background: "#cdcfd1",
                         // overflow: "auto",
