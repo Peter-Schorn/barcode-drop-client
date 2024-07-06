@@ -1447,10 +1447,18 @@ class UserScansRootCore extends Component {
                     <DebugBreakpointView />
                 } */}
 
-                {process.env?.NODE_ENV === "development" ?
+                {/* {process.env?.NODE_ENV === "development" ?
                     <DebugBreakpointView /> :
                     null
-                }
+                } */}
+
+                {/* *** =====================-=== */}
+                {/* *** === Scan Barcode View === */}
+                {/* *** =====================-=== */}
+                <ScanBarcodeView
+                    user={this.user}
+                    viewportSize={this.state.viewportSize}
+                />
 
                 <ConfigureLinkModal
                     formattedLink={this.state.formattedLink}
@@ -1483,16 +1491,6 @@ class UserScansRootCore extends Component {
                             </strong>
                         </h2>
                     </div>
-
-                    {/* --- Spacer --- */}
-
-                    {/* *** =====================-=== */}
-                    {/* *** === Scan Barcode View === */}
-                    {/* *** =====================-=== */}
-                    <ScanBarcodeView
-                        user={this.user}
-                        viewportSize={this.state.viewportSize}
-                    />
 
                     {/* --- Spacer --- */}
 

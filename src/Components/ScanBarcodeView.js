@@ -3,7 +3,7 @@ import { Component } from "react";
 
 import { AppContext } from "../Model/AppContext";
 
-import { Button, Dropdown, Stack, Form, Col, Row } from "react-bootstrap";
+import { Button, Dropdown, Stack, Form, InputGroup, Col, Row } from "react-bootstrap";
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 
 import Modal from "react-modal";
@@ -95,76 +95,170 @@ export default class ScanBarcodeView extends Component {
                     `ScanBarcodeView.scanBarcode(): response: ` +
                     `"${response}"`
                 );
+                this.setState({ 
+                    barcode: "" 
+                });
             })
             .catch((error) => {
                 console.error(
                     `ScanBarcodeView.scanBarcode(): error: ` +
                     `"${error}"`
                 );
+                this.setState({ 
+                    barcode: "" 
+                });
             });
+
 
     }
 
     render() {
         return (
             <div 
-                className="mt-3 p-2 border border-2 rounded "
+                className="scan-barcode-container translate-middle top-50 start-50 position-absolute rounded z-index-1"
+                // className="scan-barcode-container position-absolute translate-middle rounded"
                 style={{
+                    zIndex: 1,
+                    // width: "90%",
                     // width: "100%",
-                    maxWidth: "600px",
-                    margin: "auto",
-                    backgroundColor: "lightgray"
+                    height: "38px",
+                    width: "500px",
+                    maxWidth: "90vw",
+                    marginLeft: "auto",
+                    marginRight: "-10px",
+                    marginTop: "-35vh",
+                         /* top    | right | bottom | left */
+                    // margin: "120px   0px    10px      50%",
+                    // margin: "auto",
+                    // padding: "100px",
+                    backgroundColor: "lightgray",
+
+                    border: "0px solid black",
+
+                    // position: "absolute"
+
+                    // shadow: "2px 2px 2px 2px",
+                    // top: "40px",
+                    // left: "auto"
                 }}
             >
-                <Form
-                    onSubmit={this.onSubmitForm}
-                >
-                    
-                    {/* <div 
-                        className="row justify-content-start"
-                    > */}
-                    <div 
-                        className="d-flex p-2"
+                {/* <div
+                    // className="position-sticky "
+                    style={{
+                        top: 0,
+                        height: "200px"
+                        // maxWidth: "90vw"
+                    }}
+                > */}
+                    <Form
+                        onSubmit={this.onSubmitForm}
+                        
                     >
-                            {/* COLUMN */}
-                            <div 
-                                className="flex-fill pe-3"
-                            >
-
-                                {/* <FloatingLabel
-                                    controlId="floatingInput"
-                                    label="Enter Barcode"
-                                    className=""  // "mb-3"
-                                    size="sm"
-                                > */}
-                                    <Form.Control
-                                        ref={this.barcodeField}
-                                        type="text"
-                                        // size="sm"
-                                        value={this.state.barcode}
-                                        onChange={this.handleInputChange}
-                                        placeholder="Enter Barcode"
-                                    />
-                                {/* </FloatingLabel> */}
-                            </div>
-                            
-                            {/* COLUMN */}
-                            <div 
-                                className=""
-                            >
-                                <Button 
-                                    // className="m-3" 
-                                    variant="dark" 
-                                    type="submit"
-                                    style={{
-                                        maxWidth: "80px"
-                                    }}
+                        
+                        {/* <div 
+                            className="row justify-content-start"
+                        > */}
+                        <div 
+                            className="d-flex"
+                        >
+                                {/* COLUMN */}
+                                <div 
+                                    className="flex-fill"
                                 >
-                                    Submit
-                                </Button>
-                            </div>
-                    </div>
-                </Form>
+                                    {/* <i 
+                                        className="fa-solid fa-barcode"
+                                        style={{
+                                            margin: "0px 10px",
+                                            color: "black",
+                                            width: "16px"
+                                            
+                                        }}
+                                    >
+                                    </i> */}
+
+                                    {/* <FloatingLabel
+                                        controlId="floatingInput"
+                                        label="Enter Barcode"
+                                        className=""  // "mb-3"
+                                        size="sm"
+                                    > */}
+                                        {/* *** ADD BARCODE ICON *** */}
+                                        {/* <span className="input-group-text" id="basic-addon1">@</span> */}
+                                        
+                                        
+                                        
+                                        <InputGroup>
+                                        
+                                            <InputGroup.Text
+                                                style={{
+                                                    // width: "16px",
+                                                    // height: "60px"
+                                                    border: "2px solid white"
+                                                }}
+                                            >
+                                                <i
+                                                    className="fa-solid fa-barcode"
+                                                    style={{
+                                                        color: "black",
+                                                        width: "16px",
+                                                        height: "16px"
+                                                    }}
+                                                >
+                                                </i>
+                                            </InputGroup.Text>
+
+                                            <Form.Control
+                                                ref={this.barcodeField}
+                                                type="text"
+                                                size="lg"
+                                                value={this.state.barcode}
+                                                onChange={this.handleInputChange}
+                                                placeholder="Enter Barcode"
+                                                className="scan-barcode-input"
+                                                style={{
+                                                    // maxWidth: "300px"
+                                                    paddingRight: "70px",
+                                                    border: "0px solid black"
+                                                }}
+                                            >
+                                            </Form.Control>
+
+                                        </InputGroup>
+                                    {/* </FloatingLabel> */}
+                                </div>
+                                
+                                {/* COLUMN */}
+                                <div 
+                                    className=""
+                                >
+                                    {/* ============================== */}
+                                    {/* *** ==== SUBMIT BUTTON === *** */}
+                                    {/* ============================== */}
+                                    <button 
+                                        className="scan-barcode-submit-button"
+                                        // variant="dark" 
+                                        // size="sm"
+                                        type="submit"
+                                        style={{
+                                            maxWidth: "80px",
+                                            height: "48px",
+                                            position: "absolute",
+                                            margin: "0px -63px",
+                                            color: "gray",
+                                            // backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                            backgroundColor: "#f0eded",
+                                            borderRadius: "0px 8px 8px 0px",
+                                            border: "none",
+                                            // opacity: "0.4"
+                                        }}
+                                    >
+                                        Submit
+                                        {/* {"  ↳  "} */}
+                                    </button>
+                                </div>
+                        </div>
+                    </Form>
+                {/* </div> */}
             </div>
         );
     }

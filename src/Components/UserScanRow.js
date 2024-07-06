@@ -217,7 +217,7 @@ export default class UserScansRow extends Component {
             borderLeft: "1px solid black",
             borderRight: "0.5px solid black",
             borderRadius: "5px 0px 0px 5px",
-            rounded: "10px",
+            // rounded: "10px",  // probably don't need; should be `borderRadius`
             color: "black",
 
             // borderLeft: isHighlighted ? "1px solid green" : "1px solid",
