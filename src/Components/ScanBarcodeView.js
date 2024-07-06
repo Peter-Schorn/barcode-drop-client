@@ -146,7 +146,7 @@ export default class ScanBarcodeView extends Component {
                     width: "500px",
                     maxWidth: "90vw",
                     marginLeft: "auto",
-                    marginRight: "-10px",
+                    marginRight: "10px",
                     marginTop: "-35vh",
                          /* top    | right | bottom | left */
                     // margin: "120px   0px    10px      50%",
