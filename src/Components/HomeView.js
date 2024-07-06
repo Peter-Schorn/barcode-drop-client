@@ -1,10 +1,15 @@
 import React from 'react';
 import { Component } from "react";
+
 import { Form, Button } from 'react-bootstrap';
+import FloatingLabel from 'react-bootstrap/FloatingLabel';
+
+
 import { useNavigate } from 'react-router-dom';
-import Backend from "../API/backend.js";
 
 import MainNavbar from "./MainNavbar";
+
+import { AppContext } from "../Model/AppContext";
 
 // import barcode_drop_background from "./images/barcode_drop_background.svg";
 
@@ -23,14 +28,14 @@ export default function HomeView(props) {
 
 class HomeViewCore extends Component {
 
+    static contextType = AppContext;
+
     constructor(props) {
         super(props);
 
         this.navigate = props.navigate;
 
         document.title = `BarcodeDrop`;
-
-        this.backend = new Backend();
 
         this.usernameField = React.createRef();
 
@@ -45,7 +50,7 @@ class HomeViewCore extends Component {
 
         this.usernameField?.current?.focus();
 
-        this.backend.getRandomSplashText()
+        this.context.api.getRandomSplashText()
             .then((splashText) => {
                 console.log(`HomeView.componentDidMount(): splashText: "${splashText}"`);
                 this.setState({
@@ -105,9 +110,10 @@ class HomeViewCore extends Component {
                         <Form.Label>
                             <h2 className=" mb-3"> Enter Your Username</h2>
                         </Form.Label>
+                        
                         <Form.Control
                             ref={this.usernameField}
-                            className=""
+                            className="form-floating"
                             size="lg"
                             type="text"
                             placeholder=""

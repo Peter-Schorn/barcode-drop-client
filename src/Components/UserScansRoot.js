@@ -26,6 +26,7 @@ import UserScansTable from "./UserScansTable";
 import { DebugBreakpointView } from "./DebugBreakpointView";
 import ConfigureLinkModal from "./ConfigureLinkModal";
 import UserScansToast from "./UserScansToast";
+import ScanBarcodeView from "./ScanBarcodeView";
 
 export default function UserScansRoot(props) {
 
@@ -1354,6 +1355,88 @@ class UserScansRootCore extends Component {
 
     // MARK: --- Rendering ---
 
+    renderMainContextMenu() {
+        return (
+            <Dropdown>
+                <Dropdown.Toggle variant="success">
+                    <i className="fa fa-ellipsis-v px-2"></i>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                    <Dropdown.Item
+                        className={this.disabledClassIfZeroBarcodes()}
+                        onClick={this.copyAsCSV}
+                    >
+                        <div className="hstack gap-3">
+                            <i className="fa fa-file-csv"></i>
+                            <span>Copy as CSV</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {this.copyAsCSVKeyboardShortcutString()}
+                            </span>
+                        </div>
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                        className={this.disabledClassIfZeroBarcodes()}
+                        onClick={this.exportAsCSV}
+                    >
+                        <div className="hstack gap-3">
+                            <i className="fa-solid fa-file-export"></i>
+                            <span>Export as CSV</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {this.exportAsCSVKeyboardShortcutString()}
+                            </span>
+                        </div>
+                    </Dropdown.Item>
+                    <Dropdown.Divider className="" />
+                    <Dropdown.Item
+                        className={this.disabledClassIfZeroBarcodes()}
+                        onClick={this.copyLastBarcodeToClipboard}
+                    >
+                        <div className="hstack gap-3">
+                            <i className="fa-solid fa-copy"></i>
+                            <span>Copy Latest Barcode</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {this.copyLastBarcodeKeyboardShortcutString()}
+                            </span>
+                        </div>
+                    </Dropdown.Item>
+                    <Dropdown.Divider className="" />
+                    <Dropdown.Item
+                        onClick={this.configureLink}
+                    >
+                        <div className="hstack gap-3">
+                            <i className="fa fa-link"></i>
+                            <span>Configure Link...</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {this.configureLinkKeyboardShortcutString()}
+                            </span>
+                        </div>
+                    </Dropdown.Item>
+                </Dropdown.Menu>
+            </Dropdown>
+        );
+    }
+
     render() {
         return (
             <div className="vw-100 vh-100">
@@ -1403,6 +1486,16 @@ class UserScansRootCore extends Component {
 
                     {/* --- Spacer --- */}
 
+                    {/* *** =====================-=== */}
+                    {/* *** === Scan Barcode View === */}
+                    {/* *** =====================-=== */}
+                    <ScanBarcodeView
+                        user={this.user}
+                        viewportSize={this.state.viewportSize}
+                    />
+
+                    {/* --- Spacer --- */}
+
                     <Stack direction="horizontal" className="pt-4 pb-3" gap={2}>
                         <div className="pe-1">
                             {/* --- Delete All --- */}
@@ -1419,85 +1512,10 @@ class UserScansRootCore extends Component {
                             </Button>
                         </div>
                         <div className="p-1">
-                            {/* --- Dropdown --- */}
-
-                            <Dropdown>
-                                <Dropdown.Toggle variant="success">
-                                    <i className="fa fa-ellipsis-v px-2"></i>
-                                </Dropdown.Toggle>
-
-                                <Dropdown.Menu>
-                                    <Dropdown.Item
-                                        className={this.disabledClassIfZeroBarcodes()}
-                                        onClick={this.copyAsCSV}
-                                    >
-                                        <div className="hstack gap-3">
-                                            <i className="fa fa-file-csv"></i>
-                                            <span>Copy as CSV</span>
-                                            <span className="ms-auto">
-                                                {/* --- Spacer --- */}
-                                            </span>
-                                            <span style={{
-                                                color: "gray",
-                                            }}>
-                                                {this.copyAsCSVKeyboardShortcutString()}
-                                            </span>
-                                        </div>
-                                    </Dropdown.Item>
-                                    <Dropdown.Item
-                                        className={this.disabledClassIfZeroBarcodes()}
-                                        onClick={this.exportAsCSV}
-                                    >
-                                        <div className="hstack gap-3">
-                                            <i className="fa-solid fa-file-export"></i>
-                                            <span>Export as CSV</span>
-                                            <span className="ms-auto">
-                                                {/* --- Spacer --- */}
-                                            </span>
-                                            <span style={{
-                                                color: "gray",
-                                            }}>
-                                                {this.exportAsCSVKeyboardShortcutString()}
-                                            </span>
-                                        </div>
-                                    </Dropdown.Item>
-                                    <Dropdown.Divider className="" />
-                                    <Dropdown.Item
-                                        className={this.disabledClassIfZeroBarcodes()}
-                                        onClick={this.copyLastBarcodeToClipboard}
-                                    >
-                                        <div className="hstack gap-3">
-                                            <i className="fa-solid fa-copy"></i>
-                                            <span>Copy Latest Barcode</span>
-                                            <span className="ms-auto">
-                                                {/* --- Spacer --- */}
-                                            </span>
-                                            <span style={{
-                                                color: "gray",
-                                            }}>
-                                                {this.copyLastBarcodeKeyboardShortcutString()}
-                                            </span>
-                                        </div>
-                                    </Dropdown.Item>
-                                    <Dropdown.Divider className="" />
-                                    <Dropdown.Item
-                                        onClick={this.configureLink}
-                                    >
-                                        <div className="hstack gap-3">
-                                            <i className="fa fa-link"></i>
-                                            <span>Configure Link...</span>
-                                            <span className="ms-auto">
-                                                {/* --- Spacer --- */}
-                                            </span>
-                                            <span style={{
-                                                color: "gray",
-                                            }}>
-                                                {this.configureLinkKeyboardShortcutString()}
-                                            </span>
-                                        </div>
-                                    </Dropdown.Item>
-                                </Dropdown.Menu>
-                            </Dropdown>
+                            {/* *** ==================================== *** */}
+                            {/* *** === Dropdown - Main Context Menu === *** */}
+                            {/* *** ==================================== *** */}
+                            {this.renderMainContextMenu()}
                         </div>
                         <div className="p-1">
                             {/* Auto-Copy */}
