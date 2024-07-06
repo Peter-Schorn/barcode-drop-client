@@ -72,8 +72,8 @@ class HomeViewCore extends Component {
                 <div 
                     className={
                         "d-flex justify-content-center align-items-center " +
-                        "w-100 h-75 " +
-                        "bg-secondary"
+                        "w-100 h-75 "
+                        // "bg-secondary"
                     }
                     style={{
                         backgroundImage: `url(${process.env.PUBLIC_URL + "images/barcode_drop_background.svg"})`,
