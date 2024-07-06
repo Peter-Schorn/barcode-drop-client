@@ -88,13 +88,13 @@ class HomeViewCore extends Component {
     renderForm() {
         return  (
             <div 
-                className="form-container rounded"
+                className="username-form-container rounded"
                 style={{
                     backgroundColor: "white"
                 }}
             >
                 <Form 
-                    className="username-form shadow-lg p-5 rounded text-center shine" 
+                    className="username-form p-5 rounded text-center shine" 
                     onSubmit={this.onSubmitForm}
                     style={this.usernameFormBackground()}   
                     // style={{
