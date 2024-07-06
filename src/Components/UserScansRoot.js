@@ -1507,7 +1507,7 @@ class UserScansRootCore extends Component {
                                 className=""
                                 data-toggle="tooltip"
                                 data-placement="top"
-                                title={`(${this.toggleAutoCopyKeyboardShortcutString()}) Automatically copy the most recent barcode to the clipboard"`}
+                                title={`(${this.toggleAutoCopyKeyboardShortcutString()}) Automatically copy the most recent barcode to the clipboard`}
                             >
                                 <input
                                     type="checkbox"
