@@ -19,7 +19,11 @@ import MainNavbar from "./MainNavbar";
 import { WebSocket } from "partysocket";
 
 
-import { isApplePlatform, setIntervalImmediately } from "../MiscellaneousUtilities";
+import {
+    isApplePlatform,
+    setIntervalImmediately,
+    prefixTitleWithDocumentHostIfPort
+} from "../MiscellaneousUtilities";
 import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import UserScansTable from "./UserScansTable";
@@ -183,12 +187,7 @@ class UserScansRootCore extends Component {
 
         // MARK: Document Title
         let title = `Scans for ${this.user} | BarcodeDrop`;
-        if (document.location.port) {
-            document.title = `[${document.location.host}] ${title}`;
-        }
-        else {
-            document.title = title;
-        }
+        document.title = prefixTitleWithDocumentHostIfPort(title);
 
 
         if (this.user) {
@@ -240,7 +239,7 @@ class UserScansRootCore extends Component {
         window.removeEventListener("resize", this.windowDidResize);
     }
 
-    
+
 
     componentDidMount() {
 
@@ -334,14 +333,14 @@ class UserScansRootCore extends Component {
             let newState = {
                 enableAutoCopy: enableAutoCopy,
                 formattedLink: formattedLink
-            }
+            };
             return newState;
         });
 
     };
 
     windowDidResize = (e) => {
-        
+
         this.setState((state) => {
             const size = {
                 width: window.innerWidth,
@@ -356,7 +355,7 @@ class UserScansRootCore extends Component {
             };
         });
 
-    }
+    };
 
     promptForClipboardPermission = () => {
         console.log("promptForClipboardPermission");
@@ -1054,11 +1053,11 @@ class UserScansRootCore extends Component {
 
     scanBarcodeKeyboardShortcutString = () => {
         return isApplePlatform() ? "⌘S" : "Ctrl+S";
-    }
+    };
 
     toggleAutoCopyKeyboardShortcutString = () => {
         return isApplePlatform() ? "⌘Z" : "Ctrl+Z";
-    }
+    };
 
     toggleAutoCopy = (e) => {
         this.setState((state) => {
@@ -1074,7 +1073,7 @@ class UserScansRootCore extends Component {
         );
         urlFragmentParams.set("auto-copy", !this.state.enableAutoCopy);
         window.location.hash = urlFragmentParams.toString();
-        
+
     };
 
     makeCSVString = () => {
@@ -1196,7 +1195,7 @@ class UserScansRootCore extends Component {
                 );
                 return;
             }
-    
+
             window.open(url, "_blank");
 
         } catch (error) {
@@ -1280,9 +1279,9 @@ class UserScansRootCore extends Component {
     };
 
     closeConfigureLinkModal = (e) => {
-        
+
         console.log(`closeConfigureLinkModal():`, e);
-        
+
         this.setState({
             showFormattedLinkModal: false
         });
@@ -1292,7 +1291,7 @@ class UserScansRootCore extends Component {
         );
 
         const formattedLink = this.state.formattedLink;
-        
+
         if (!formattedLink) {
             urlFragmentParams.delete("formatted-link");
         }
@@ -1513,13 +1512,13 @@ class UserScansRootCore extends Component {
                 {/* *** =====================-=== */}
                 {/* *** === Scan Barcode View === */}
                 {/* *** =====================-=== */}
-                { this.state.showScanBarcodeView ? (
+                {this.state.showScanBarcodeView ? (
                     <ScanBarcodeView
                         user={this.user}
                         viewportSize={this.state.viewportSize}
                         onClose={this.closeScanBarcodeView}
                     />
-                ) : null }
+                ) : null}
 
                 <ConfigureLinkModal
                     formattedLink={this.state.formattedLink}
@@ -1530,7 +1529,7 @@ class UserScansRootCore extends Component {
                     closeConfigureLinkModal={this.closeConfigureLinkModal}
                     onSubmitConfigureLinkForm={this.onSubmitConfigureLinkForm}
                 />
-                <UserScansToast 
+                <UserScansToast
                     barcode={this.state.highlightedBarcode}
                     onClose={this.dismissToast}
                     viewportSize={this.state.viewportSize}

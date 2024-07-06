@@ -11,6 +11,8 @@ import MainNavbar from "./MainNavbar";
 
 import { AppContext } from "../Model/AppContext";
 
+import { prefixTitleWithDocumentHostIfPort } from "../MiscellaneousUtilities";
+
 // import barcode_drop_background from "./images/barcode_drop_background.svg";
 
 export default function HomeView(props) {
@@ -35,7 +37,8 @@ class HomeViewCore extends Component {
 
         this.navigate = props.navigate;
 
-        document.title = `BarcodeDrop`;
+        const title = `BarcodeDrop`;
+        document.title = prefixTitleWithDocumentHostIfPort(title);
 
         this.usernameField = React.createRef();
 

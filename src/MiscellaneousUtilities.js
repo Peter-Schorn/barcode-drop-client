@@ -114,3 +114,11 @@ export function truncateString(str, maxLength) {
 String.prototype.truncated = function(maxLength) {
     return truncateString(this, maxLength);
 }
+
+export function prefixTitleWithDocumentHostIfPort(title) {
+    if (document.location.port) {
+        const host = document.location.host;
+        return `[${host}] ${title}`;
+    }
+    return title;
+}
