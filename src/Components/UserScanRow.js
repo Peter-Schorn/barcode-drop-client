@@ -26,17 +26,6 @@ export default class UserScansRow extends Component {
             this.props.barcode.date
         );
 
-        this.customStyles = {
-            content: {
-                top: "50%",
-                left: "50%",
-                right: "auto",
-                bottom: "auto",
-                marginRight: "-50%",
-                transform: "translate(-50%, -50%)",
-            },
-        };
-
         this.state = {
             dateDifference: dateDifference,
             generateBarcodeModalIsOpen: false,
@@ -307,7 +296,9 @@ export default class UserScansRow extends Component {
 
         return (
             <td>
-                <span className="barcode-text text-break">
+                <span 
+                    className="barcode-text line display-linebreaks text-break"
+                >
                     {this.props.barcode.barcode}
                 </span>
                 { smallSize ? (
@@ -328,6 +319,70 @@ export default class UserScansRow extends Component {
             </td>
         );
     }
+
+    renderDropdownMenu() {
+        return (
+            <Dropdown className="ms-1">
+                <Dropdown.Toggle variant="success" className="text-center">
+                    <i className="fa fa-ellipsis-v px-2" />
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                    <Dropdown.Item 
+                        onClick={this.didClickGenerateBarcode}
+                        disabled={this.barcodeIsFalsy()}
+                        style={{
+                            color: "#076b05"
+                        }}
+                    >
+                        <div className="hstack gap-3">
+                            <i className="fa-solid fa-barcode"></i>
+                            <span>Generate Barcode</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {/* {this.copyAsCSVKeyboardShortcutString()} */}
+                            </span>
+                        </div>
+                    </Dropdown.Item>
+                    <Dropdown.Divider className="" />
+                    <Dropdown.Item
+                        style={{
+                            color: "#ed432d",
+                            // color: "white",
+                            // backgroundColor: "#ed432d"
+                        }}
+                        onClick={this.onClickDeleteButton(
+                            this.props.barcode
+                        )}
+                        disabled={this.barcodeIsFalsy()}
+                    >
+                        <div 
+                            className="hstack gap-3"
+                            style={{
+                                // padding: "5px 10px",
+                            }}
+                        >
+                            <i className="fa fa-trash"></i>
+                            <span>Delete</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {/* {this.copyAsCSVKeyboardShortcutString()} */}
+                            </span>
+                        </div>
+                    </Dropdown.Item>
+                </Dropdown.Menu>
+            </Dropdown>
+        );
+    }
+
 
     render() {
         return (
@@ -350,107 +405,42 @@ export default class UserScansRow extends Component {
                     // maxHeight: "10px"
                     // height: "20px"
                     // margin: "2px !important",
-                    padding: "2px !important"
+                    // padding: "2px !important"
                 }}>
 
-                <Stack direction="horizontal" className="pt-4 pb-3" gap={0}>
-                   
-                    {/* <div> */}
-                        {/* --- Copy Button --- */}
-                        <button
-                            // variant=""
-                            className="copy-button"
-                            style={this.copyButtonStyle()}
-                            onClick={this.onClickCopyButton(
-                                this.props.barcode
-                            )}
-                        >
-                            {/* span>Copy</span> */}
-                            <i className="fa-solid fa-copy"></i>
-                        </button>
-                        {/* --- Link Button --- */}
-                        <button
-                            className="link-button"
-                            onClick={(e) => {
-                                return this.props.onClickOpenLink(
-                                    e, this.props.barcode
-                                );
-                            }}
-                            style={this.linkButtonStyle()}
-                        >
-                            <i className="fa fa-link"></i>
-                        </button>
-                    {/* </div> */}
-                {/* </td> */}
-                {/* --- Context Menu --- */}
-                {/* <td */}
-                    {/* style={{
-                        textAlign: "center",
-                    }}
-                    data-toggle="tooltip"
-                    data-placement="top"
-                    title="Show context menu"
-                > */}
-                    <Dropdown className="ms-1">
-                        <Dropdown.Toggle variant="success" className="text-center">
-                            <i className="fa fa-ellipsis-v px-2" />
-                        </Dropdown.Toggle>
+                <Stack 
+                    direction="horizontal" 
+                    className="" 
+                    gap={0}
+                >
+                    {/* --- Copy Button --- */}
+                    <button
+                        // variant=""
+                        className="copy-button"
+                        style={this.copyButtonStyle()}
+                        onClick={this.onClickCopyButton(
+                            this.props.barcode
+                        )}
+                    >
+                        {/* span>Copy</span> */}
+                        <i className="fa-solid fa-copy"></i>
+                    </button>
+                    {/* --- Link Button --- */}
+                    <button
+                        className="link-button"
+                        onClick={(e) => {
+                            return this.props.onClickOpenLink(
+                                e, this.props.barcode
+                            );
+                        }}
+                        style={this.linkButtonStyle()}
+                    >
+                        <i className="fa fa-link"></i>
+                    </button>
+                  
+                    {this.renderDropdownMenu()}
 
-                        <Dropdown.Menu>
-                            <Dropdown.Item 
-                                onClick={this.didClickGenerateBarcode}
-                                disabled={this.barcodeIsFalsy()}
-                                style={{
-                                    color: "#076b05"
-                                }}
-                            >
-                                <div className="hstack gap-3">
-                                    <i className="fa-solid fa-barcode"></i>
-                                    <span>Generate Barcode</span>
-                                    <span className="ms-auto">
-                                        {/* --- Spacer --- */}
-                                    </span>
-                                    <span style={{
-                                        color: "gray",
-                                    }}>
-                                        {/* {this.copyAsCSVKeyboardShortcutString()} */}
-                                    </span>
-                                </div>
-                            </Dropdown.Item>
-                            <Dropdown.Divider className="" />
-                            <Dropdown.Item
-                                style={{
-                                    color: "#ed432d",
-                                    // color: "white",
-                                    // backgroundColor: "#ed432d"
-                                }}
-                                onClick={this.onClickDeleteButton(
-                                    this.props.barcode
-                                )}
-                                disabled={this.barcodeIsFalsy()}
-                            >
-                                <div 
-                                    className="hstack gap-3"
-                                    style={{
-                                        // padding: "5px 10px",
-                                    }}
-                                >
-                                    <i className="fa fa-trash"></i>
-                                    <span>Delete</span>
-                                    <span className="ms-auto">
-                                        {/* --- Spacer --- */}
-                                    </span>
-                                    <span style={{
-                                        color: "gray",
-                                    }}>
-                                        {/* {this.copyAsCSVKeyboardShortcutString()} */}
-                                    </span>
-                                </div>
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
                 </Stack>
-                    {/* </div> */}
                     {/* --- Barcode Image Modal --- */}
                 </td>
                 {/* --- Barcode Cell --- */}

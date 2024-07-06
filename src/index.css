@@ -43,7 +43,9 @@ code {
     }
 }
 
-
+.display-linebreaks {
+    white-space: pre-line;
+  }
 
 
 .barcode-table {
@@ -80,9 +82,9 @@ code {
 
 }
 
-.configure-link-modal {
+/* .configure-link-modal {
     background-color: #cdcfd1;
-}
+} */
 
 .configure-link-form {
     /* padding: 20px; */

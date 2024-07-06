@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 import { Component } from "react";
 
-import { Button, Table } from 'react-bootstrap';
+import { Button, Table } from "react-bootstrap";
 
 import Modal from "react-modal";
 
-import Badge from 'react-bootstrap/Badge';
+import Badge from "react-bootstrap/Badge";
 
 import { AppContext } from "../Model/AppContext";
 
@@ -27,27 +27,66 @@ export default class ConfigureLinkModal extends Component {
     };
 
     onOpen = () => {
-        this.configureLinkInputRef.current.focus();
+        this.configureLinkInputRef?.current?.focus();
         this.props.onOpenConfigureLinkModal();
     };
 
+    // modalWidth = () => {
+    //     // return this.props.viewportSize.width <= 1000 ? "w-100" : "w-50";
+    //     return this.props.viewportSize.width <= 1000 ? "" : "w-75";
+    // }
+
     render() {
+        let offset;
+
+        if (this.props.viewportSize.width <= 600) {
+            offset = "10px";
+        } 
+        else if (this.props.viewportSize.width <= 1000) {
+            offset = "50px";
+        } 
+        else {
+            offset = "100px";
+        }
+
         return (
-            // const _ = (
+
             <Modal
 
-                className={"configure-link-modal rounded-3 m-5 mx-auto p-5 w-50 shadow-lg text-black"}
-
+                className={`{this.modalWidth()} configure-link-modal rounded-3 m-5 mx-auto p-5 shadow-lg text-black border border-primary`}
                 isOpen={this.props.showFormattedLinkModal}
                 onAfterOpen={this.onOpen}
                 onRequestClose={this.props.closeConfigureLinkModal}
-
+                style={{
+                    overlay: {
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(255, 255, 255, 0.75)"
+                      },
+                      content: {
+                        position: "fixed",
+                        top: "20px",
+                        left: offset,
+                        right: offset,
+                        bottom: "20px",
+                        border: "1px solid #ccc",
+                        background: "#cdcfd1",
+                        // overflow: "auto",
+                        // WebkitOverflowScrolling: "touch",
+                        borderRadius: "4px",
+                        outline: "none",
+                        // padding: "20px"
+                      }
+                }}
             // style={this.customStyles}
             // contentLabel="configure-link-modal"
             >
 
                 <div
-                    className="configure-link-modal-container f text-center"
+                    className="configure-link-modal-container text-center"
                 >
                     <h3 className="pb-3">
                         Configure Link
@@ -79,7 +118,7 @@ export default class ConfigureLinkModal extends Component {
                                 className="form-control"
                                 type="text"
                                 placeholder={this.exampleFormattedURL()}
-                                value={this.props.formattedLink}
+                                value={this.props.formattedLink || ""}
                                 onChange={this.props.onChangeConfigureLinkInput}
                             />
                             {/* <label for="configure-link-input">

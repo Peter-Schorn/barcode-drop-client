@@ -39,23 +39,21 @@ class UserScansTableCore extends Component {
         
         /*
          <UserScansTable
-            barcodes={this.state.barcodes}
-            user={this.user}
-            highlightedBarcode={this.state.highlightedBarcode}
-            router={this.props.router}
-            removeBarcodesFromState={
+             barcodes={this.state.barcodes}
+             user={this.user}
+             highlightedBarcode={this.state.highlightedBarcode}
+             viewportSize={this.state.viewportSize}
+             router={this.props.router}
+             removeBarcodesFromState={
                  this.removeBarcodesFromState
              }
+             setHighlightedBarcode={
+                 this._setHighlightedBarcode
+             }
+             onClickOpenLink={this.onClickOpenLink}
          />
 
          */
-
-        this.state = {
-            viewportSize: {
-                width: window.innerWidth,
-                height: window.innerHeight
-            }
-        };
 
         if (this.props.user) {
             console.log(
@@ -69,48 +67,6 @@ class UserScansTableCore extends Component {
         }
     }
 
-    componentDidMount() {
-        
-        console.log("UserScansTableCore.componentDidMount():");
-
-        window.addEventListener("resize", this.windowDidResize);
-    }
-
-    componentWillUnmount() {
-        
-        console.log("UserScansTableCore.componentWillUnmount()");
-
-        window.removeEventListener("resize", this.windowDidResize);
-
-    }
-
-    // componentDidUpdate(prevProps, prevState) {
-    //     console.log(
-    //         `UserScansTableCore.componentDidUpdate(): ` +
-    //         `prevProps: ${prevProps}; currentProps: ${this.props}; ` +
-    //         `prevState: ${prevState}`
-    //     );
-    // }
-
-    windowDidResize = (e) => {
-        
-        this.setState((state) => {
-            const size = {
-                width: window.innerWidth,
-                height: window.innerHeight
-            };
-            console.log(
-                `UserScansTableCore.windowDidResize(): size:`,
-                size
-            );
-            return {
-                viewportSize: size
-            };
-        });
-
-    }
-
-
     render() {
         console.log("UserScansTableCore.render()");
         return (
@@ -121,17 +77,19 @@ class UserScansTableCore extends Component {
             >
                 <thead>
                     <tr>
-                        <th>
+                        <th
+                            style={{ width: "100px" }}
+                        >
                             {/* --- Primary Buttons --- */}
                         {/* </th> */}
                         {/* <th style={{ width: "100px" }}> */}
                             {/* --- Context Menu --- */}
                         </th>
                         <th>Barcode</th>
-                        { this.state.viewportSize.width > 600 ? (
+                        { this.props.viewportSize.width > 600 ? (
                             <th>Time</th>
                         ) : null }
-                        { this.state.viewportSize.width > 800 ? (
+                        { this.props.viewportSize.width > 800 ? (
                             <th style={{ width: "80px" }}>Delete</th>
                         ) : null }
                     </tr>
@@ -143,7 +101,7 @@ class UserScansTableCore extends Component {
                             index={index}
                             barcode={barcode}
                             user={this.props.user}
-                            viewportSize={this.state.viewportSize}
+                            viewportSize={this.props.viewportSize}
                             isHighlighted={this.props.highlightedBarcode?.id === barcode.id}
                             router={this.props.router}
                             removeBarcodesFromState={

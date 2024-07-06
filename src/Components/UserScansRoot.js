@@ -160,8 +160,13 @@ class UserScansRootCore extends Component {
             enableAutoCopy: enableAutoCopy,
             highlightedBarcode: null,
             formattedLink: formattedLink,
-            showFormattedLinkModal: false
+            showFormattedLinkModal: false,
+            viewportSize: {
+                width: window.innerWidth,
+                height: window.innerHeight
+            }
         };
+
 
         this.deleteIDs = new Set();
         this.pingPongInterval = null;
@@ -228,7 +233,10 @@ class UserScansRootCore extends Component {
         document.removeEventListener("focusout", this.handleFocusOut);
         document.removeEventListener("visibilitychange", this.handleVisibilityChange);
         document.removeEventListener("keydown", this.handleKeyDown);
+        window.removeEventListener("resize", this.windowDidResize);
     }
+
+    
 
     componentDidMount() {
 
@@ -243,6 +251,7 @@ class UserScansRootCore extends Component {
         document.addEventListener("focusout", this.handleFocusOut);
         document.addEventListener("visibilitychange", this.handleVisibilityChange);
         document.addEventListener("keydown", this.handleKeyDown);
+        window.addEventListener("resize", this.windowDidResize);
 
         // MARK: Configure WebSocket
         this.configureSocket();
@@ -319,15 +328,31 @@ class UserScansRootCore extends Component {
         this.setState((state) => {
 
             let newState = {
-                enableAutoCopy: enableAutoCopy
-            }
-            if (formattedLink) {
-                newState.formattedLink = formattedLink;
+                enableAutoCopy: enableAutoCopy,
+                formattedLink: formattedLink
             }
             return newState;
         });
 
     };
+
+    windowDidResize = (e) => {
+        
+        this.setState((state) => {
+            const size = {
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+            console.log(
+                `UserScansTableCore.windowDidResize(): size:`,
+                size
+            );
+            return {
+                viewportSize: size
+            };
+        });
+
+    }
 
     promptForClipboardPermission = () => {
         console.log("promptForClipboardPermission");
@@ -1197,7 +1222,14 @@ class UserScansRootCore extends Component {
             window.location.hash.slice(1)
         );
 
-        urlFragmentParams.set("formatted-link", this.state.formattedLink);
+        const formattedLink = this.state.formattedLink;
+        
+        if (!formattedLink) {
+            urlFragmentParams.delete("formatted-link");
+        }
+        else {
+            urlFragmentParams.set("formatted-link", formattedLink);
+        }
         window.location.hash = urlFragmentParams.toString();
 
     };
@@ -1288,14 +1320,17 @@ class UserScansRootCore extends Component {
                 <ConfigureLinkModal
                     formattedLink={this.state.formattedLink}
                     showFormattedLinkModal={this.state.showFormattedLinkModal}
-                    setState={this.setState}
+                    viewportSize={this.state.viewportSize}
                     onOpenConfigureLinkModal={this.onOpenConfigureLinkModal}
                     onChangeConfigureLinkInput={this.onChangeConfigureLinkInput}
                     closeConfigureLinkModal={this.closeConfigureLinkModal}
                     onSubmitConfigureLinkForm={this.onSubmitConfigureLinkForm}
                 />
-                <UserScansToast />
-
+                <UserScansToast 
+                    barcode={this.state.highlightedBarcode}
+                    onClose={this.dismissToast}
+                    viewportSize={this.state.viewportSize}
+                />
 
                 <MainNavbar />
 
@@ -1444,6 +1479,7 @@ class UserScansRootCore extends Component {
                         barcodes={this.state.barcodes}
                         user={this.user}
                         highlightedBarcode={this.state.highlightedBarcode}
+                        viewportSize={this.state.viewportSize}
                         router={this.props.router}
                         removeBarcodesFromState={
                             this.removeBarcodesFromState
