@@ -2,6 +2,7 @@ import React from 'react';
 import { Component } from "react";
 import { Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import Backend from "../API/backend.js";
 
 import MainNavbar from "./MainNavbar";
 
@@ -29,16 +30,32 @@ class HomeViewCore extends Component {
 
         document.title = `BarcodeDrop`;
 
+        this.backend = new Backend();
+
         this.usernameField = React.createRef();
 
         this.state = {
-            user: null
+            user: null,
+            splashText: null
         };
 
     }
 
     componentDidMount() {
+
         this.usernameField?.current?.focus();
+
+        this.backend.getRandomSplashText()
+            .then((splashText) => {
+                console.log(`HomeView.componentDidMount(): splashText: "${splashText}"`);
+                this.setState({
+                    splashText: splashText
+                });
+            })
+            .catch((error) => {
+                console.error(`HomeView.componentDidMount(): error: "${error}"`);
+            });
+
     }
 
     onSubmitForm = (event) => {
@@ -57,13 +74,58 @@ class HomeViewCore extends Component {
         });
     };
 
-    usernameFormBackgroundGradient = () => {
+    usernameFormBackground = () => {
         return {
             background: "linear-gradient(to right, rgba(0, 210, 255, 0.9), rgba(58, 123, 213, 0.9))" ,
-            // background: "rgba(0, 0, 0, 0.1)",
+            // background: "rgb(0, 0, 0)"
+            // backgroundColor: "#071f5c"
+            // backgroundColor: "white"
+            // backgroundColor: "rgba(255, 240, 200, 1)"
             // opacity: "0.9"
         };
     }
+
+    renderForm() {
+        return  (
+            <div 
+                className="form-container rounded"
+                style={{
+                    backgroundColor: "white"
+                }}
+            >
+                <Form 
+                    className="username-form shadow-lg p-5 rounded text-center shine" 
+                    onSubmit={this.onSubmitForm}
+                    style={this.usernameFormBackground()}   
+                    // style={{
+                    //     background: "rgba(255, 250, 255, 255) !important"
+                    // }}   
+                >
+                    <Form.Group className="" controlId="userForm.userInput">
+                        <Form.Label>
+                            <h2 className=" mb-3"> Enter Your Username</h2>
+                        </Form.Label>
+                        <Form.Control
+                            ref={this.usernameField}
+                            className=""
+                            size="lg"
+                            type="text"
+                            placeholder=""
+                            onChange={this.handleUserInputChange}
+                        />
+                    </Form.Group>
+                    <Button 
+                        className="mt-4" 
+                        variant="dark" 
+                        type="submit"
+                    >
+                        Submit
+                    </Button>
+                </Form>
+            </div>
+        );
+    }
+
 
     render() {
         return (
@@ -81,34 +143,13 @@ class HomeViewCore extends Component {
                         backgroundPosition: "center"
                     }}
                 >
-                    {/* <img src={barcode_drop_background} alt="barcode_drop_background" /> */}
-                    {/* <img src={process.env.PUBLIC_URL + "images/barcode_drop_background.svg"} alt="barcode drop background" /> */}
-                    <Form 
-                        className="username-form shadow-lg p-5 bg-body rounded text-center" 
-                        onSubmit={this.onSubmitForm}
-                        style={this.usernameFormBackgroundGradient()}   
-                    >
-                        <Form.Group className="" controlId="userForm.userInput">
-                            <Form.Label>
-                                <h2 className=" mb-3"> Enter Your Username</h2>
-                            </Form.Label>
-                            <Form.Control
-                                ref={this.usernameField}
-                                className=""
-                                size="lg"
-                                type="text"
-                                placeholder=""
-                                onChange={this.handleUserInputChange}
-                            />
-                        </Form.Group>
-                        <Button 
-                            className="mt-4" 
-                            variant="dark" 
-                            type="submit"
-                        >
-                            Submit
-                        </Button>
-                    </Form>
+                    {/* <div className="splash-text text-center">
+                        <p className="display-1">
+                            {this.state.splashText}
+                        </p>
+                    </div> */}
+                    {/* *** === FORM === *** */}
+                    {this.renderForm()}
                 </div>
             </div>
         );

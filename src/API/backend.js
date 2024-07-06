@@ -99,6 +99,26 @@ export default class Backend {
         });
     }
 
+    /**
+     * Gets all splash texts.
+     * 
+     * @returns an array of splash text objects in JSON format
+     */
+    async getSplashTexts() {
+        return await this._get(
+            "/splash-text",
+        );
+    }
+
+    /**
+     * Gets a random splash text.
+     */
+    async getRandomSplashText() {
+        return await this._get(
+            "/splash-text/random"
+        );
+    }
+
     // MARK: Wrappers
 
     async _get(path, {queryParams, headers} = {}) {

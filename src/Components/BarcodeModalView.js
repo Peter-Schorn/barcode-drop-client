@@ -92,6 +92,8 @@ export default class BarcodeModalView extends Component {
             textyoffset: 10,
             paddingwidth: 5,
             paddingheight: 5,
+            width: "1000px",
+            height: "500px",
         };
 
         if (this.canvasProps.is2DSymbology) {
