@@ -115,3 +115,7 @@ hr.padded-hr {
 .dropdown-toggle::after {
     display: none !important;
 }
+
+.username-form {
+    /* backdrop-filter: blur(5px); */
+}

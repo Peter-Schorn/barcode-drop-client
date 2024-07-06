@@ -15,10 +15,12 @@ import { stringify as csvStringify } from 'csv-stringify/browser/esm/sync';
 
 import MainNavbar from "./MainNavbar";
 // import UserScansTable from "./UserScansTable";
-import { isApplePlatform, setIntervalImmediately } from "../MiscellaneousUtilities";
-import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import { WebSocket } from "partysocket";
+
+
+import { isApplePlatform, setIntervalImmediately } from "../MiscellaneousUtilities";
+import { SocketMessageTypes } from "../Model/SocketMessageTypes";
 
 import UserScansTable from "./UserScansTable";
 import { DebugBreakpointView } from "./DebugBreakpointView";
