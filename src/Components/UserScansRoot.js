@@ -444,12 +444,22 @@ class UserScansRootCore extends Component {
                 });
                 e.preventDefault();
             }
+            else if (e.key === "z" && !e.shiftKey && !e.altKey) {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + "a" pressed: ` +
+                    `toggling auto copy`
+                );
+                this.toggleAutoCopy(e);
+                e.preventDefault();
+            }
             else {
                 console.log(
                     `UserScansRootCore.handleKeyDown(): ` +
                     `Platform modifier key + "${e.key}" pressed`
                 );
             }
+
         }
 
     };
@@ -1029,6 +1039,27 @@ class UserScansRootCore extends Component {
         return isApplePlatform() ? "⌘L" : "Ctrl+L";
     };
 
+    toggleAutoCopyKeyboardShortcutString = () => {
+        return isApplePlatform() ? "⌘Z" : "Ctrl+Z";
+    }
+
+    toggleAutoCopy = (e) => {
+        this.setState((state) => {
+            const newValue = !state.enableAutoCopy;
+            console.log(`toggleAutoCopy(): set to ${newValue}`);
+            return {
+                enableAutoCopy: newValue
+            };
+        });
+
+        const urlFragmentParams = new URLSearchParams(
+            window.location.hash.slice(1)
+        );
+        urlFragmentParams.set("auto-copy", !this.state.enableAutoCopy);
+        window.location.hash = urlFragmentParams.toString();
+        
+    };
+
     makeCSVString = () => {
         const csvString = csvStringify(this.state.barcodes, {
             header: true,
@@ -1476,7 +1507,7 @@ class UserScansRootCore extends Component {
                                 className=""
                                 data-toggle="tooltip"
                                 data-placement="top"
-                                title="Automatically copy the most recent barcode to the clipboard"
+                                title={`(${this.toggleAutoCopyKeyboardShortcutString()}) Automatically copy the most recent barcode to the clipboard"`}
                             >
                                 <input
                                     type="checkbox"
