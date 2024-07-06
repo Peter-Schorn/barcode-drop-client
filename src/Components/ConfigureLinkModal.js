@@ -77,6 +77,7 @@ export default class ConfigureLinkModal extends Component {
                         // WebkitOverflowScrolling: "touch",
                         borderRadius: "4px",
                         outline: "none",
+                        maxWidth: "1000px",
                         // padding: "20px"
                       }
                 }}
