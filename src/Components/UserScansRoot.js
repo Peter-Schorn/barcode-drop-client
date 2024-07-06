@@ -164,6 +164,7 @@ class UserScansRootCore extends Component {
             highlightedBarcode: null,
             formattedLink: formattedLink,
             showFormattedLinkModal: false,
+            showScanBarcodeView: false,
             viewportSize: {
                 width: window.innerWidth,
                 height: window.innerHeight
@@ -452,6 +453,17 @@ class UserScansRootCore extends Component {
                     `toggling auto copy`
                 );
                 this.toggleAutoCopy(e);
+                e.preventDefault();
+            }
+            else if (e.key === "s" && !e.shiftKey && !e.altKey) {
+                console.log(
+                    `UserScansRootCore.handleKeyDown(): ` +
+                    `Platform modifier key + "s" pressed: ` +
+                    `SHOWING scan barcode view`
+                );
+                this.setState({
+                    showScanBarcodeView: true
+                });
                 e.preventDefault();
             }
             else {
@@ -1040,6 +1052,10 @@ class UserScansRootCore extends Component {
         return isApplePlatform() ? "⌘L" : "Ctrl+L";
     };
 
+    scanBarcodeKeyboardShortcutString = () => {
+        return isApplePlatform() ? "⌘S" : "Ctrl+S";
+    }
+
     toggleAutoCopyKeyboardShortcutString = () => {
         return isApplePlatform() ? "⌘Z" : "Ctrl+Z";
     }
@@ -1287,6 +1303,29 @@ class UserScansRootCore extends Component {
 
     };
 
+    // MARK: - Scan Barcode View -
+
+    onOpenScanBarcodeView = (e) => {
+
+        console.log(`onOpenScanBarcodeView():`, e);
+
+        this.setState({
+            showScanBarcodeView: true
+        });
+
+    };
+
+    closeScanBarcodeView = (e) => {
+
+        console.log(`closeScanBarcodeView():`, e);
+
+        this.setState({
+            showScanBarcodeView: false
+        });
+
+    };
+
+
     // MARK: Private Interface
 
     _copyLastBarcodeIsDisabled = () => {
@@ -1416,6 +1455,25 @@ class UserScansRootCore extends Component {
                         </div>
                     </Dropdown.Item>
                     <Dropdown.Divider className="" />
+                    {/* *** === Open Scan Barcode View === *** */}
+                    <Dropdown.Item
+                        onClick={this.onOpenScanBarcodeView}
+                    >
+                        <div className="hstack gap-3">
+                            <i className="fa-solid fa-camera"></i>
+                            <span>Scan Barcode...</span>
+                            <span className="ms-auto">
+                                {/* --- Spacer --- */}
+                            </span>
+                            <span style={{
+                                color: "gray",
+                            }}>
+                                {this.scanBarcodeKeyboardShortcutString()}
+                            </span>
+
+                        </div>
+                    </Dropdown.Item>
+                    {/* *** === Configure Link *** === */}
                     <Dropdown.Item
                         onClick={this.configureLink}
                     >
@@ -1455,10 +1513,13 @@ class UserScansRootCore extends Component {
                 {/* *** =====================-=== */}
                 {/* *** === Scan Barcode View === */}
                 {/* *** =====================-=== */}
-                <ScanBarcodeView
-                    user={this.user}
-                    viewportSize={this.state.viewportSize}
-                />
+                { this.state.showScanBarcodeView ? (
+                    <ScanBarcodeView
+                        user={this.user}
+                        viewportSize={this.state.viewportSize}
+                        onClose={this.closeScanBarcodeView}
+                    />
+                ) : null }
 
                 <ConfigureLinkModal
                     formattedLink={this.state.formattedLink}

@@ -27,6 +27,7 @@ export default class ScanBarcodeView extends Component {
 
         console.log("ScanBarcodeView.componentDidMount()");
 
+        document.addEventListener("keydown", this.handleKeyDown);
         this.barcodeField?.current?.focus();
 
     }
@@ -34,6 +35,7 @@ export default class ScanBarcodeView extends Component {
     componentWillUnmount() {
         
         console.log("ScanBarcodeView.componentWillUnmount()");
+        document.removeEventListener("keydown", this.handleKeyDown);
 
     }
 
@@ -73,6 +75,11 @@ export default class ScanBarcodeView extends Component {
 
     };
 
+    onClose = () => {
+        console.log("ScanBarcodeView.onClose()");
+        this.props.onClose();
+    }
+
     scanBarcode = (barcode) => {
         
         const user = this.props?.user;
@@ -110,6 +117,20 @@ export default class ScanBarcodeView extends Component {
             });
 
 
+    }
+
+    handleKeyDown = (event) => {
+        console.log(
+            `ScanBarcodeView.handleKeyDown(): ` +
+            `keyCode: "${event.keyCode}"`
+        );
+        if (event.key === "Escape") {
+            console.log(
+                "ScanBarcodeView.handleKeyDown(): ESCAPE"
+            );
+            event.preventDefault();
+            this.onClose();
+        }
     }
 
     render() {
@@ -161,70 +182,81 @@ export default class ScanBarcodeView extends Component {
                         <div 
                             className="d-flex"
                         >
+
+                                {/* COLUMN */}
+                                <div 
+                                    className=""
+                                >
+                                    {/* *** === Close Button === *** */}
+                                    <button 
+                                        onClick={this.onClose}
+                                        className="scan-barcode-close-button"
+                                        // variant="dark" 
+                                        // size="sm"
+                                        type="button"
+                                        style={{
+                                            width: "30px",
+                                            height: "48px",
+                                            position: "absolute",
+                                            margin: "0px 44px",
+                                            color: "gray",
+                                            // backgroundColor: "clear",
+                                            backgroundColor: "rgba(0, 0, 0, 0)",
+                                            // backgroundColor: "#f0eded",
+                                            // borderRadius: "0px 0px 0px 0px",
+                                            // borderRadius: "40px",
+                                            border: "none",
+                                            // opacity: "0.4"
+                                            zIndex: 6
+                                        }}
+                                    >
+                                        X
+                                    </button>
+                                </div>
+
                                 {/* COLUMN */}
                                 <div 
                                     className="flex-fill"
                                 >
-                                    {/* <i 
-                                        className="fa-solid fa-barcode"
-                                        style={{
-                                            margin: "0px 10px",
-                                            color: "black",
-                                            width: "16px"
-                                            
-                                        }}
-                                    >
-                                    </i> */}
-
-                                    {/* <FloatingLabel
-                                        controlId="floatingInput"
-                                        label="Enter Barcode"
-                                        className=""  // "mb-3"
-                                        size="sm"
-                                    > */}
-                                        {/* *** ADD BARCODE ICON *** */}
-                                        {/* <span className="input-group-text" id="basic-addon1">@</span> */}
                                         
-                                        
-                                        
-                                        <InputGroup>
-                                        
-                                            <InputGroup.Text
+                                    <InputGroup>
+                                    
+                                        <InputGroup.Text
+                                            style={{
+                                                // width: "16px",
+                                                // height: "60px"
+                                                border: "2px solid white"
+                                            }}
+                                        >
+                                            <i
+                                                className="fa-solid fa-barcode"
                                                 style={{
-                                                    // width: "16px",
-                                                    // height: "60px"
-                                                    border: "2px solid white"
+                                                    color: "black",
+                                                    width: "16px",
+                                                    height: "16px"
                                                 }}
                                             >
-                                                <i
-                                                    className="fa-solid fa-barcode"
-                                                    style={{
-                                                        color: "black",
-                                                        width: "16px",
-                                                        height: "16px"
-                                                    }}
-                                                >
-                                                </i>
-                                            </InputGroup.Text>
+                                            </i>
+                                        </InputGroup.Text>
 
-                                            <Form.Control
-                                                ref={this.barcodeField}
-                                                type="text"
-                                                size="lg"
-                                                value={this.state.barcode}
-                                                onChange={this.handleInputChange}
-                                                placeholder="Enter Barcode"
-                                                className="scan-barcode-input"
-                                                style={{
-                                                    // maxWidth: "300px"
-                                                    paddingRight: "70px",
-                                                    border: "0px solid black"
-                                                }}
-                                            >
-                                            </Form.Control>
+                                        <Form.Control
+                                            ref={this.barcodeField}
+                                            type="text"
+                                            size="lg"
+                                            value={this.state.barcode}
+                                            onChange={this.handleInputChange}
+                                            placeholder="Enter Barcode"
+                                            className="scan-barcode-input"
+                                            style={{
+                                                // maxWidth: "300px"
+                                                paddingRight: "70px",
+                                                paddingLeft: "30px",
+                                                border: "0px solid black"
+                                            }}
+                                        >
+                                        </Form.Control>
 
-                                        </InputGroup>
-                                    {/* </FloatingLabel> */}
+                                    </InputGroup>
                                 </div>
                                 
                                 {/* COLUMN */}
@@ -249,7 +281,9 @@ export default class ScanBarcodeView extends Component {
                                             backgroundColor: "#f0eded",
                                             borderRadius: "0px 8px 8px 0px",
                                             border: "none",
-                                            // opacity: "0.4"
+                                            // opacity: "0.43
+                                            // hidden: true
+                                            zIndex: 5
                                         }}
                                     >
                                         Submit
