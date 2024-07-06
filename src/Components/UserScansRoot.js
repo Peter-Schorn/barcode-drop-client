@@ -1128,13 +1128,32 @@ class UserScansRootCore extends Component {
             return;
         }
 
-        const url = formattedLink.replace("%s", barcodeText);
+        const urlString = formattedLink.replace("%s", barcodeText);
         console.log(
-            `onClickOpenLink(): Opening link: "${url}" ` +
+            `onClickOpenLink(): Opening link: "${urlString}" ` +
             `for barcode: "${barcodeText}"`
         );
 
-        window.open(url, "_blank");
+        try {
+
+            const url = new URL(urlString);
+
+            const barcodedropHost = "www.barcodedrop.com";
+            if ([barcodedropHost, document.location.host].includes(url?.host)) {
+                console.log(
+                    `onClickOpenLink(): WILL NOT open link because same host: ` +
+                    `"${urlString}" `
+                );
+                return;
+            }
+    
+            window.open(url, "_blank");
+
+        } catch (error) {
+            console.error(
+                `onClickOpenLink(): Could not open link: "${urlString}": ${error}`
+            );
+        }
 
     };
 
