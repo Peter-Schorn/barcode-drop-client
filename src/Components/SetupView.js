@@ -2,6 +2,7 @@ import React from 'react';
 import { Component } from "react";
 import { Container } from "react-bootstrap";
 import MainNavbar from "./MainNavbar";
+import { prefixTitleWithDocumentHostIfPort } from "../MiscellaneousUtilities";
 // import PostBarcodeIcloudShortcut from "./postBarcodeIcloudShortcut.svg";
 
 export default class SetupView extends Component {
@@ -11,10 +12,13 @@ export default class SetupView extends Component {
         
         this.icloudShortcutURL = "https://www.icloud.com/shortcuts/0f7f0a8a0bc3476f807324d922b44fe2";
 
+        const title = `Setup | BarcodeDrop`;
+        document.title = prefixTitleWithDocumentHostIfPort(title);
+
     }
 
     componentDidMount() {
-        document.title = `Setup | BarcodeDrop`;
+        console.log(`SetupView.componentDidMount():`);
     }
 
     newTabLink = (url, body) => {
