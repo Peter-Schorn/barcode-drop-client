@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.6.8",
     "bootstrap": "^5.3.3",
+    "bson": "^6.8.0",
     "bwip-js": "^4.3.2",
     "csv-stringify": "^6.5.0",
     "partysocket": "^1.0.1",

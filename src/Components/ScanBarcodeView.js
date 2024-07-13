@@ -8,6 +8,8 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 
 import Modal from "react-modal";
 
+import { ObjectId } from "bson";
+
 export default class ScanBarcodeView extends Component {
 
     static contextType = AppContext;
@@ -55,23 +57,16 @@ export default class ScanBarcodeView extends Component {
 
     onSubmitForm = (event) => {
 
+        event.preventDefault();
         
         const barcode = this.state?.barcode;
-        if (!barcode) {
-            console.log(
-                "ScanBarcodeView.onSubmitForm(): barcode is EMPTY"
-            );
-            return;
-        }
 
         console.log(
             `ScanBarcodeView.onSubmitForm(): user: "${this.state.user}"; ` +
             `barcode: "${barcode}"`
         );
         
-        this.scanBarcode(this.state.barcode);
-
-        event.preventDefault();
+        this.scanBarcode(barcode);
 
     };
 
@@ -90,13 +85,22 @@ export default class ScanBarcodeView extends Component {
             );
             return;
         }
+        if (!barcode) {
+            console.error(
+                "ScanBarcodeView.scanBarcode(): barcode is EMPTY"
+            );
+            return;
+        }
+
+        const id = new ObjectId().toHexString();
+        this.props.insertClientScannedBarcodeID(id);
 
         console.log(
-            `ScanBarcodeView.scanBarcode(): will barcode ` +
-            `for user "${user}": "${barcode}"`
+            `ScanBarcodeView.scanBarcode(): will scan barcode ` +
+            `for user "${user}": "${barcode}" (id: "${id}")`
         );
 
-        this.context.api.scanBarcode({user, barcode})
+        this.context.api.scanBarcode({user, barcode, id})
             .then((response) => {
                 console.log(
                     `ScanBarcodeView.scanBarcode(): response: ` +
@@ -250,7 +254,7 @@ export default class ScanBarcodeView extends Component {
                                             style={{
                                                 // maxWidth: "300px"
                                                 paddingRight: "70px",
-                                                paddingLeft: "30px",
+                                                paddingLeft: "25px",
                                                 border: "0px solid black"
                                             }}
                                         >

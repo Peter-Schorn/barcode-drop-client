@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { Axios } from "axios";
 
+
+
 export default class Backend {
 
     constructor() {
@@ -26,15 +28,23 @@ export default class Backend {
      * 
      * @param {string} user the user to scan the barcode for
      * @param {string} barcode the barcode to scan
+     * @param {string} [id] the id of the barcode
      * @returns the response from the server
      */
-    async scanBarcode({user, barcode}) {
+    async scanBarcode({user, barcode, id}) {
+
+        let body = {
+            barcode: barcode
+        };
+
+        if (id) {
+            body.id = id;
+        }
+
         return await this._apiRequest({
             method: "POST",
             path: `/scan/${user}`,
-            body: {
-                barcode: barcode
-            }
+            body: body
         });
     }
 

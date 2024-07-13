@@ -163,6 +163,9 @@ class UserScansRootCore extends Component {
 
         this.state = {
             barcodes: [],
+            // the ids of barcodes scanned directly in the client that we don't
+            // want to auto-copy even if auto-copy is enabled
+            clientScannedBarcodeIDs: new Set(),
             // barcodes: UserScansRootCore.sampleBarcodes,
             enableAutoCopy: enableAutoCopy,
             highlightedBarcode: null,
@@ -238,8 +241,6 @@ class UserScansRootCore extends Component {
         document.removeEventListener("keydown", this.handleKeyDown);
         window.removeEventListener("resize", this.windowDidResize);
     }
-
-
 
     componentDidMount() {
 
@@ -512,7 +513,6 @@ class UserScansRootCore extends Component {
                     `(readyState: ${this.socket.current.readyState})`
                 );
                 this.socket.current.reconnect();
-                this.copyLastBarcodeToClipboard();
             }
             else {
                 console.log(
@@ -865,6 +865,16 @@ class UserScansRootCore extends Component {
         const mostRecentBarcode = this.state.barcodes[0];
         const barcodeText = mostRecentBarcode?.barcode;
 
+        const clientScannedBarcodeIDs = this.state.clientScannedBarcodeIDs;
+
+        if (clientScannedBarcodeIDs.has(mostRecentBarcode?.id)) {
+            console.log(
+                `will NOT copy barcode scanned from CLIENT:`,
+                mostRecentBarcode
+            )
+            return;
+        }
+
         if (barcodeText == null) {
             console.error(
                 `AUTO-Copy failed: most recent barcode is null or undefined:`,
@@ -873,15 +883,14 @@ class UserScansRootCore extends Component {
             return;
         }
 
-        if (this.latestBarcodeChanged) {
-            console.log(
-                `Auto-copying most recent barcode: "${mostRecentBarcode}"`
-            );
-            this._writeBarcodeToClipboard(mostRecentBarcode, {
-                showNotification: true,
-                highlight: true
-            });
-        }
+        console.log(
+            `Auto-copying most recent barcode: "${mostRecentBarcode}"`
+        );
+        
+        this._writeBarcodeToClipboard(mostRecentBarcode, {
+            showNotification: true,
+            highlight: true
+        });
 
     };
 
@@ -1324,6 +1333,17 @@ class UserScansRootCore extends Component {
 
     };
 
+    insertClientScannedBarcodeID = (barcodeID) => {
+
+        this.setState(state => {
+            let clientScannedBarcodeIDs = state.clientScannedBarcodeIDs;
+            clientScannedBarcodeIDs.add(barcodeID);
+            return {
+                clientScannedBarcodeIDs: clientScannedBarcodeIDs
+            };
+        });
+
+    };
 
     // MARK: Private Interface
 
@@ -1517,6 +1537,7 @@ class UserScansRootCore extends Component {
                         user={this.user}
                         viewportSize={this.state.viewportSize}
                         onClose={this.closeScanBarcodeView}
+                        insertClientScannedBarcodeID={this.insertClientScannedBarcodeID}
                     />
                 ) : null}
 

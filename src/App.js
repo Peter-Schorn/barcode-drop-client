@@ -1,7 +1,6 @@
-// import logo from './logo.svg';
-import React from 'react';
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-// import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
+// import { Container, Navbar, Nav, NavDropdown } from "react-bootstrap";
 
 import { Component } from "react";
 
@@ -10,13 +9,13 @@ import HomeView from "./Components/HomeView";
 import UserScansRoot from "./Components/UserScansRoot";
 import SetupView from "./Components/SetupView";
 
-import { AppContext } from './Model/AppContext';
+import { AppContext } from "./Model/AppContext";
 
-import Backend from './API/backend';
+import Backend from "./API/Backend";
 
 import Modal from "react-modal";
 
-Modal.setAppElement('#root');
+Modal.setAppElement("#root");
 
 export default class App extends Component {
 
