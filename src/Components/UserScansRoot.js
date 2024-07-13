@@ -306,7 +306,13 @@ class UserScansRootCore extends Component {
     componentDidUpdate(prevProps, prevState) {
         console.log("UserScansRootCore.componentDidUpdate():");
 
-        const previousBarcode = prevState.barcodes[0];
+        // if we use this, then the barcode could change from x to undefined,
+        // and then back to x again, which would trigger the auto-copy again
+        
+        // const previousBarcode = prevState.barcodes[0];
+
+        // instead, we use the last auto-copied barcode
+        const previousBarcode = this.state.lastAutoCopiedBarcode;
         const currentBarcode = this.state.barcodes[0];
 
         if (this.latestBarcodeChanged(previousBarcode, currentBarcode)) {
@@ -709,8 +715,11 @@ class UserScansRootCore extends Component {
             message?.newScans
         ) {
             const newScans = message.newScans;
+            const hash = message.transactionHash;
+
             console.log(
                 `socket will insert newScans for user ${this.user}:`,
+                `(transactionHash: ${hash}):`,
                 newScans
             );
             this.setState(state => {
@@ -747,8 +756,9 @@ class UserScansRootCore extends Component {
 
             const hash = message.transactionHash;
             console.log(
-                `socket will delete barcodes with IDs (transactionHash: ${hash}): ` +
-                `${ids}`
+                `socket will delete barcodes with IDs ` +
+                `(transactionHash: ${hash}):`,
+                ids
             );
             this.removeBarcodesFromState(ids);
 
@@ -759,10 +769,13 @@ class UserScansRootCore extends Component {
             message?.type === SocketMessageTypes.replaceAllScans &&
             message?.scans
         ) {
+
             const scans = message.scans;
+            const hash = message.transactionHash;
 
             console.log(
-                `socket will replace all scans for user ${this.user}:`,
+                `socket will replace all scans for user ${this.user} ` +
+                `(transactionHash: ${hash}):`,
                 scans
             );
 
@@ -831,7 +844,7 @@ class UserScansRootCore extends Component {
 
         if (
             !previousBarcode ||
-            new Date(currentBarcode.date) >= new Date(previousBarcode.date)
+            new Date(currentBarcode?.date) >= new Date(previousBarcode?.date)
         ) {
             console.log(
                 "UserScansRootCore.latestBarcodeChanged(): " +
