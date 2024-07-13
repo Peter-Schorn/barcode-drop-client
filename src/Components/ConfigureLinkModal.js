@@ -41,10 +41,10 @@ export default class ConfigureLinkModal extends Component {
 
         if (this.props.viewportSize.width <= 600) {
             offset = "10px";
-        } 
+        }
         else if (this.props.viewportSize.width <= 1000) {
             offset = "50px";
-        } 
+        }
         else {
             offset = "100px";
         }
@@ -71,7 +71,6 @@ export default class ConfigureLinkModal extends Component {
                         top: "20px",
                         left: offset,
                         right: offset,
-                        border: "1px solid #ccc",
                         background: "#cdcfd1",
                         // overflow: "auto",
                         // WebkitOverflowScrolling: "touch",
@@ -125,7 +124,7 @@ export default class ConfigureLinkModal extends Component {
                                 Link:
                             </label> */}
                             <label htmlFor="configure-link-input">
-                                Link:
+                                Link
                             </label>
                         </div>
                         <div className="form-group pt-3">

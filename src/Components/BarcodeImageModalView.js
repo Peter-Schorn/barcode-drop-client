@@ -10,7 +10,7 @@ import Modal from "react-modal";
 import bwipjs from "bwip-js";
 // import { setIntervalImmediately } from "../MiscellaneousUtilities";
 
-export default class BarcodeModalView extends Component {
+export default class BarcodeImageModalView extends Component {
 
     static contextType = AppContext;
     
@@ -91,9 +91,7 @@ export default class BarcodeModalView extends Component {
             textsize: 13,
             textyoffset: 10,
             paddingwidth: 5,
-            paddingheight: 5,
-            width: "1000px",
-            height: "500px",
+            paddingheight: 5
         };
 
         if (this.canvasProps.is2DSymbology) {
@@ -201,13 +199,6 @@ export default class BarcodeModalView extends Component {
     }
     
     render() {
-        const barcodeText = this.props?.barcode?.barcode;
-
-        if (!barcodeText) {
-            return null;
-        }
-
-
         let header;
         if (this.canvasProps.is2DSymbology) {
             header = (

@@ -80,15 +80,17 @@ code {
     background-color: rgba(0, 0, 0, 0.4); */
 }
 
-.configure-link-modal-container {}
+/* .configure-link-modal-container {
+    
+} */
 
 /* .configure-link-modal {
     background-color: #cdcfd1;
 } */
 
-.configure-link-form {
+/* .configure-link-form { */
     /* padding: 20px; */
-}
+/* } */
 
 .copy-button:active {
     /* box-shadow: 0 5px #666; */

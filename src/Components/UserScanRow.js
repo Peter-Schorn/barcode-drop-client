@@ -11,7 +11,7 @@ import bwipjs from "bwip-js";
 
 import { setIntervalImmediately } from "../MiscellaneousUtilities";
 
-import BarcodeModalView from "./BarcodeModalView";
+import BarcodeImageModalView from "./BarcodeImageModalView";
 
 export default class UserScansRow extends Component {
     
@@ -269,6 +269,8 @@ export default class UserScansRow extends Component {
 
     }
 
+    // MARK: - Barcode Image Modal -
+
     // MARK: - Components -
 
     renderDeleteButton() {
@@ -393,7 +395,7 @@ export default class UserScansRow extends Component {
             >
                 {/* {this.renderBarcodeImageModal()} */}
 
-                <BarcodeModalView 
+                <BarcodeImageModalView 
                     barcode={this.props.barcode}
                     generateBarcodeModalIsOpen={this.state.generateBarcodeModalIsOpen}
                     closeGenerateBarcodeModal={this.closeGenerateBarcodeModal}
