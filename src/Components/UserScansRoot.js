@@ -162,11 +162,12 @@ class UserScansRootCore extends Component {
         );
 
         this.state = {
+            // barcodes: UserScansRootCore.sampleBarcodes,
             barcodes: [],
             // the ids of barcodes scanned directly in the client that we don't
             // want to auto-copy even if auto-copy is enabled
             clientScannedBarcodeIDs: new Set(),
-            // barcodes: UserScansRootCore.sampleBarcodes,
+            lastAutoCopiedBarcode: null,
             enableAutoCopy: enableAutoCopy,
             highlightedBarcode: null,
             formattedLink: formattedLink,
@@ -834,7 +835,7 @@ class UserScansRootCore extends Component {
         ) {
             console.log(
                 "UserScansRootCore.latestBarcodeChanged(): " +
-                "most *RECENT* barcode has changed from " +
+                "most *RECENT* barcode *HAS* changed from " +
                 `${JSON.stringify(previousBarcode)} to ` +
                 `${JSON.stringify(currentBarcode)}`
             );
@@ -882,6 +883,21 @@ class UserScansRootCore extends Component {
             );
             return;
         }
+        
+        
+        if (this.state.lastAutoCopiedBarcode?.id === mostRecentBarcode?.id) {
+            console.log(
+                `AUTO-Copy failed: most recent barcode is the same as the ` +
+                `last auto-copied barcode:`,
+                mostRecentBarcode
+            );
+            return;
+            
+        }
+        
+        this.setState({
+            lastAutoCopiedBarcode: mostRecentBarcode
+        });
 
         console.log(
             `Auto-copying most recent barcode: "${mostRecentBarcode}"`
