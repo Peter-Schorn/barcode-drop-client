@@ -8,8 +8,6 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 
 import Modal from "react-modal";
 
-import { ObjectId } from "bson";
-
 export default class ScanBarcodeView extends Component {
 
     static contextType = AppContext;
@@ -92,7 +90,7 @@ export default class ScanBarcodeView extends Component {
             return;
         }
 
-        const id = new ObjectId().toHexString();
+        const id = crypto.randomUUID();
         this.props.insertClientScannedBarcodeID(id);
 
         console.log(
@@ -106,19 +104,25 @@ export default class ScanBarcodeView extends Component {
                     `ScanBarcodeView.scanBarcode(): response: ` +
                     `"${response}"`
                 );
-                this.setState({ 
-                    barcode: "" 
-                });
+                // this.setState({ 
+                //     barcode: "" 
+                // });
             })
             .catch((error) => {
                 console.error(
                     `ScanBarcodeView.scanBarcode(): error: ` +
                     `"${error}"`
                 );
+                // this.setState({ 
+                //     barcode: "" 
+                // });
+            })
+            .finally(() => {
                 this.setState({ 
                     barcode: "" 
                 });
             });
+
 
 
     }

@@ -23,7 +23,7 @@ export default class UserScansRow extends Component {
         this.removeHighlightedBarcodeTimer = null;
 
         const dateDifference = this.dateDifferenceFromNow(
-            this.props.barcode.date
+            this.props.barcode.scanned_at
         );
 
         this.state = {
@@ -51,7 +51,7 @@ export default class UserScansRow extends Component {
 
     updateDateDifference = () => {
         const dateDifference = this.dateDifferenceFromNow(
-            this.props.barcode.date
+            this.props.barcode.scanned_at
         );
         this.setState({
             dateDifference: dateDifference
@@ -453,7 +453,7 @@ export default class UserScansRow extends Component {
                         <td
                             data-toggle="tooltip"
                             data-placement="top"
-                            title={this.formattedDateString(this.props.barcode.date)}
+                            title={this.formattedDateString(this.props.barcode.scanned_at)}
                         >
                             {this.state.dateDifference}
                         </td>

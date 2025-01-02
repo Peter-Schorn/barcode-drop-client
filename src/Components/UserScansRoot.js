@@ -57,92 +57,222 @@ export default function UserScansRoot(props) {
 class UserScansRootCore extends Component {
 
     static sampleBarcodes = [
-        {
-            "barcode": "SQk05WLwrc_001_v",
-            "date": "2024-05-23T22:00:11Z",
-            "id": "664f94cf7f5e45f823e032d3",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "J2L",
-            "date": "2024-05-23T22:09:11Z",
-            "id": "664f94cd8012fd3b4cff1318",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "https://amazon.com/thisboxusqr",
-            "date": "2024-05-23T21:45:41Z",
-            "id": "664f9475a31dbee57cf438d1",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "J2L",
-            "date": "2024-05-23T21:09:41Z",
-            "id": "664f94cbdb1ad752e1b5db57",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "SQk05WLwrc_001_v",
-            "date": "2024-05-23T19:09:40Z",
-            "id": "664f9474331bae0a7c6699ad",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "LPNRRFN8843140",
-            "date": "2024-05-23T16:15:46Z",
-            "id": "664f6bb27d769648dd846219",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "LPNRRFN8843140",
-            "date": "2024-05-23T16:15:40Z",
-            "id": "664f6bacafe43456cae7c039",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "LPNRRFN8843140",
-            "date": "2024-05-23T16:15:20Z",
-            "id": "664f6b981b2f8ef108097e5c",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "X003DQ1B4N",
-            "date": "2024-05-23T14:23:17Z",
-            "id": "664f515596236013184465eb",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "X003DQ1B4N",
-            "date": "2024-05-23T14:23:13Z",
-            "id": "664f5151af96bc3c9e7e5a3d",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "X002WB6F1T",
-            "date": "2024-05-23T14:22:49Z",
-            "id": "664f51396992afc3db9611f6",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "X003DQ1B4N",
-            "date": "2024-05-23T14:22:47Z",
-            "id": "664f51374242e94e92d74fb4",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "LPNRRFN8843140",
-            "date": "2024-05-23T14:22:39Z",
-            "id": "664f512fd33b3afcf23bde69",
-            "user": "schornpe"
-        },
-        {
-            "barcode": "305212750003",
-            "date": "2024-05-23T14:22:10Z",
-            "id": "664f5112ec69813c6ab12daf",
-            "user": "schornpe"
-        }
+        [
+            {
+                "id": "55a95a52-031f-48b9-af00-15c3c49e4438",
+                "scanned_at": "2024-12-28T03:24:21.083Z",
+                "barcode": "Lithuania",
+                "username": "peter"
+            },
+            {
+                "id": "ccd3bc88-e1f4-4571-91ba-fac083e6b10d",
+                "scanned_at": "2024-12-27T05:00:48.833Z",
+                "barcode": "Proactive",
+                "username": "peter"
+            },
+            {
+                "id": "ede49f6b-109d-4257-a23c-b23bf3d438a2",
+                "scanned_at": "2024-12-27T04:56:11.639Z",
+                "barcode": "invoice",
+                "username": "peter"
+            },
+            {
+                "id": "db280b09-7712-4370-946a-8d2c647116c6",
+                "scanned_at": "2024-12-27T04:54:55.629Z",
+                "barcode": "Agent",
+                "username": "peter"
+            },
+            {
+                "id": "2462dbed-0b65-4bc7-b610-417179d6777f",
+                "scanned_at": "2024-12-27T04:54:55.164Z",
+                "barcode": "red",
+                "username": "peter"
+            },
+            {
+                "id": "e3bdf009-c65c-4317-a645-e8c1125c3a7e",
+                "scanned_at": "2024-12-27T04:54:54.631Z",
+                "barcode": "Tactics",
+                "username": "peter"
+            },
+            {
+                "id": "4c2768a8-9316-4cc4-9d23-cd7956206f8f",
+                "scanned_at": "2024-12-27T04:54:53.367Z",
+                "barcode": "lavender",
+                "username": "peter"
+            },
+            {
+                "id": "c177feaf-aba3-44b8-bc5f-0e2f88b97dc0",
+                "scanned_at": "2024-12-27T04:54:52.917Z",
+                "barcode": "Reduced",
+                "username": "peter"
+            },
+            {
+                "id": "41658687-2c7c-4fce-99b2-55cc2545e23e",
+                "scanned_at": "2024-12-27T04:54:52.392Z",
+                "barcode": "Tactics",
+                "username": "peter"
+            },
+            {
+                "id": "1174210e-5882-4ac1-bdbd-702ce76e7b11",
+                "scanned_at": "2024-12-27T04:54:51.869Z",
+                "barcode": "Plastic",
+                "username": "peter"
+            },
+            {
+                "id": "2ce04ebb-dd1d-4d81-854f-acd028d8db19",
+                "scanned_at": "2024-12-27T04:54:51.284Z",
+                "barcode": "e-markets",
+                "username": "peter"
+            },
+            {
+                "id": "1c01fb5a-ecc9-4397-9e05-05e83e41f7b2",
+                "scanned_at": "2024-12-27T04:54:50.668Z",
+                "barcode": "Turks",
+                "username": "peter"
+            },
+            {
+                "id": "9bf9f811-d996-4343-adb0-ad8c53e0889a",
+                "scanned_at": "2024-12-27T04:54:50.208Z",
+                "barcode": "Persistent",
+                "username": "peter"
+            },
+            {
+                "id": "e0337a9a-acd2-40e5-aa5c-61f2e95aee98",
+                "scanned_at": "2024-12-27T04:54:49.679Z",
+                "barcode": "Granite",
+                "username": "peter"
+            },
+            {
+                "id": "fc889d4c-aeab-4cce-8b1e-f175ecb425dd",
+                "scanned_at": "2024-12-27T04:54:49.212Z",
+                "barcode": "Niue",
+                "username": "peter"
+            },
+            {
+                "id": "20a193a2-c01d-4b33-bf5e-4d64b373758e",
+                "scanned_at": "2024-12-27T04:54:48.618Z",
+                "barcode": "COM",
+                "username": "peter"
+            },
+            {
+                "id": "75cdaccd-1c61-453d-b6ec-26838e857e95",
+                "scanned_at": "2024-12-27T04:54:47.926Z",
+                "barcode": "of",
+                "username": "peter"
+            },
+            {
+                "id": "eacaf8fe-3e72-43a3-a31c-02a9ecedb6a9",
+                "scanned_at": "2024-12-27T04:54:46.627Z",
+                "barcode": "toolset",
+                "username": "peter"
+            },
+            {
+                "id": "8583b846-2e65-4773-bf90-3edcfc672d8f",
+                "scanned_at": "2024-12-27T04:54:45.216Z",
+                "barcode": "Fantastic",
+                "username": "peter"
+            },
+            {
+                "id": "4dc0f612-0d0a-4371-9114-396d776b0dd3",
+                "scanned_at": "2024-12-27T04:54:43.966Z",
+                "barcode": "deposit",
+                "username": "peter"
+            },
+            {
+                "id": "1172d2e2-8d46-4007-a1c3-f4ce2c92f7e5",
+                "scanned_at": "2024-12-27T04:54:42.564Z",
+                "barcode": "EXE",
+                "username": "peter"
+            },
+            {
+                "id": "92a8790f-9f94-4a8f-8353-cc4cfc781a7f",
+                "scanned_at": "2024-12-27T04:54:42.161Z",
+                "barcode": "cutting-edge",
+                "username": "peter"
+            },
+            {
+                "id": "631e842a-a147-4263-ac5e-eea93ff42177",
+                "scanned_at": "2024-12-27T04:54:41.769Z",
+                "barcode": "synthesizing",
+                "username": "peter"
+            },
+            {
+                "id": "a38c78d3-c523-4d30-8a8d-e99a92c93d30",
+                "scanned_at": "2024-12-27T04:54:41.419Z",
+                "barcode": "Stravenue",
+                "username": "peter"
+            },
+            {
+                "id": "3ee0b7d8-6d4e-4bcf-a800-896efe750944",
+                "scanned_at": "2024-12-27T04:54:41.047Z",
+                "barcode": "Stravenue",
+                "username": "peter"
+            },
+            {
+                "id": "39d86482-bd17-4061-adfd-260407773072",
+                "scanned_at": "2024-12-27T04:54:40.467Z",
+                "barcode": "Handmade",
+                "username": "peter"
+            },
+            {
+                "id": "1fa11846-54c7-4f16-ae7f-a4f58f6bfa15",
+                "scanned_at": "2024-12-27T04:54:39.962Z",
+                "barcode": "invoice",
+                "username": "peter"
+            },
+            {
+                "id": "61d5acc2-b091-4e74-80ac-dc7de648423a",
+                "scanned_at": "2024-12-27T04:54:39.455Z",
+                "barcode": "Dollar",
+                "username": "peter"
+            },
+            {
+                "id": "51b2232f-9d42-4b31-9fab-a889a99441c8",
+                "scanned_at": "2024-12-27T04:54:38.696Z",
+                "barcode": "Account",
+                "username": "peter"
+            },
+            {
+                "id": "188d7e4f-c429-4a8b-9e30-26136eba693f",
+                "scanned_at": "2024-12-27T04:54:37.859Z",
+                "barcode": "Account",
+                "username": "peter"
+            },
+            {
+                "id": "1d911dee-876b-48b8-bd97-0ff48011aad4",
+                "scanned_at": "2024-12-27T04:54:20.443Z",
+                "barcode": "Directives",
+                "username": "peter"
+            },
+            {
+                "id": "661b0b7d-719c-41ed-acb8-431411ad71c8",
+                "scanned_at": "2024-12-27T04:19:05.349Z",
+                "barcode": "Barbuda",
+                "username": "peter"
+            },
+            {
+                "id": "a01243f5-c47a-4c25-a08f-04326c478b2d",
+                "scanned_at": "2024-12-27T04:19:03.527Z",
+                "barcode": "Gorgeous",
+                "username": "peter"
+            },
+            {
+                "id": "9bfc8390-b7fd-464f-8774-d9c2144b8c1e",
+                "scanned_at": "2024-12-27T04:19:02.911Z",
+                "barcode": "innovate",
+                "username": "peter"
+            },
+            {
+                "id": "11379a9e-e32b-4027-8fbe-2926ee0c224c",
+                "scanned_at": "2024-12-27T04:19:02.490Z",
+                "barcode": "Lead",
+                "username": "peter"
+            }
+        ]
     ];
 
+    // TODO: Add second app context for UserScansRootCore to pass to child
+    // TODO: components
     static contextType = AppContext;
 
     constructor(props) {
@@ -184,7 +314,6 @@ class UserScansRootCore extends Component {
         this.pingPongInterval = null;
         this.lastPongDate = null;
         this.removeHighlightedBarcodeTimer = null;
-        this.pollingID = null;
         this.copyBarcodeAfterDelayTimeout = null;
         this.user = props.router.params.user;
         this.lastAutoCopiedBarcode = null;
@@ -230,7 +359,6 @@ class UserScansRootCore extends Component {
     componentWillUnmount() {
         console.log("UserScansRootCore.componentWillUnmount():");
 
-        clearInterval(this.pollingID);
         clearInterval(this.pingPongInterval);
         clearTimeout(this.removeHighlightedBarcodeTimer);
         clearTimeout(this.copyBarcodeAfterDelayTimeout);
@@ -282,18 +410,19 @@ class UserScansRootCore extends Component {
                 user: user,
                 barcode: barcode
             })
-                .then((result) => {
-                    console.log(
-                        `document.scan(): scanBarcode result ` +
-                        `(user: ${user}): ${result}`
-                    );
-                })
-                .catch((error) => {
-                    console.error(
-                        `document.scan(): could not scan barcode "${barcode}" ` +
-                        `for user ${user}: ${error}`
-                    );
-                });
+            .then((result) => {
+                console.log(
+                    `document.scan(): scanBarcode result ` +
+                    `(user: ${user}): ${result}`
+                );
+            })
+            .catch((error) => {
+                console.error(
+                    `document.scan(): could not scan barcode "${barcode}" ` +
+                    `for user ${user}: ${error}`
+                );
+            });
+
         };
 
         // can be called from the developer console
@@ -308,7 +437,7 @@ class UserScansRootCore extends Component {
 
         // if we use this, then the barcode could change from x to undefined,
         // and then back to x again, which would trigger the auto-copy again
-        
+
         // const previousBarcode = prevState.barcodes[0];
 
         // instead, we use the last auto-copied barcode
@@ -366,7 +495,9 @@ class UserScansRootCore extends Component {
     };
 
     promptForClipboardPermission = () => {
+
         console.log("promptForClipboardPermission");
+
         return navigator.permissions.query({ name: "clipboard-write" }).then(result => {
             if (result.state === "granted" || result.state === "prompt") {
                 console.log(
@@ -378,8 +509,8 @@ class UserScansRootCore extends Component {
                     `Clipboard permissions denied: ${result.state}`
                 );
             }
-            throw new Error("Clipboard permissions denied");
         });
+
     };
 
     handleKeyDown = (e) => {
@@ -578,7 +709,8 @@ class UserScansRootCore extends Component {
             );
 
             this.getUserScans({ user: this.user });
-            this.configurePingPongInterval();
+            // MARK: Disable high-level ping-pong for now; probably not needed
+            // this.configurePingPongInterval();
             this.lastPongDate = new Date();
 
         };
@@ -707,7 +839,17 @@ class UserScansRootCore extends Component {
             return;
         }
 
-        const message = JSON.parse(event.data);
+        let message; // the parsed JSON message
+        try {
+            message = JSON.parse(event.data);
+        }
+        catch (error) {
+            console.error(
+                `UserScansRootCore.receiveSocketMessage(): ` +
+                `could not parse JSON message:`, error
+            );
+            return;
+        }
 
         // MARK: Insert new scans
         if (
@@ -715,16 +857,14 @@ class UserScansRootCore extends Component {
             message?.newScans
         ) {
             const newScans = message.newScans;
-            const hash = message.transactionHash;
 
             console.log(
                 `socket will insert newScans for user ${this.user}:`,
-                `(transactionHash: ${hash}):`,
                 newScans
             );
             this.setState(state => {
                 // MARK: insert the new scans in sorted order by date
-                // and remove any existing scan with the same ID
+                // and remove any existing scans with the same ID
 
                 let newBarcodes = state.barcodes
                     .filter((barcode) => {
@@ -738,7 +878,7 @@ class UserScansRootCore extends Component {
                     .concat(newScans);
 
                 newBarcodes.sort((lhs, rhs) => {
-                    return new Date(rhs.date) - new Date(lhs.date);
+                    return new Date(rhs.scanned_at) - new Date(lhs.scanned_at);
                 });
 
                 return {
@@ -754,10 +894,8 @@ class UserScansRootCore extends Component {
         ) {
             const ids = message.ids;
 
-            const hash = message.transactionHash;
             console.log(
                 `socket will delete barcodes with IDs ` +
-                `(transactionHash: ${hash}):`,
                 ids
             );
             this.removeBarcodesFromState(ids);
@@ -771,11 +909,9 @@ class UserScansRootCore extends Component {
         ) {
 
             const scans = message.scans;
-            const hash = message.transactionHash;
 
             console.log(
                 `socket will replace all scans for user ${this.user} ` +
-                `(transactionHash: ${hash}):`,
                 scans
             );
 
@@ -794,20 +930,15 @@ class UserScansRootCore extends Component {
 
     };
 
-    beginPolling = () => {
-        console.log("UserScansRootCore.beginPolling():");
-        // MARK: IMPORTANT: CLEAR any previously created polling intervals 
-        // MARK: before creating a new one
-        // otherwise, multiple polling intervals will be created and execute
-        // concurrently
-        if (this.pollingID) {
-            console.log("Clearing previous polling interval");
-            clearInterval(this.pollingID);
-        }
-        this.pollingID = setIntervalImmediately(() => {
-            this.getUserScans({ user: this.user });
-        }, 2_000);
+    // TODO: Callee for all updates to the barcodes
+    // TODO: makes it easier to auto copy the latest barcode
+    // WARNING: NOT FULLY IMPLEMENTED YET
+    updateBarcodes = (newBarcodes) => {
+        this.setState({
+            barcodes: newBarcodes
+        });
     };
+
 
     /**
      * Determines if the current barcode is different from the previous barcode
@@ -885,7 +1016,7 @@ class UserScansRootCore extends Component {
             console.log(
                 `will NOT copy barcode scanned from CLIENT:`,
                 mostRecentBarcode
-            )
+            );
             return;
         }
 
@@ -896,8 +1027,8 @@ class UserScansRootCore extends Component {
             );
             return;
         }
-        
-        
+
+
         if (this.state.lastAutoCopiedBarcode?.id === mostRecentBarcode?.id) {
             console.log(
                 `AUTO-Copy failed: most recent barcode is the same as the ` +
@@ -905,9 +1036,9 @@ class UserScansRootCore extends Component {
                 mostRecentBarcode
             );
             return;
-            
+
         }
-        
+
         this.setState({
             lastAutoCopiedBarcode: mostRecentBarcode
         });
@@ -915,7 +1046,7 @@ class UserScansRootCore extends Component {
         console.log(
             `Auto-copying most recent barcode: "${mostRecentBarcode}"`
         );
-        
+
         this._writeBarcodeToClipboard(mostRecentBarcode, {
             showNotification: true,
             highlight: true
@@ -928,31 +1059,32 @@ class UserScansRootCore extends Component {
 
         let barcodeTextMessage = barcodeText.truncated(30);
 
-        toast.success(
+        const toastID = toast.success(
             `Copied "${barcodeTextMessage}" to the Clipboard`,
             {
                 duration: 5_000
             }
         );
 
+        // TODO: Toast can be dismissed by clicking on it
+        // toast.dismiss(toastID);
+
     };
 
     /** Get the user's scans */
     getUserScans = ({ user }) => {
 
-        let date = new Date().toISOString();
+        let dateString = new Date().toISOString();
 
         console.log(
             `UserScansRootCore.getUserScans(): Getting scans for ` +
-            `user "${user}" at date ${date}`
+            `user "${user}" at date ${dateString}`
         );
 
-        this.context.api.getUserScans(this.user).then((result) => {
-
-            const jsonString = JSON.stringify(result);
+        this.context.api.getUserScans(user).then((result) => {
 
             console.log(
-                `UserScansRootCore.getUserScans(): result: ${jsonString}`
+                `UserScansRootCore.getUserScans(): result:`, result
             );
 
             this.setState({
@@ -960,11 +1092,11 @@ class UserScansRootCore extends Component {
             });
 
         })
-            .catch((error) => {
-                console.error(
-                    `UserScansRootCore.getUserScans(): error: ${error}`
-                );
-            });
+        .catch((error) => {
+            console.error(
+                `UserScansRootCore.getUserScans(): error: ${error}`
+            );
+        });
 
     };
 
@@ -983,18 +1115,18 @@ class UserScansRootCore extends Component {
         this.context.api.deleteUserScans({
             user: this.user
         })
-            .then((result) => {
-                console.log(
-                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                    `result: ${result}`
-                );
-            })
-            .catch((error) => {
-                console.error(
-                    `UserScansRootCore.deleteAllUserBarcodes(): ` +
-                    `could not delete all user barcodes: ${error}`
-                );
-            });
+        .then((result) => {
+            console.log(
+                `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                `result: ${result}`
+            );
+        })
+        .catch((error) => {
+            console.error(
+                `UserScansRootCore.deleteAllUserBarcodes(): ` +
+                `could not delete all user barcodes: ${error}`
+            );
+        });
 
     };
 
@@ -1128,9 +1260,10 @@ class UserScansRootCore extends Component {
     };
 
     copyAsCSV = (e) => {
-        console.log(`exportAsCSV():`, e);
 
-        if (!this.state?.barcodes?.length) {
+        console.log(`copyAsCSV():`, e);
+
+        if (this._copyLastBarcodeIsDisabled()) {
             console.error(
                 `copyAsCSV(): cannot copy CSV to clipboard: no barcodes`
             );
@@ -1139,16 +1272,16 @@ class UserScansRootCore extends Component {
 
         const csvString = this.makeCSVString();
 
-        console.log(`exportAsCSV(): csvString:`, csvString);
+        console.log(`copyAsCSV(): csvString:`, csvString);
 
         navigator.clipboard.writeText(csvString)
             .then(() => {
-                console.log(`exportAsCSV(): copied CSV to clipboard`);
+                console.log(`copyAsCSV(): copied CSV to clipboard`);
                 toast.success("Copied CSV to clipboard");
             })
             .catch((error) => {
                 console.error(
-                    `exportAsCSV(): could not copy CSV to clipboard: ${error}`
+                    `copyAsCSV(): could not copy CSV to clipboard: ${error}`
                 );
                 toast.error("Could not copy CSV to clipboard");
             });
@@ -1169,22 +1302,27 @@ class UserScansRootCore extends Component {
             return;
         }
 
-
         const date = new Date();
         const dateString = date.toISOString();
 
-        const fileData = this.makeCSVString();
+        const csvString = this.makeCSVString();
 
-        const blob = new Blob([fileData], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
+        console.log(`exportAsCSV(): csvString:`, csvString);
 
-        link.download = `barcodes-${dateString}.csv`;
-        link.href = url;
+        const blob = new Blob([csvString], { type: "text/csv" });
+        const blobURL = URL.createObjectURL(blob);
 
-        link.click();
+        const blobLinkElement = document.createElement("a");
+
+        blobLinkElement.download = `barcodes-${dateString}.csv`;
+        blobLinkElement.href = blobURL;
+
+        blobLinkElement.click();
+
     };
 
+
+    // TODO: Implement Dismiss Toast Functionality
     dismissToast = (e) => {
         console.log(`dismissToast():`, e);
     };
@@ -1197,7 +1335,7 @@ class UserScansRootCore extends Component {
 
     onClickOpenLink = (e, barcode) => {
 
-        console.log(`onClickOpenLink(): event:`, e, `barcode:`, barcode);
+        console.log(`onClickOpenLink(): barcode:`, barcode, `event:`, e);
 
         const barcodeText = barcode?.barcode;
         if (barcodeText == null) {
@@ -1217,7 +1355,7 @@ class UserScansRootCore extends Component {
 
         const urlString = formattedLink.replace("%s", barcodeText);
         console.log(
-            `onClickOpenLink(): Opening link: "${urlString}" ` +
+            `onClickOpenLink(): opening link: "${urlString}" ` +
             `for barcode: "${barcodeText}"`
         );
 
@@ -1228,7 +1366,7 @@ class UserScansRootCore extends Component {
             const barcodedropHost = "www.barcodedrop.com";
             if ([barcodedropHost, document.location.host].includes(url?.host)) {
                 console.log(
-                    `onClickOpenLink(): WILL NOT open link because same host: ` +
+                    `onClickOpenLink(): will NOT open link because same host: ` +
                     `"${urlString}" `
                 );
                 return;
@@ -1238,7 +1376,7 @@ class UserScansRootCore extends Component {
 
         } catch (error) {
             console.error(
-                `onClickOpenLink(): Could not open link: "${urlString}": ${error}`
+                `onClickOpenLink(): could not open link: "${urlString}": ${error}`
             );
         }
 
@@ -1364,7 +1502,7 @@ class UserScansRootCore extends Component {
 
     insertClientScannedBarcodeID = (barcodeID) => {
 
-        this.setState(state => {
+        this.setState((state) => {
             let clientScannedBarcodeIDs = state.clientScannedBarcodeIDs;
             clientScannedBarcodeIDs.add(barcodeID);
             return {
@@ -1651,7 +1789,9 @@ class UserScansRootCore extends Component {
 
                     {/* --- spacer --- */}
 
-                    {/* Table of Barcodes */}
+                    {/* *** ===================================== *** */}
+                    {/* *** ========= Table of Barcodes ========= *** */}
+                    {/* *** ===================================== *** */}
 
                     <UserScansTable
                         barcodes={this.state.barcodes}

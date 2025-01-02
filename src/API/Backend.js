@@ -18,8 +18,7 @@ export default class Backend {
      */
     async getUserScans(user) {
         return await this._get(
-            `/scans/${user}`,
-            { queryParams: { "pretty-printed": false } }
+            `/scans/${user}`
         );
     }
 
@@ -31,7 +30,7 @@ export default class Backend {
      * @param {string} [id] the id of the barcode
      * @returns the response from the server
      */
-    async scanBarcode({user, barcode, id}) {
+    async scanBarcode({ user, barcode, id }) {
 
         let body = {
             barcode: barcode
@@ -70,17 +69,17 @@ export default class Backend {
      * the current date.
      * 
      * @param {String} user the user to delete the scans for
-     * @param {Integer} olderThan the number of seconds before the current date
+     * @param {Integer} [olderThan] the number of seconds before the current date
      * to delete scans for
      * @returns the response from the server
      */
-    async deleteUserScans({user, olderThan}) {
+    async deleteUserScans({ user, olderThan }) {
         if (olderThan) {
             return await this._apiRequest({
                 method: "DELETE",
                 path: `/scans/${user}/older`,
                 queryParams: {
-                    t: olderThan
+                    seconds: olderThan
                 }
             });
         }
@@ -90,23 +89,6 @@ export default class Backend {
                 path: `/scans/${user}`
             });
         }
-    }
-
-    /**
-     * Delete all scans for a user except the last n scans.
-     * 
-     * @param {String} user the user to delete the scans for 
-     * @param {Integer} last the number of most recent scans to keep
-     * @returns 
-     */
-    async deleteUserScansExcept({user, last}) {
-        return await this._apiRequest({
-            method: "DELETE",
-            path: `/scans/${user}/except-last`,
-            queryParams: {
-                n: last
-            }
-        });
     }
 
     /**
@@ -131,7 +113,7 @@ export default class Backend {
 
     // MARK: Wrappers
 
-    async _get(path, {queryParams, headers} = {}) {
+    async _get(path, { queryParams, headers } = {}) {
         return await this._apiRequest({
             method: "GET",
             path: path,
@@ -141,10 +123,10 @@ export default class Backend {
     }
 
     async _apiRequest({
-        method, 
-        path, 
-        queryParams, 
-        body, 
+        method,
+        path,
+        queryParams,
+        body,
         headers
     }) {
         let response = await this.httpClient.request({

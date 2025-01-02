@@ -67,6 +67,10 @@ class UserScansTableCore extends Component {
         }
     }
 
+    barcodeIsHighlighted(barcode) {
+        return this.props.highlightedBarcode?.id === barcode.id;
+    }
+
     render() {
         console.log("UserScansTableCore.render()");
         return (
@@ -96,13 +100,15 @@ class UserScansTableCore extends Component {
                 </thead>
                 <tbody>
                     {this.props.barcodes.map((barcode, index) =>
+                        // TODO: These parameters could be passed automatically
+                        // TODO: by the parent component via context.
                         <UserScansRow
                             key={barcode.id}
                             index={index}
                             barcode={barcode}
                             user={this.props.user}
                             viewportSize={this.props.viewportSize}
-                            isHighlighted={this.props.highlightedBarcode?.id === barcode.id}
+                            isHighlighted={this.barcodeIsHighlighted(barcode)}
                             router={this.props.router}
                             removeBarcodesFromState={
                                 this.props.removeBarcodesFromState
