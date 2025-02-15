@@ -674,20 +674,20 @@ class UserScansRootCore extends Component {
 
          For each reconnection attempt, the delay is calculated as follows:
 
-            delay = minReconnectionDelay *  
+            delay = minReconnectionDelay *
                 Math.pow(reconnectionDelayGrowFactor, this._retryCount - 1);
 
             if (delay > maxReconnectionDelay) {
                 delay = maxReconnectionDelay;
             }
-         
-         The first reconnection attempt will have a delay of 
-         minReconnectionDelay, the second will have a delay of 
+
+         The first reconnection attempt will have a delay of
+         minReconnectionDelay, the second will have a delay of
          minReconnectionDelay * reconnectionDelayGrowFactor, and the max
          delay will be maxReconnectionDelay.
 
          https://www.desmos.com/calculator/cv5yene4jw
-            
+
          */
         const wsOptions = {
             minReconnectionDelay: 500,  // half a second
@@ -943,7 +943,7 @@ class UserScansRootCore extends Component {
     /**
      * Determines if the current barcode is different from the previous barcode
      * AND if the current barcode is *NEWER* than the previous barcode.
-     * 
+     *
      * @param {*} previousBarcode the previous barcode
      * @param {*} currentBarcode the current barcode
      * @returns {boolean} `true` if the current barcode is different from the

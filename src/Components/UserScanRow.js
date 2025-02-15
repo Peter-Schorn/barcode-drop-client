@@ -14,7 +14,7 @@ import { setIntervalImmediately } from "../MiscellaneousUtilities";
 import BarcodeImageModalView from "./BarcodeImageModalView";
 
 export default class UserScansRow extends Component {
-    
+
     static contextType = AppContext;
 
     constructor(props) {
@@ -57,7 +57,7 @@ export default class UserScansRow extends Component {
             dateDifference: dateDifference
         });
     };
-    
+
     rowStyleClassName = () => {
         // TODO: figure out why table variants cover borders
         // return this.props.index === 0 ? "table-success" : "";
@@ -127,7 +127,7 @@ export default class UserScansRow extends Component {
         return (e) => {
 
             const barcodeText = barcode.barcode;
-            
+
             this.setState({
                 isCopying: true
             });
@@ -298,14 +298,14 @@ export default class UserScansRow extends Component {
 
         return (
             <td>
-                <span 
+                <span
                     className="barcode-text line display-linebreaks text-break"
                 >
                     {this.props.barcode.barcode}
                 </span>
                 { smallSize ? (
                     // <div>
-                        <span 
+                        <span
                             className="text-secondary px-2"
                             style={{
                                 fontSize: "12px"
@@ -330,7 +330,7 @@ export default class UserScansRow extends Component {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                    <Dropdown.Item 
+                    <Dropdown.Item
                         onClick={this.didClickGenerateBarcode}
                         disabled={this.barcodeIsFalsy()}
                         style={{
@@ -362,7 +362,7 @@ export default class UserScansRow extends Component {
                         )}
                         disabled={this.barcodeIsFalsy()}
                     >
-                        <div 
+                        <div
                             className="hstack gap-3"
                             style={{
                                 // padding: "5px 10px",
@@ -395,7 +395,7 @@ export default class UserScansRow extends Component {
             >
                 {/* {this.renderBarcodeImageModal()} */}
 
-                <BarcodeImageModalView 
+                <BarcodeImageModalView
                     barcode={this.props.barcode}
                     generateBarcodeModalIsOpen={this.state.generateBarcodeModalIsOpen}
                     closeGenerateBarcodeModal={this.closeGenerateBarcodeModal}
@@ -410,9 +410,9 @@ export default class UserScansRow extends Component {
                     // padding: "2px !important"
                 }}>
 
-                <Stack 
-                    direction="horizontal" 
-                    className="" 
+                <Stack
+                    direction="horizontal"
+                    className=""
                     gap={0}
                 >
                     {/* --- Copy Button --- */}
@@ -439,7 +439,7 @@ export default class UserScansRow extends Component {
                     >
                         <i className="fa fa-link"></i>
                     </button>
-                  
+
                     {this.renderDropdownMenu()}
 
                 </Stack>
@@ -459,7 +459,7 @@ export default class UserScansRow extends Component {
                         </td>
                     ) : null
                 }
-                
+
                 {/* --- Delete Button (>800px) --- */}
                 {
                     this.props.viewportSize?.width > 800 ? (
