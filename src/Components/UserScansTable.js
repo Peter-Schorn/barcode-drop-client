@@ -34,9 +34,9 @@ class UserScansTableCore extends Component {
     static contextType = AppContext;
 
     constructor(props) {
-        
+
         super(props);
-        
+
         /*
          <UserScansTable
              barcodes={this.state.barcodes}

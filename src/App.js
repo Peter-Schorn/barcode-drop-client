@@ -45,8 +45,8 @@ export default class App extends Component {
                     <Routes>
 
                         {/* --- Home --- */}
-                        <Route 
-                            path="/" 
+                        <Route
+                            path="/"
                             element={<HomeView/>}
                         />
 
@@ -57,8 +57,8 @@ export default class App extends Component {
                         />
 
                         {/* --- User Scans Table --- */}
-                        <Route 
-                            path="/scans/:user" 
+                        <Route
+                            path="/scans/:user"
                             element={<UserScansRoot/>}
                         />
 
